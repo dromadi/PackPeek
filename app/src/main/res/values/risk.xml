@@ -230,15 +230,15 @@
     <string name="risk_analysis">Risk analysis</string>
     <string-array name="risk_data_theft">
         <item>Personal data sent to a hidden destination</item>
-        <item>The app\'s own code reads personal data (such as SMS, contacts, notifications or screen text) and, in the same code path, sends data to a Telegram bot or Discord webhook. Scam apps use these channels because they need no server of their own.</item>
-        <item>Ordinary apps send data to their own servers, not to chat bots or webhooks. Developers sometimes use bots for crash reports, but those do not read personal data.</item>
+        <item>The app\'s own code reads personal data (such as SMS, contacts, notifications or screen text) and, in the same code path, sends data to a Telegram bot, a Discord webhook, or a public IP address written in the sending code. Scam apps use these channels because they need no named server that can be traced.</item>
+        <item>Ordinary apps send data to their own named servers, not to chat bots or webhooks. Developers sometimes use bots for crash reports, but those do not read personal data. A bare IP is a strong indicator only for a file or an app from an untrusted source; otherwise it needs attention.</item>
         <item></item>
         <item>Do not install this file. If it is installed: uninstall it, change passwords of accounts whose codes or messages it could read, and turn two-step verification back on.</item>
     </string-array>
     <string-array name="risk_hidden_destination">
         <item>Hidden destination in the code</item>
-        <item>The code contains the address of a Telegram bot, a Discord webhook or a bare IP address. Data sent there is hard to trace back to a company.</item>
-        <item>Some apps use bots or webhooks for alerts, and IP addresses for local devices (cameras, routers). It is a concern when combined with access to personal data.</item>
+        <item>The code contains the address of a Telegram bot, a Discord webhook or a public IP address without a domain name. Data sent there is hard to trace back to a company. Local addresses (home network, the device itself) are not counted.</item>
+        <item>Some apps use bots or webhooks for alerts, or reach their own servers by IP. It is a concern when combined with access to personal data.</item>
         <item></item>
         <item>Check whether the app needs to talk to chat services or raw IP addresses for its purpose. Prefer apps from known developers.</item>
     </string-array>

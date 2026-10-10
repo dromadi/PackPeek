@@ -9,6 +9,7 @@ import com.packpeek.app.engine.risk.RiskId
 import com.packpeek.app.engine.risk.RiskRules
 import com.packpeek.app.engine.risk.StateKey
 import com.packpeek.app.model.AppFailure
+import com.packpeek.app.model.ErrorCode
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.ByteBuffer
@@ -38,8 +39,17 @@ class ManifestParserTest {
 
     private fun int(name: String, resId: Int?, value: Int) = Attr(name, resId, 0x10, value)
 
-    private fun compile(root: Element): ByteArray {
-        val all = generateSequence(listOf(root)) { level -> level.flatMap { it.children }.ifEmpty { null } }
+    /**
+     * [endName] picks the name written in each end tag (null skips the end tag); [extra] elements
+     * are emitted after the root, as stray top-level elements.
+     */
+    private fun compile(
+        root: Element,
+        endName: (Element) -> String? = { it.name },
+        extra: List<Element> = emptyList(),
+        strayEnd: Boolean = false,
+    ): ByteArray {
+        val all = generateSequence(listOf(root) + extra) { level -> level.flatMap { it.children }.ifEmpty { null } }
             .flatten()
             .toList()
         // Resource-mapped attribute names must come first in the pool, in resource-map order.
@@ -56,6 +66,7 @@ class ManifestParserTest {
         fun mappedIndex(a: Attr) = mapped.indexOfFirst { it.name == a.name && it.resId == a.resId }
         all.forEach { e ->
             index(e.name)
+            endName(e)?.let(::index)
             e.attrs.forEach { a ->
                 if (a.resId == null) index(a.name)
                 a.text?.let(::index)
@@ -104,11 +115,18 @@ class ManifestParserTest {
             }
             chunk(0x0102, 16, b.array())
             e.children.forEach(::emit)
+            val name = endName(e) ?: return
             val end = ByteBuffer.allocate(16).order(ByteOrder.LITTLE_ENDIAN)
-            end.putInt(1).putInt(-1).putInt(-1).putInt(index(e.name))
+            end.putInt(1).putInt(-1).putInt(-1).putInt(index(name))
             chunk(0x0103, 16, end.array())
         }
         emit(root)
+        extra.forEach(::emit)
+        if (strayEnd) {
+            val end = ByteBuffer.allocate(16).order(ByteOrder.LITTLE_ENDIAN)
+            end.putInt(1).putInt(-1).putInt(-1).putInt(index(root.name))
+            chunk(0x0103, 16, end.array())
+        }
         val out = ByteBuffer.allocate(8 + body.size()).order(ByteOrder.LITTLE_ENDIAN)
         out.putShort(3).putShort(8).putInt(8 + body.size()).put(body.toByteArray())
         return out.array()
@@ -231,6 +249,44 @@ class ManifestParserTest {
         assertTrue(finding.evidence.all { it.stateKey == StateKey.NO_LAUNCHER })
         val shown = RiskRules.evaluate(facts, context, DeviceState(launcherVisible = true))
         assertTrue(shown.findings.none { it.id == RiskId.HIDDEN_ICON })
+    }
+
+    private val nested =
+        Element(
+            "manifest",
+            listOf(str("package", null, "t.app")),
+            listOf(Element("application", emptyList(), listOf(launcherActivity()))),
+        )
+
+    private fun failsAsArchive(bytes: ByteArray) {
+        val failure = runCatching { BinaryXml.parse(bytes) }.exceptionOrNull()
+        assertEquals(ErrorCode.ARCHIVE, (failure as? AppFailure)?.code)
+    }
+
+    @Test
+    fun wellFormedNestingIsAccepted() {
+        val tree = BinaryXml.parse(compile(nested))
+        assertEquals("manifest", tree.name)
+        assertEquals(1, tree.child("application").single().child("activity").size)
+    }
+
+    /** An end tag naming another element would let a crafted file reshape the tree. */
+    @Test
+    fun endTagMustCloseTheOpenElement() {
+        failsAsArchive(compile(nested, endName = { if (it.name == "intent-filter") "application" else it.name }))
+        failsAsArchive(compile(nested, endName = { if (it.name == "activity") "service" else it.name }))
+    }
+
+    @Test
+    fun unclosedElementsFailClosed() {
+        failsAsArchive(compile(nested, endName = { if (it.name == "application") null else it.name }))
+        failsAsArchive(compile(nested, endName = { if (it.name == "manifest") null else it.name }))
+    }
+
+    @Test
+    fun strayEndTagsAndSecondRootsFailClosed() {
+        failsAsArchive(compile(nested, strayEnd = true))
+        failsAsArchive(compile(nested, extra = listOf(Element("application", emptyList(), listOf(launcherActivity())))))
     }
 
     /** Random corruption must end in a clean AppFailure, never a crash or a hang. */

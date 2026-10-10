@@ -29,7 +29,7 @@
     <string name="icon_saved">512 × 512 PNG आइकन सेव किया गया</string>
     <string name="backups">बैकअप</string>
     <string name="backup_folder">बैकअप फ़ोल्डर</string>
-    <string name="privacy_local">आपकी ऐप सूची और विश्लेषण इसी डिवाइस पर रहते हैं। कोई विज्ञापन, एनालिटिक्स या खाता नहीं।</string>
+    <string name="privacy_local">आपकी ऐप सूची और विश्लेषण इसी डिवाइस पर रहते हैं। कोई विज्ञापन, एनालिटिक्स या खाता नहीं। इंटरनेट अनुमति केवल वैकल्पिक VirusTotal जाँच के लिए है, जिसे आप अपनी कुंजी से चालू करते हैं; इसमें केवल ऐप का SHA-256 फ़िंगरप्रिंट भेजा जाता है, फ़ाइल कभी नहीं।</string>
     <string name="backup_disclaimer">बैकअप में इंस्टॉलेशन APK होते हैं, ऐप डेटा, खाते या गेम की प्रगति नहीं।</string>
     <string name="onboarding_one">एक कॉपी रखें।\nअपने ऐप्स जानें।</string>
     <string name="onboarding_one_body">एक ऐप निकालें या कई ऐप्स चुनकर एक साथ बैकअप लें।</string>

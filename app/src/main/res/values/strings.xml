@@ -29,7 +29,7 @@
     <string name="icon_saved">512 × 512 PNG icon saved</string>
     <string name="backups">Backups</string>
     <string name="backup_folder">Backup folder</string>
-    <string name="privacy_local">Your app list and analysis stay on this device. No ads, analytics, or account required.</string>
+    <string name="privacy_local">Your app list and analysis stay on this device. No ads, analytics, or account required. The Internet permission is used only for the optional VirusTotal check, which you turn on with your own key; it sends only an app\'s SHA-256 fingerprint, never the file.</string>
     <string name="backup_disclaimer">Backups contain installation APKs, not app data, accounts, or game progress.</string>
     <string name="onboarding_one">Keep a copy.\nKnow your apps.</string>
     <string name="onboarding_one_body">Extract one app or select several to back them up together.</string>

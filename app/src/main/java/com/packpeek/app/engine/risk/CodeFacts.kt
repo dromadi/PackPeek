@@ -65,10 +65,18 @@ data class CodeFlow(
     val method: String,
     val sourceApi: String,
     val sinkApi: String,
+    /** Public IP literal in the sending code's class, when the data goes to a bare address. */
+    val ipHost: String? = null,
 )
 
 /** A host found in a URL string in the app's own code. */
-data class Destination(val host: String, val cleartext: Boolean, val ipAddress: Boolean)
+data class Destination(
+    val host: String,
+    val cleartext: Boolean,
+    val ipAddress: Boolean,
+    /** A public IP: not private, loopback, link-local or a well-known resolver. */
+    val publicIp: Boolean = false,
+)
 
 enum class GapKind {
     /** DEX, JAR or APK files hidden in assets or resources; loaded at runtime, if at all. */
@@ -129,6 +137,8 @@ data class CodeChain(
     val toSource: List<ChainStep>,
     /** Methods from the start to where data is sent. */
     val toSink: List<ChainStep>,
+    /** Public IP literal in the class that sends, for network chains. */
+    val ipHost: String? = null,
 )
 
 enum class Decoding { BASE64, JOINED, CHAR_ARRAY, XOR, REVERSED }

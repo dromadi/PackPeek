@@ -29,7 +29,7 @@
     <string name="icon_saved">512 × 512 PNG simge kaydedildi</string>
     <string name="backups">Yedekler</string>
     <string name="backup_folder">Yedek klasörü</string>
-    <string name="privacy_local">Uygulama listeniz ve analizler bu cihazda kalır. Reklam, analiz veya hesap yok.</string>
+    <string name="privacy_local">Uygulama listeniz ve analizler bu cihazda kalır. Reklam, analiz veya hesap yok. İnternet izni yalnızca kendi anahtarınızla açtığınız isteğe bağlı VirusTotal kontrolü için kullanılır; dosya değil, yalnızca uygulamanın SHA-256 parmak izi gönderilir.</string>
     <string name="backup_disclaimer">Yedekler kurulum APK\'larını içerir; uygulama verilerini, hesapları veya oyun ilerlemesini içermez.</string>
     <string name="onboarding_one">Bir kopya saklayın.\nUygulamalarınızı tanıyın.</string>
     <string name="onboarding_one_body">Tek bir uygulamayı çıkarın veya birkaçını seçip birlikte yedekleyin.</string>

@@ -150,8 +150,9 @@ object RiskRules {
         fun finding(id: RiskId, severity: Severity, evidence: List<Evidence>, note: ContextNote = ContextNote.NONE) =
             RiskFinding(id, severity, evidence, note, code = state(evidence))
         val hiddenDestinations = calls(Capability.TELEGRAM, Capability.DISCORD)
+        // Private, loopback and link-local addresses are local servers, not hidden destinations.
         val ipDestinations =
-            code?.destinations.orEmpty().filter { it.ipAddress }.map {
+            code?.destinations.orEmpty().filter { it.publicIp }.map {
                 Evidence(EvidenceLevel.CODE, EvidenceKind.DESTINATION, "${it.host}|${it.cleartext}|true", "")
             }
         val forwarding = calls(Capability.CALL_FORWARDING)
@@ -401,14 +402,19 @@ object RiskRules {
                         (it == Capability.SCREEN_READ && RiskId.SCREEN_SPYING in alreadyCovered)
                 }
             val theftHidden = flowsFrom(*theftSources.toTypedArray(), sinks = Capability.hiddenDestinations)
-            // Sending personal data to a hardcoded bare IP (no domain name) is a command-and-control
-            // signature: legitimate apps use named servers, not raw IPs, to upload personal data.
-            val ipExfil =
-                if (ipDestinations.isEmpty()) emptyList()
-                else flowsFrom(*theftSources.toTypedArray(), sinks = setOf(Capability.NETWORK))
-            val theft = theftHidden + ipExfil
-            if (theft.isNotEmpty() && !system)
-                findings += finding(RiskId.DATA_THEFT, Severity.STRONG, theft + hiddenDestinations + ipDestinations + untrusted)
+            // Personal data sent by code whose class holds a public bare IP (no domain name), as
+            // command-and-control servers often use. An IP elsewhere in the app, a local address
+            // or a resolver does not count. Without an untrusted source it stays at attention:
+            // some legitimate apps do talk to raw IPs.
+            val ipFlows = code.flows.filter { it.source in theftSources && it.sink == Capability.NETWORK && it.ipHost != null }
+            val ipExfil = ipFlows.map {
+                Evidence(EvidenceLevel.FLOW, EvidenceKind.FLOW, "${it.source}>${it.sink}|${it.sourceApi}|${it.sinkApi}", it.method)
+            }
+            val ipUsed = ipDestinations.filter { e -> ipFlows.any { e.detail.startsWith("${it.ipHost}|") } }
+            if (!system && (theftHidden.isNotEmpty() || (ipExfil.isNotEmpty() && untrusted.isNotEmpty())))
+                findings += finding(RiskId.DATA_THEFT, Severity.STRONG, theftHidden + ipExfil + hiddenDestinations + ipUsed + untrusted)
+            else if (!system && ipExfil.isNotEmpty())
+                findings += finding(RiskId.DATA_THEFT, Severity.ATTENTION, ipExfil + ipUsed)
             if (hiddenDestinations.isNotEmpty() || ipDestinations.isNotEmpty())
                 findings += finding(RiskId.HIDDEN_DESTINATION, severity(Severity.ATTENTION), hiddenDestinations + ipDestinations)
             if (forwarding.isNotEmpty())

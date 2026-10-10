@@ -29,7 +29,7 @@
     <string name="icon_saved">Đã lưu biểu tượng PNG 512 × 512</string>
     <string name="backups">Bản sao lưu</string>
     <string name="backup_folder">Thư mục sao lưu</string>
-    <string name="privacy_local">Danh sách ứng dụng và kết quả phân tích chỉ nằm trên thiết bị này. Không quảng cáo, không phân tích, không cần tài khoản.</string>
+    <string name="privacy_local">Danh sách ứng dụng và kết quả phân tích chỉ nằm trên thiết bị này. Không quảng cáo, không phân tích, không cần tài khoản. Quyền Internet chỉ dùng cho bước kiểm tra VirusTotal tùy chọn mà bạn bật bằng khóa của mình; chỉ gửi dấu vân tay SHA-256 của ứng dụng, không bao giờ gửi tệp.</string>
     <string name="backup_disclaimer">Bản sao lưu chứa APK cài đặt, không chứa dữ liệu ứng dụng, tài khoản hay tiến trình trò chơi.</string>
     <string name="onboarding_one">Giữ một bản sao.\nHiểu ứng dụng của bạn.</string>
     <string name="onboarding_one_body">Trích xuất một ứng dụng hoặc chọn nhiều ứng dụng để sao lưu cùng lúc.</string>

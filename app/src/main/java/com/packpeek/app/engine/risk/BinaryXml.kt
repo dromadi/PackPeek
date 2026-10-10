@@ -120,7 +120,7 @@ object BinaryXml {
             throw AppFailure(ErrorCode.ARCHIVE, e)
         }
 
-    private class Builder(val name: String, val attrs: Map<String, XmlValue>) {
+    private class Builder(val ns: Int, val name: String, val attrs: Map<String, XmlValue>) {
         val children = mutableListOf<Builder>()
 
         fun build(): XmlNode = XmlNode(name, attrs, children.map { it.build() })
@@ -156,6 +156,9 @@ object BinaryXml {
                 0x0102 -> {
                     val ext = pos + header
                     require(ext + 20 <= end)
+                    // A second root would be a separate document that Android never reads.
+                    require(root == null || stack.isNotEmpty())
+                    val ns = i32(ext)
                     val element = str(i32(ext + 4))
                     val first = ext + u16(ext + 8)
                     val stride = u16(ext + 10)
@@ -181,15 +184,24 @@ object BinaryXml {
                             }
                         attrs[name] = XmlValue(t, data, text)
                     }
-                    val node = Builder(element, attrs)
+                    val node = Builder(ns, element, attrs)
                     if (root == null) root = node else stack.lastOrNull()?.children?.add(node)
                     stack += node
                     require(stack.size <= 64)
                 }
-                0x0103 -> stack.removeLastOrNull()
+                0x0103 -> {
+                    // Every end tag must close the element that is open, so a crafted file cannot
+                    // move components out of <application> or hide them under another parent.
+                    val ext = pos + header
+                    require(ext + 8 <= end)
+                    val open = stack.removeLastOrNull()
+                    require(open != null && open.ns == i32(ext) && open.name == str(i32(ext + 4)))
+                }
             }
             pos = end
         }
+        // A truncated or unbalanced document would yield a partial tree; fail closed instead.
+        require(stack.isEmpty())
         return root?.build() ?: throw AppFailure(ErrorCode.ARCHIVE)
     }
 

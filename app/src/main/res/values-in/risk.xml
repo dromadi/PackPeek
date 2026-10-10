@@ -215,15 +215,15 @@
     <string name="risk_analysis">Analisis risiko</string>
     <string-array name="risk_data_theft">
         <item>Data pribadi dikirim ke tujuan tersembunyi</item>
-        <item>Kode aplikasi sendiri membaca data pribadi (misalnya SMS, kontak, notifikasi, atau teks di layar) dan, di jalur kode yang sama, mengirim data ke bot Telegram atau webhook Discord. Aplikasi penipuan memakai jalur ini karena tidak perlu server sendiri.</item>
-        <item>Aplikasi biasa mengirim data ke server miliknya, bukan ke bot obrolan atau webhook. Pengembang kadang memakai bot untuk laporan error, tetapi itu tidak membaca data pribadi.</item>
+        <item>Kode aplikasi sendiri membaca data pribadi (misalnya SMS, kontak, notifikasi, atau teks di layar) dan, di jalur kode yang sama, mengirim data ke bot Telegram, webhook Discord, atau alamat IP publik yang tertulis di kode pengirimnya. Aplikasi penipuan memakai jalur ini karena tidak perlu server bernama yang bisa dilacak.</item>
+        <item>Aplikasi biasa mengirim data ke server bernama miliknya, bukan ke bot obrolan atau webhook. Pengembang kadang memakai bot untuk laporan error, tetapi itu tidak membaca data pribadi. Alamat IP langsung baru menjadi indikator kuat untuk berkas atau aplikasi dari sumber yang tidak tepercaya; selain itu cukup perlu perhatian.</item>
         <item></item>
         <item>Jangan pasang berkas ini. Bila sudah terpasang: uninstall, ganti kata sandi akun yang kode atau pesannya bisa terbaca, lalu aktifkan ulang verifikasi dua langkah.</item>
     </string-array>
     <string-array name="risk_hidden_destination">
         <item>Tujuan tersembunyi di dalam kode</item>
-        <item>Kode berisi alamat bot Telegram, webhook Discord, atau alamat IP tanpa nama domain. Data yang dikirim ke sana sulit dilacak ke perusahaan mana pun.</item>
-        <item>Sebagian aplikasi memakai bot atau webhook untuk notifikasi, dan alamat IP untuk perangkat lokal (kamera, router). Menjadi kekhawatiran bila bersamaan dengan akses ke data pribadi.</item>
+        <item>Kode berisi alamat bot Telegram, webhook Discord, atau alamat IP publik tanpa nama domain. Data yang dikirim ke sana sulit dilacak ke perusahaan mana pun. Alamat lokal (jaringan rumah, perangkat itu sendiri) tidak dihitung.</item>
+        <item>Sebagian aplikasi memakai bot atau webhook untuk notifikasi, atau menghubungi servernya sendiri lewat IP. Menjadi kekhawatiran bila bersamaan dengan akses ke data pribadi.</item>
         <item></item>
         <item>Periksa apakah aplikasi memang perlu terhubung ke layanan obrolan atau alamat IP langsung. Utamakan aplikasi dari pengembang yang dikenal.</item>
     </string-array>

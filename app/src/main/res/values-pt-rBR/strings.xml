@@ -29,7 +29,7 @@
     <string name="icon_saved">Ícone PNG de 512 × 512 salvo</string>
     <string name="backups">Backups</string>
     <string name="backup_folder">Pasta de backup</string>
-    <string name="privacy_local">Sua lista de apps e as análises ficam neste dispositivo. Sem anúncios, análises de uso ou conta.</string>
+    <string name="privacy_local">Sua lista de apps e as análises ficam neste dispositivo. Sem anúncios, análises de uso ou conta. A permissão de Internet só é usada na verificação opcional no VirusTotal, que você ativa com sua própria chave; ela envia apenas a impressão digital SHA-256 do app, nunca o arquivo.</string>
     <string name="backup_disclaimer">Os backups contêm os APKs de instalação, não dados de apps, contas ou progresso de jogos.</string>
     <string name="onboarding_one">Guarde uma cópia.\nConheça seus apps.</string>
     <string name="onboarding_one_body">Extraia um app ou selecione vários para fazer backup juntos.</string>

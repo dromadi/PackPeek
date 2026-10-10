@@ -29,7 +29,7 @@
     <string name="icon_saved">Ikon PNG 512 × 512 tersimpan</string>
     <string name="backups">Backup</string>
     <string name="backup_folder">Folder backup</string>
-    <string name="privacy_local">Daftar aplikasi dan analisis tetap di perangkat ini. Tanpa iklan, analitik, atau akun.</string>
+    <string name="privacy_local">Daftar aplikasi dan analisis tetap di perangkat ini. Tanpa iklan, analitik, atau akun. Izin Internet hanya dipakai untuk cek VirusTotal opsional yang kamu aktifkan dengan kunci sendiri; yang dikirim hanya sidik jari SHA-256 aplikasi, bukan berkasnya.</string>
     <string name="backup_disclaimer">Backup berisi APK instalasi, bukan data aplikasi, akun, atau progres permainan.</string>
     <string name="onboarding_one">Simpan salinannya.\nKenali aplikasimu.</string>
     <string name="onboarding_one_body">Ekstrak satu aplikasi atau pilih beberapa untuk dicadangkan sekaligus.</string>

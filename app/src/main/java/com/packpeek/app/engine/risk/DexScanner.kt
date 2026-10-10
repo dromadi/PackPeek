@@ -134,7 +134,6 @@ object DexScanner {
     private val telegramToken = Regex("""(?<![0-9])\d{8,10}:[A-Za-z0-9_-]{35}(?![A-Za-z0-9_-])""")
     private val forwardingCode = Regex("""^(\*\*?|#)(21|61|62|67|002|004)\*""")
     private val url = Regex("""(https?)://([A-Za-z0-9.-]+|\[[0-9a-fA-F:]+])(:\d+)?""")
-    private val ipv4 = Regex("""^\d{1,3}(\.\d{1,3}){3}$""")
     private val ignoredHosts =
         setOf("schemas.android.com", "www.w3.org", "www.apache.org", "xmlpull.org", "localhost", "127.0.0.1",
             "example.com", "www.example.com", "ns.adobe.com", "purl.org", "xml.org", "www.xml.org")
@@ -351,6 +350,8 @@ object DexScanner {
         val classMethods = HashMap<String, MutableList<String>>()
         val names = HashMap<String, String>()
         val destinations = LinkedHashMap<String, Destination>()
+        /** App classes (descriptors) that contain a public IP literal, with the first one found. */
+        val classIps = HashMap<String, String>()
         /**
          * Text evidence in app code waiting for confirmation: bot/webhook texts count only in a
          * class that can send, content:// texts only in a class that queries.
@@ -426,8 +427,9 @@ object DexScanner {
         val flows =
             (shallowFlows +
                     chains.map {
-                        CodeFlow(it.source, it.sink, it.toSink.first().method, it.sourceApi, it.sinkApi)
+                        CodeFlow(it.source, it.sink, it.toSink.first().method, it.sourceApi, it.sinkApi, it.ipHost)
                     })
+                .sortedBy { if (it.ipHost != null) 0 else 1 }
                 .distinctBy { Triple(it.source, it.sink, it.method) }
                 .sortedBy { if (it.sink in Capability.hiddenDestinations) 0 else 1 }
         val confirmedTexts =
@@ -607,16 +609,22 @@ object DexScanner {
         val result = LinkedHashMap<String, CodeFlow>()
         val sending = HashSet<String>()
         val querying = HashSet<String>()
-        fun callees(info: MethodInfo): List<MethodInfo> =
+        fun calleeKeys(info: MethodInfo): List<String> =
             info.callees.flatMap { key ->
                 if (key.endsWith("-><init>")) {
                     val members = state.classMethods[key.substringBefore("->")].orEmpty()
-                    if (members.size <= CONSTRUCTOR_EXPANSION_LIMIT) members.mapNotNull { state.methods[it] }
-                    else listOfNotNull(state.methods[key])
-                } else listOfNotNull(state.methods[key])
+                    if (members.size <= CONSTRUCTOR_EXPANSION_LIMIT) members else listOf(key)
+                } else listOf(key)
             }
         for ((key, info) in state.methods) {
-            val reach = callees(info) + info
+            val reachKeys = (calleeKeys(info) + key).filter { it in state.methods }
+            val reach = reachKeys.map { state.methods.getValue(it) }
+            // The bare IP must sit in the class of code that actually sends.
+            val ipHost =
+                reachKeys.firstNotNullOfOrNull { k ->
+                    if (state.methods.getValue(k).sinks and NETWORK.bit != 0) state.classIps[k.substringBefore("->")]
+                    else null
+                }
             val all = MethodInfo().apply { reach.forEach(::merge) }
             val queries = all.markers and CONTENT_QUERY.bit != 0
             val network = all.sinks and NETWORK.bit != 0
@@ -638,6 +646,7 @@ object DexScanner {
                             state.names[key] ?: key,
                             reach.firstNotNullOf { it.apis[source] },
                             reach.firstNotNullOf { it.apis[sink] },
+                            ipHost.takeIf { sink == NETWORK },
                         )
                 }
         }
@@ -704,7 +713,12 @@ object DexScanner {
             for (source in Capability.entries.filter { it.source }) {
                 val sourceNode = parent.keys.firstOrNull { sources(state.methods.getValue(it), it.substringBefore("->")) and source.bit != 0 } ?: continue
                 for (sink in Capability.entries.filter { it.sink }) {
-                    val sinkNode = parent.keys.firstOrNull { sinks(state.methods.getValue(it), it.substringBefore("->")) and sink.bit != 0 } ?: continue
+                    val sending = parent.keys.filter { sinks(state.methods.getValue(it), it.substringBefore("->")) and sink.bit != 0 }
+                    // A network sink in a class holding a bare IP is the one that matters.
+                    val sinkNode =
+                        (if (sink == NETWORK) sending.firstOrNull { it.substringBefore("->") in state.classIps } else null)
+                            ?: sending.firstOrNull()
+                            ?: continue
                     val id = "$source>$sink"
                     val toSource = path(sourceNode)
                     val toSink = path(sinkNode)
@@ -719,6 +733,7 @@ object DexScanner {
                             state.methods.getValue(sinkNode).apis[sink].orEmpty(),
                             toSource,
                             toSink,
+                            state.classIps[sinkNode.substringBefore("->")].takeIf { sink == NETWORK },
                         )
                 }
             }
@@ -927,7 +942,7 @@ object DexScanner {
                     0x1a ->
                         if (info != null) {
                             stringRule(next)?.let(::record)
-                            url(string(next))
+                            url(string(next), descriptor)
                             if (deep) {
                                 if (strings!!.size < MAX_STRINGS_PER_METHOD) strings += string(next)
                                 line("text \"${shown(string(next))}\"")
@@ -937,7 +952,7 @@ object DexScanner {
                         if (info != null && i + 2 < size) {
                             val idx = next or (u16(start + 2 * (i + 2)) shl 16)
                             stringRule(idx)?.let(::record)
-                            url(string(idx))
+                            url(string(idx), descriptor)
                             if (deep) {
                                 if (strings!!.size < MAX_STRINGS_PER_METHOD) strings += string(idx)
                                 line("text \"${shown(string(idx))}\"")
@@ -1071,20 +1086,23 @@ object DexScanner {
                 } else state.hit(Rule(rule.capability, hit.api, true), readable, null)
                 info.apis.putIfAbsent(rule.capability, hit.api)
             }
-            url(text)
+            url(text, key.substringBefore("->"))
             return true
         }
 
-        /** Records hosts of URLs written in the app's own code. */
-        fun url(s: String) {
-            if (state.destinations.size >= 40 || s.length > 2048) return
+        /** Records hosts of URLs written in the app's own code, in class [owner]. */
+        fun url(s: String, owner: String) {
+            if (s.length > 2048) return
             url.findAll(s).take(3).forEach { m ->
                 val host = m.groupValues[2].lowercase().trim('[', ']')
                 if (host.isBlank() || host in ignoredHosts || '.' !in host && ':' !in host) return@forEach
                 val cleartext = m.groupValues[1] == "http"
                 val existing = state.destinations[host]
+                val public = NetAddress.isPublic(host)
+                if (public && state.classIps.size < 200) state.classIps.putIfAbsent(owner, host)
+                if (existing == null && state.destinations.size >= 40) return@forEach
                 state.destinations[host] =
-                    Destination(host, cleartext || existing?.cleartext == true, ipv4.matches(host) || ':' in host)
+                    Destination(host, cleartext || existing?.cleartext == true, NetAddress.isIp(host), public)
             }
         }
 
