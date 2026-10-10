@@ -96,6 +96,8 @@ data class CodeFacts(
     /** Advertising and analytics SDKs found by package name. */
     val sdks: List<String>,
     val gaps: List<CodeGap>,
+    /** Present only after a deep analysis. */
+    val deep: DeepFacts? = null,
 ) {
     fun appHits(capability: Capability) = hits[capability].orEmpty().filter { it.library == null }
 
@@ -103,3 +105,64 @@ data class CodeFacts(
 
     fun flowsFrom(vararg sources: Capability) = flows.filter { it.source in sources }
 }
+
+/** How one step of a chain reaches the next method. */
+enum class StepVia {
+    /** The first method of the chain. */
+    START,
+    CALL,
+    /** An Intent or WorkRequest naming another component (Receiver → Service). */
+    INTENT,
+    /** A new object whose methods run later (Runnable, Thread, lambda). */
+    OBJECT,
+}
+
+data class ChainStep(val method: String, val via: StepVia)
+
+/** A deep read-then-send path: from [steps].first() it reaches the reading and the sending code. */
+data class CodeChain(
+    val source: Capability,
+    val sink: Capability,
+    val sourceApi: String,
+    val sinkApi: String,
+    /** Methods from the start to where data is read. */
+    val toSource: List<ChainStep>,
+    /** Methods from the start to where data is sent. */
+    val toSink: List<ChainStep>,
+)
+
+enum class Decoding { BASE64, JOINED, CHAR_ARRAY, XOR, REVERSED }
+
+/** A text the code hides, as decoded statically. Bot tokens are masked. */
+data class DecodedText(
+    val technique: Decoding,
+    val decoded: String,
+    val method: String,
+    val capability: Capability?,
+    /** XOR key or other detail; empty if none. */
+    val detail: String = "",
+)
+
+enum class PayloadKind { DEX, ARCHIVE, ENCRYPTED }
+
+/** A code file hidden inside the package and what its code can do. */
+data class PayloadScan(
+    val path: String,
+    val kind: PayloadKind,
+    val classes: Int,
+    val capabilities: Set<Capability>,
+    /** Bits per byte, 0–8; encrypted or compressed data is close to 8. */
+    val entropy: Double = 0.0,
+)
+
+/** Results only the deep analysis produces. */
+data class DeepFacts(
+    val chains: List<CodeChain>,
+    val decoded: List<DecodedText>,
+    val payloads: List<PayloadScan>,
+    /** Short code listings of the methods in the evidence, by readable method name. */
+    val listings: Map<String, List<String>>,
+    val sha256: String,
+    val bytes: Long,
+    val millis: Long,
+)

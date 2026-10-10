@@ -17,6 +17,12 @@ import java.util.zip.ZipFile
 object DexScanner {
     const val MAX_DEX_BYTES = 96 * 1024 * 1024
     const val TIME_LIMIT_MS = 30_000L
+    const val DEEP_TIME_LIMIT_MS = 90_000L
+    /** Call levels followed by the deep analysis. */
+    const val DEEP_DEPTH = 3
+    private const val MAX_CHAINS = 12
+    private const val LISTING_LINES = 60
+    private const val MAX_STRINGS_PER_METHOD = 200
     private const val PLACES_PER_CAPABILITY = 4
     private const val MAX_FLOWS = 24
     /** Constructors of small app classes stand for all their methods (lambdas, Runnables). */
@@ -132,6 +138,39 @@ object DexScanner {
     private val ignoredHosts =
         setOf("schemas.android.com", "www.w3.org", "www.apache.org", "xmlpull.org", "localhost", "127.0.0.1",
             "example.com", "www.example.com", "ns.adobe.com", "purl.org", "xml.org", "www.xml.org")
+
+    private val base64 = Regex("""^[A-Za-z0-9+/]+={0,2}$""")
+
+    /** Calls that hand an app class to Android to run later (Intent, work request, job). */
+    private val launchKeys =
+        setOf(
+            "Landroid/content/Intent;-><init>",
+            "Landroid/content/Intent;->setClass",
+            "Landroid/content/ComponentName;-><init>",
+            "Landroidx/work/OneTimeWorkRequest\$Builder;-><init>",
+            "Landroidx/work/PeriodicWorkRequest\$Builder;-><init>",
+            "Landroidx/core/app/JobIntentService;->enqueueWork",
+            "Landroid/app/job/JobInfo\$Builder;-><init>",
+        )
+
+    /** Methods Android calls on a component started through an Intent or work request. */
+    private val entryPoints =
+        setOf("onReceive", "onStartCommand", "onHandleIntent", "onHandleWork", "handleWork", "doWork",
+            "startWork", "onStartJob", "onCreate", "run", "onBind")
+
+    private fun printable(s: String) =
+        s.isNotEmpty() && s.count { it.code in 32..126 || it.isLetterOrDigit() } >= s.length * 0.9
+
+    private fun interesting(s: String): Rule? = stringRule(s)?.takeIf { it.capability != INSTALL_PACKAGE }
+
+    private fun decodingName(d: Decoding) =
+        when (d) {
+            Decoding.BASE64 -> "Base64"
+            Decoding.JOINED -> "joined"
+            Decoding.CHAR_ARRAY -> "char array"
+            Decoding.XOR -> "XOR"
+            Decoding.REVERSED -> "reversed"
+        }
 
     /** Classifies a string constant; null when uninteresting. */
     private fun stringRule(s: String): Rule? =
@@ -259,6 +298,10 @@ object DexScanner {
         var markers = 0
         val apis = HashMap<Capability, String>()
         val callees = HashSet<String>()
+        /** Deep: app classes named by const-class, started through an Intent or work request. */
+        val constClasses = HashSet<String>()
+        var launches = false
+        val listing = ArrayList<String>()
 
         fun merge(other: MethodInfo) {
             sources = sources or other.sources
@@ -268,10 +311,19 @@ object DexScanner {
             markers = markers or other.markers
             other.apis.forEach { (k, v) -> apis.putIfAbsent(k, v) }
             callees += other.callees
+            constClasses += other.constClasses
+            launches = launches || other.launches
+            if (listing.isEmpty()) listing += other.listing
         }
     }
 
-    private class State(val deadline: Long) {
+    private class State(val deadline: Long, val deep: Boolean = false) {
+        val decoded = mutableListOf<DecodedText>()
+        val decodedKeys = HashSet<String>()
+        val payloads = mutableListOf<PayloadScan>()
+        /** Capabilities seen while scanning the current payload, if any. */
+        var payloadCaps: MutableSet<Capability>? = null
+        var payloadClasses = 0
         val appHits = HashMap<Capability, MutableList<CodeHit>>()
         val libraryHits = HashMap<Capability, MutableList<CodeHit>>()
         val hitKeys = HashSet<String>()
@@ -293,6 +345,7 @@ object DexScanner {
 
         /** Keeps a few places per capability: the app's own code, then known libraries. */
         fun hit(rule: Rule, method: String, library: String?) {
+            if (library == null) payloadCaps?.add(rule.capability)
             if (!hitKeys.add("${rule.capability}|${rule.api}|$method")) return
             val list = (if (library == null) appHits else libraryHits).getOrPut(rule.capability) { mutableListOf() }
             val limit = if (library == null) PLACES_PER_CAPABILITY else PLACES_PER_CAPABILITY / 2
@@ -311,8 +364,13 @@ object DexScanner {
         }
     }
 
-    fun scan(apks: List<File>, timeLimitMs: Long = TIME_LIMIT_MS): CodeFacts {
-        val state = State(System.currentTimeMillis() + timeLimitMs)
+    /**
+     * @param deep also follows calls [DEEP_DEPTH] levels deep and through Intents, decodes hidden
+     *   texts, scans code files hidden in assets and keeps listings of the methods in evidence.
+     */
+    fun scan(apks: List<File>, timeLimitMs: Long = TIME_LIMIT_MS, deep: Boolean = false): CodeFacts {
+        val started = System.currentTimeMillis()
+        val state = State(started + timeLimitMs, deep)
         apks.forEach { apk ->
             runCatching {
                     ZipFile(apk).use { zip ->
@@ -342,26 +400,74 @@ object DexScanner {
                 .onFailure { state.gaps += CodeGap(GapKind.UNREADABLE, apk.name) }
         }
         if (state.stopped) state.gaps += CodeGap(GapKind.LIMIT, "time")
-        val (flows, classes) = flows(state)
+        val (shallowFlows, classes) = flows(state)
+        val chains = if (deep) chains(state, classes) else emptyList()
+        // Deep chains also count as flows, so the findings pick them up.
+        val flows =
+            (shallowFlows +
+                    chains.map {
+                        CodeFlow(it.source, it.sink, it.toSink.first().method, it.sourceApi, it.sinkApi)
+                    })
+                .distinctBy { Triple(it.source, it.sink, it.method) }
+                .sortedBy { if (it.sink in Capability.hiddenDestinations) 0 else 1 }
+        val confirmedTexts =
+            state.pendingTexts
+                .filter { (key, hit) ->
+                    val owner = key.substringBefore("->")
+                    if (hit.capability.source) owner in classes.querying else owner in classes.sending
+                }
+                .map { it.second }
+        val hits = state.hits(confirmedTexts)
+        val deepFacts =
+            if (!deep) null
+            else {
+                val evidence =
+                    (chains.flatMap { c -> (c.toSource + c.toSink).map { it.method } } +
+                            state.decoded.map { it.method } +
+                            hits.values.flatten().filter { it.library == null }.map { it.method })
+                        .toSet()
+                DeepFacts(
+                    chains = chains,
+                    decoded = state.decoded.toList(),
+                    payloads = state.payloads.toList(),
+                    listings =
+                        state.methods
+                            .filter { (key, info) -> info.listing.isNotEmpty() && (state.names[key] ?: key) in evidence }
+                            .entries
+                            .take(40)
+                            .associate { (key, info) -> (state.names[key] ?: key) to info.listing.toList() },
+                    sha256 = apks.firstOrNull()?.let(::sha256).orEmpty(),
+                    bytes = apks.sumOf { it.length() },
+                    millis = System.currentTimeMillis() - started,
+                )
+            }
         return CodeFacts(
             dexFiles = state.dexFiles,
             classes = state.classes,
             appClasses = state.appClasses,
-            hits =
-                state.hits(
-                    state.pendingTexts
-                        .filter { (key, hit) ->
-                            val owner = key.substringBefore("->")
-                            if (hit.capability.source) owner in classes.querying else owner in classes.sending
-                        }
-                        .map { it.second }
-                ),
+            hits = hits,
             flows = flows,
             destinations = state.destinations.values.toList(),
             sdks = state.sdks.toList(),
             gaps = state.gaps.distinct(),
+            deep = deepFacts,
         )
     }
+
+    private fun sha256(file: File): String =
+        runCatching {
+                val digest = java.security.MessageDigest.getInstance("SHA-256")
+                file.inputStream().use { input ->
+                    val buffer = ByteArray(64 * 1024)
+                    while (true) {
+                        val n = input.read(buffer)
+                        if (n < 0) break
+                        digest.update(buffer, 0, n)
+                    }
+                }
+                digest.digest().joinToString("") { "%02x".format(it) }
+            }
+            .getOrDefault("")
 
     /** Code that DEX analysis cannot see: hidden payloads, packers, cross-platform engines. */
     private fun inspectPackaging(
@@ -397,10 +503,69 @@ object DexScanner {
                 val dex = head != null && head.size == 4 && head[0] == 'd'.code.toByte() &&
                     head[1] == 'e'.code.toByte() && head[2] == 'x'.code.toByte() && head[3] == '\n'.code.toByte()
                 val archive = file.endsWith(".jar") || file.endsWith(".apk") || file.endsWith(".dex")
-                if (dex || (archive && head != null && head.size == 4 && head[0] == 'P'.code.toByte() && head[1] == 'K'.code.toByte()))
+                val zipped = head != null && head.size == 4 && head[0] == 'P'.code.toByte() && head[1] == 'K'.code.toByte()
+                if (dex || (archive && zipped)) {
                     state.gaps += CodeGap(GapKind.HIDDEN_CODE, "$apk!$name")
+                    if (state.deep) scanPayload(zip, e, if (dex) PayloadKind.DEX else PayloadKind.ARCHIVE, state)
+                } else if (state.deep && lower.startsWith("assets/") && e.size >= 16 * 1024 && file.substringAfterLast('.', "") !in mediaExtensions)
+                    entropy(zip, e)?.takeIf { it > 7.6 }?.let {
+                        state.payloads += PayloadScan(name, PayloadKind.ENCRYPTED, 0, emptySet(), it)
+                    }
             }
         }
+    }
+
+    private val mediaExtensions =
+        setOf("png", "jpg", "jpeg", "webp", "gif", "mp3", "mp4", "ogg", "wav", "m4a", "ttf", "otf", "woff", "woff2",
+            "zip", "gz", "pak", "bundle", "tflite", "bin_compressed", "jar", "apk", "dex")
+
+    /** Shannon entropy of the first 64 KiB, in bits per byte. */
+    private fun entropy(zip: ZipFile, entry: java.util.zip.ZipEntry): Double? =
+        runCatching {
+                val counts = IntArray(256)
+                var total = 0
+                zip.getInputStream(entry).use { input ->
+                    val buffer = ByteArray(8192)
+                    while (total < 65536) {
+                        val n = input.read(buffer)
+                        if (n < 0) break
+                        for (i in 0 until n) counts[buffer[i].toInt() and 255]++
+                        total += n
+                    }
+                }
+                if (total == 0) return null
+                counts.filter { it > 0 }.sumOf { val p = it.toDouble() / total; -p * kotlin.math.ln(p) / kotlin.math.ln(2.0) }
+            }
+            .getOrNull()
+
+    /** Deep: scans a DEX or an APK/JAR hidden in the package with the same rules. */
+    private fun scanPayload(zip: ZipFile, entry: java.util.zip.ZipEntry, kind: PayloadKind, state: State) {
+        val caps = mutableSetOf<Capability>()
+        val before = state.classes
+        state.payloadCaps = caps
+        try {
+            val bytes = zip.getInputStream(entry).use { it.readBytes() }
+            if (kind == PayloadKind.DEX) Dex(bytes, state, entry.name).scan()
+            else {
+                val temp = File.createTempFile("payload", ".zip")
+                try {
+                    temp.writeBytes(bytes)
+                    ZipFile(temp).use { inner ->
+                        inner.entries().asSequence().filter { Regex("""classes\d*\.dex""").matches(it.name) }.forEach { dex ->
+                            if (dex.size <= MAX_DEX_BYTES)
+                                Dex(inner.getInputStream(dex).use { it.readBytes() }, state, entry.name).scan()
+                        }
+                    }
+                } finally {
+                    temp.delete()
+                }
+            }
+        } catch (e: Exception) {
+            /* Recorded with no classes below. */
+        } finally {
+            state.payloadCaps = null
+        }
+        state.payloads += PayloadScan(entry.name, kind, state.classes - before, caps - CONTENT_QUERY)
     }
 
     /** First four bytes; InputStream.readNBytes needs API 33. */
@@ -460,8 +625,91 @@ object DexScanner {
         return result.values.sortedBy { if (it.sink in Capability.hiddenDestinations) 0 else 1 } to Classes(sending, querying)
     }
 
+    /**
+     * Deep: read-then-send paths up to [DEEP_DEPTH] levels, following calls, new objects and
+     * Intents. Each chain keeps the shortest path to the reading and to the sending code.
+     */
+    private fun chains(state: State, classes: Classes): List<CodeChain> {
+        fun edges(key: String, info: MethodInfo): List<Pair<String, StepVia>> {
+            val out = ArrayList<Pair<String, StepVia>>()
+            info.callees.forEach { callee ->
+                if (callee.endsWith("-><init>")) {
+                    val members = state.classMethods[callee.substringBefore("->")].orEmpty()
+                    if (members.size <= CONSTRUCTOR_EXPANSION_LIMIT) members.forEach { out += it to StepVia.OBJECT }
+                }
+                if (callee in state.methods && callee != key) out += callee to StepVia.CALL
+            }
+            if (info.launches)
+                info.constClasses.forEach { cls ->
+                    state.classMethods[cls].orEmpty()
+                        .filter { it.substringAfter("->") in entryPoints }
+                        .forEach { out += it to StepVia.INTENT }
+                }
+            return out
+        }
+        fun sources(info: MethodInfo, owner: String) =
+            info.sources or (if (owner in classes.querying) info.stringSources else 0)
+        fun sinks(info: MethodInfo, owner: String) =
+            info.sinks or (if (owner in classes.sending) info.stringSinks else 0)
+        val result = LinkedHashMap<String, CodeChain>()
+        for ((start, startInfo) in state.methods) {
+            if (result.size >= MAX_CHAINS * 3) break
+            // Breadth-first so each node keeps its shortest path from the start.
+            val parent = LinkedHashMap<String, Pair<String?, StepVia>>()
+            parent[start] = null to StepVia.START
+            var frontier = listOf(start)
+            repeat(DEEP_DEPTH) {
+                val next = ArrayList<String>()
+                for (node in frontier) {
+                    val info = state.methods[node] ?: continue
+                    for ((target, via) in edges(node, info)) {
+                        if (target !in parent && target in state.methods) {
+                            parent[target] = node to via
+                            next += target
+                        }
+                    }
+                }
+                frontier = next
+            }
+            fun path(to: String): List<ChainStep> {
+                val steps = ArrayList<ChainStep>()
+                var cursor: String? = to
+                while (cursor != null) {
+                    val (from, via) = parent.getValue(cursor)
+                    steps += ChainStep(state.names[cursor] ?: cursor, via)
+                    cursor = from
+                }
+                return steps.reversed()
+            }
+            for (source in Capability.entries.filter { it.source }) {
+                val sourceNode = parent.keys.firstOrNull { sources(state.methods.getValue(it), it.substringBefore("->")) and source.bit != 0 } ?: continue
+                for (sink in Capability.entries.filter { it.sink }) {
+                    val sinkNode = parent.keys.firstOrNull { sinks(state.methods.getValue(it), it.substringBefore("->")) and sink.bit != 0 } ?: continue
+                    val id = "$source>$sink"
+                    val toSource = path(sourceNode)
+                    val toSink = path(sinkNode)
+                    // Only chains the one-level analysis cannot see are new; keep a few per kind.
+                    if (toSource.size <= 2 && toSink.size <= 2 && toSource.none { it.via == StepVia.INTENT } && toSink.none { it.via == StepVia.INTENT }) continue
+                    if (result.keys.count { it.startsWith(id) } >= 2) continue
+                    result["$id|$start"] =
+                        CodeChain(
+                            source,
+                            sink,
+                            state.methods.getValue(sourceNode).apis[source].orEmpty(),
+                            state.methods.getValue(sinkNode).apis[sink].orEmpty(),
+                            toSource,
+                            toSink,
+                        )
+                }
+            }
+        }
+        return result.values
+            .sortedWith(compareBy({ if (it.sink in Capability.hiddenDestinations) 0 else 1 }, { it.toSource.size + it.toSink.size }))
+            .take(MAX_CHAINS)
+    }
+
     /** One DEX file. Offsets follow the format at source.android.com/docs/core/runtime/dex-format. */
-    private class Dex(val bytes: ByteArray, val state: State) {
+    private class Dex(val bytes: ByteArray, val state: State, val origin: String = "") {
         val b: ByteBuffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
         val strings: Array<String?>
         val stringIdsOff: Int
@@ -610,8 +858,28 @@ object DexScanner {
             val start = codeOff + 16
             require(size >= 0 && start.toLong() + 2L * size <= bytes.size)
             val name = string(b.getInt(methodIdsOff + 8 * index + 4))
-            val readable = "$className.$name"
+            val readable = if (origin.isEmpty()) "$className.$name" else "$className.$name [$origin]"
             val info = if (lib == null) MethodInfo() else null
+            val deep = state.deep && info != null
+            val strings = if (deep) ArrayList<String>() else null
+            fun line(text: String) {
+                if (deep && info!!.listing.size < LISTING_LINES) info.listing += text
+            }
+            // Deep: constants in registers and the arrays filled from them one element at a time,
+            // the way d8 compiles short array initialisers.
+            val constants = if (deep) HashMap<Int, Int>() else null
+            val arrays = if (deep) HashMap<Int, java.util.TreeMap<Int, Int>>() else null
+            val arrayWidth = if (deep) HashMap<Int, Int>() else null
+            fun flushArray(reg: Int) {
+                val values = arrays!!.remove(reg) ?: return
+                val width = arrayWidth!!.remove(reg) ?: 1
+                if (values.size in 6..4096 && values.keys.first() == 0 && values.keys.last() == values.size - 1) {
+                    val data =
+                        if (width == 2) ByteArray(values.size * 2) { if (it % 2 == 0) values.getValue(it / 2).toByte() else (values.getValue(it / 2) shr 8).toByte() }
+                        else ByteArray(values.size) { values.getValue(it).toByte() }
+                    decodeArray(data, width, readable, "$descriptor->$name")
+                }
+            }
             val key = "$descriptor->$name"
             fun record(rule: Rule) {
                 val cap = rule.capability
@@ -640,30 +908,149 @@ object DexScanner {
                         if (info != null) {
                             stringRule(next)?.let(::record)
                             url(string(next))
+                            if (deep) {
+                                if (strings!!.size < MAX_STRINGS_PER_METHOD) strings += string(next)
+                                line("text \"${shown(string(next))}\"")
+                            }
                         }
                     0x1b ->
                         if (info != null && i + 2 < size) {
                             val idx = next or (u16(start + 2 * (i + 2)) shl 16)
                             stringRule(idx)?.let(::record)
                             url(string(idx))
+                            if (deep) {
+                                if (strings!!.size < MAX_STRINGS_PER_METHOD) strings += string(idx)
+                                line("text \"${shown(string(idx))}\"")
+                            }
                         }
-                    in 0x60..0x6d -> fieldRule.getOrNull(next)?.let(::record)
+                    0x1c ->
+                        if (deep && next < typeCount) {
+                            val target = type(next)
+                            if (library(target) == null && target.startsWith("L")) info!!.constClasses += target
+                            line("class ${simple(target)}")
+                        }
+                    0x22 -> if (deep && next < typeCount) line("new ${simple(type(next))}")
+                    0x12 -> constants?.put((unit shr 8) and 0xf, (unit shl 16) shr 28)
+                    0x13 -> constants?.put((unit shr 8) and 0xff, next.toShort().toInt())
+                    0x14 -> if (constants != null && i + 2 < size) constants[(unit shr 8) and 0xff] = next or (u16(start + 2 * (i + 2)) shl 16)
+                    0x23 ->
+                        if (arrays != null) {
+                            val reg = (unit shr 8) and 0xf
+                            flushArray(reg)
+                            val elementType = if (next < typeCount) type(next) else ""
+                            if (elementType == "[B" || elementType == "[C") {
+                                arrays[reg] = java.util.TreeMap()
+                                arrayWidth!![reg] = if (elementType == "[C") 2 else 1
+                            }
+                        }
+                    0x4f, 0x50 ->
+                        if (arrays != null) {
+                            val value = constants!![(unit shr 8) and 0xff]
+                            val array = arrays[next and 0xff]
+                            val index = constants[(next shr 8) and 0xff]
+                            if (value != null && array != null && index != null && index in 0..4095) array[index] = value
+                        }
+                    in 0x60..0x6d -> {
+                        val rule = fieldRule.getOrNull(next)
+                        rule?.let(::record)
+                        if (deep && rule != null) line("read ${rule.api}")
+                    }
                     in 0x6e..0x72, in 0x74..0x78, 0xfa, 0xfb -> {
-                        methodRule.getOrNull(next)?.let(::record)
+                        val rule = methodRule.getOrNull(next)
+                        rule?.let(::record)
                         if (info != null && next < methodCount) {
                             val target = methodIdsOff + 8 * next
                             val owner = type(u16(target))
                             if (library(owner) == null && owner.startsWith("L")) info.callees += methodKey(next)
+                            if (deep) {
+                                val called = methodKey(next)
+                                if (called in launchKeys) info.launches = true
+                                line((if (rule != null) "⚠ " else "") + "call ${simple(owner)}.${called.substringAfter("->")}")
+                            }
                         }
                     }
+                    0x00 ->
+                        // fill-array-data payload: arrays of bytes or chars can hide texts.
+                        if (deep && unit == 0x0300 && i + 3 < size) {
+                            val width = next
+                            val count = b.getInt(start + 2 * (i + 2))
+                            val dataStart = start + 2 * (i + 4)
+                            if ((width == 1 || width == 2) && count in 6..4096 && dataStart + width.toLong() * count <= bytes.size)
+                                decodeArray(ByteArray(width * count) { bytes[dataStart + it] }, width, readable, key)
+                        }
                 }
                 i += width(op, unit, start, i, size)
+            }
+            if (deep) {
+                arrays!!.keys.toList().forEach(::flushArray)
+                decodeStrings(strings!!, readable, key)
             }
             if (info != null) {
                 state.names.putIfAbsent(key, readable)
                 state.classMethods.getOrPut(descriptor) { mutableListOf() }.let { if (key !in it) it += key }
                 state.methods.getOrPut(key) { MethodInfo() }.merge(info)
             }
+        }
+
+        fun simple(descriptor: String) = descriptor.removePrefix("L").removeSuffix(";").substringAfterLast('/')
+
+        /** A text for a listing: short, single line, bot tokens masked. */
+        fun shown(s: String) = maskToken(s.replace('\n', ' ')).take(80)
+
+        /** Deep: texts hidden with Base64, reversal or by splitting them into pieces. */
+        fun decodeStrings(strings: List<String>, readable: String, key: String) {
+            for (s in strings) {
+                if (s.length in 12..4096 && s.length % 4 == 0 && base64.matches(s))
+                    runCatching { String(java.util.Base64.getDecoder().decode(s), Charsets.UTF_8) }
+                        .getOrNull()
+                        ?.takeIf { printable(it) }
+                        ?.let { recordDecoded(Decoding.BASE64, it, readable, key) }
+                if (s.length >= 10) recordDecoded(Decoding.REVERSED, s.reversed(), readable, key, quiet = true)
+            }
+            if (strings.size >= 2) {
+                val joined = strings.joinToString("")
+                // Only when no single piece already shows what the whole does.
+                if (strings.none { interesting(it) != null }) recordDecoded(Decoding.JOINED, joined, readable, key)
+            }
+        }
+
+        /** Deep: byte or char arrays that spell a text directly or after a one-byte XOR. */
+        fun decodeArray(data: ByteArray, width: Int, readable: String, key: String) {
+            val text =
+                if (width == 2) String(CharArray(data.size / 2) { ((data[2 * it].toInt() and 255) or ((data[2 * it + 1].toInt() and 255) shl 8)).toChar() })
+                else String(data, Charsets.ISO_8859_1)
+            if (printable(text) && recordDecoded(Decoding.CHAR_ARRAY, text, readable, key)) return
+            if (width == 1 && data.size <= 512)
+                for (xor in 1..255) {
+                    val candidate = String(ByteArray(data.size) { (data[it].toInt() xor xor).toByte() }, Charsets.ISO_8859_1)
+                    if (printable(candidate) && recordDecoded(Decoding.XOR, candidate, readable, key, detail = "0x%02x".format(xor)))
+                        return
+                }
+        }
+
+        /**
+         * Records a decoded text when it is a bot, webhook, content URI, URL or forwarding code.
+         * Returns whether it was interesting. [quiet] skips texts that only look like URLs.
+         */
+        fun recordDecoded(technique: Decoding, text: String, readable: String, key: String, detail: String = "", quiet: Boolean = false): Boolean {
+            val rule = interesting(text)
+            val hasUrl = url.containsMatchIn(text)
+            if (rule == null && (quiet || !hasUrl)) return false
+            if (!state.decodedKeys.add("$technique|$text|$readable")) return true
+            val shownText = rule?.api ?: shown(text)
+            state.decoded += DecodedText(technique, shownText, readable, rule?.capability, detail)
+            if (rule != null) {
+                val info = state.methods.getOrPut(key) { MethodInfo() }
+                val hit = CodeHit(rule.capability, "${decodingName(technique)}: $shownText", readable, null, true)
+                if (rule.capability in Capability.hiddenDestinations || rule.capability.source) {
+                    state.pendingTexts += key to hit
+                    if (rule.capability.source) info.stringSources = info.stringSources or rule.capability.bit
+                    else info.stringSinks = info.stringSinks or rule.capability.bit
+                } else state.hit(Rule(rule.capability, hit.api, true), readable, null)
+                info.apis.putIfAbsent(rule.capability, hit.api)
+            }
+            url(text)
+            return true
         }
 
         /** Records hosts of URLs written in the app's own code. */
