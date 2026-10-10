@@ -44,6 +44,6 @@ Backup berisi paket instalasi, bukan data aplikasi, akun, progres permainan, ata
 - QUERY_ALL_PACKAGES untuk inventaris; REQUEST_INSTALL_PACKAGES untuk instalasi; izin foreground/notifikasi untuk backup. Tidak ada izin Internet atau akses semua file.
 - Baseline Profile, pengujian perangkat API 24/29/33/34/36, uji TalkBack dan signing produksi belum dinyatakan selesai. Alpha bukan rilis stabil final grand design.
 
-Lihat `docs/BUILD_REPORT.md` dan `docs/GRAND_DESIGN_STATUS.md` untuk hasil aktual serta pekerjaan lanjutan, dan `docs/IDE_FITUR.md` untuk daftar ide pengembangan.
+Lihat `docs/BUILD_REPORT.md` dan `docs/GRAND_DESIGN_STATUS.md` untuk hasil aktual serta pekerjaan lanjutan, `docs/IDE_FITUR.md` untuk daftar ide pengembangan, dan `docs/ANALISIS_RISIKO.md` untuk arah analisis risiko berbasis bukti.
 
 Referensi resmi: https://developer.android.com/build/releases/agp-8-13-0-release-notes ; https://developer.android.com/develop/background-work/background-tasks/persistent/how-to/long-running ; https://developer.android.com/reference/android/content/pm/PackageInstaller

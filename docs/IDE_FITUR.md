@@ -2,6 +2,8 @@
 
 Daftar ide pengembangan PackPeek setelah 2.0.0-alpha.3. Arah produk tetap sama: alat backup dan pemeriksa APK yang berjalan di perangkat, tanpa akun, iklan, analitik, atau izin Internet.
 
+**Arah utama sejak alpha.4:** analisis risiko berbasis bukti. Rencana lengkapnya ada di `docs/ANALISIS_RISIKO.md`; ide 11 (tracker), 12 (riwayat izin), 13 (manifest), dan 26 (pemeriksaan sebelum pasang) menjadi bagian dari rencana itu.
+
 Dokumen ini untuk direview pemilik. Belum ada fitur di sini yang dijanjikan; urutan dan cakupan diputuskan setelah review.
 
 **Ukuran usaha:** K = kecil (beberapa jam) · S = sedang (1–2 hari) · B = besar (beberapa hari atau lebih).
