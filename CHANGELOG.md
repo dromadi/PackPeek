@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.0-alpha.7 — 2026-10-10
+
+Fitur dari analisis pesaing (`docs/ANALISIS_PESAING.md`).
+
+- **Bagikan setelah ekstrak:** ekstrak satu aplikasi yang berhasil kini menampilkan bilah "Tersimpan: nama berkas · **Bagikan**" di bawah layar, bukan dialog. Ekstrak beberapa aplikasi atau yang gagal tetap memakai dialog hasil.
+- **Nama versi Android:** "Android 16 (Baklava, API 36)" untuk Android minimum dan target, plus lencana API di header detail.
+- **Detail:** tanggal pertama dipasang, nama installer ("Google Play Store (com.android.vending)"), dan jumlah di tab (Izin (15), Komponen (32)).
+- **Ringkasan yang bisa diketuk:** kelompok Sumber, Android target, Android minimum, **Sertifikat** (dengan sidik jari agar kunci bernama sama bisa dibedakan), **Arsitektur CPU**, dan teknologi, dengan persentase. Ketuk kelompok untuk membuka daftar aplikasinya; chip filter di atas daftar menghapusnya.
+- **Menu ⋮ per baris:** Detail cepat, Detail lengkap, Buka aplikasi, Info aplikasi sistem, Lihat di Google Play, Simpan ikon, Salin nama paket, dan Favorit. Favorit ditandai bintang kecil di samping nama.
+- **Detail cepat:** lembar setengah layar berisi versi, Android minimum/target, tanggal, installer, UID, ukuran, jumlah izin/activity/service/receiver/provider, dan tombol Ekstrak, Buka, Google Play, Detail lengkap. Di Pengaturan → Tampilan, "Ketuk aplikasi membuka" bisa diubah ke Detail cepat (bawaan: Detail lengkap).
+
 ## 2.0.0-alpha.6 — 2026-10-10
 
 Perbaikan keamanan data dan ketelitian parser, sebelum digabung ke `main`.

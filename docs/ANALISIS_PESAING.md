@@ -7,7 +7,7 @@ Pesaing yang dibahas:
 - **A — Apk Extractor** (`com.toralabs.apkextractor`): gaya lama, berwarna biru, dengan iklan.
 - **B — XAPK Extractor** (`com.ytheekshana.apkextractor`): Material 3, ada App Analyzer.
 
-Status di PackPeek 2.0.0-alpha.6:
+Status di PackPeek 2.0.0-alpha.7 (diperbarui setelah alpha.7):
 
 - ✅ sudah ada
 - 🟡 sebagian
@@ -18,7 +18,7 @@ Status di PackPeek 2.0.0-alpha.6:
 | # | Keunggulan | Dari | PackPeek | Catatan |
 |---|---|---|---|---|
 | 1 | Ekstrak satu ketuk langsung dari daftar | A | ✅ | Tombol unduh di tiap baris |
-| 2 | Menu ⋮ per baris: Ekstrak, Info aplikasi, Simpan ikon, Lihat di Play Store, Bagikan | A | 🟡 | Di PackPeek tindakan ini ada di halaman detail, belum di baris |
+| 2 | Menu ⋮ per baris: Ekstrak, Info aplikasi, Simpan ikon, Lihat di Play Store, Bagikan | A | ✅ | alpha.7: menu ⋮ di tiap baris (ekstrak tetap tombol tersendiri) |
 | 3 | Tekan lama untuk memilih banyak, dengan penghitung "5/342" | A | ✅ | Ditambah "Pilih semua hasil" |
 | 4 | Chip User / System / All, dengan jumlah aplikasi | B | ✅ | Chip Tipe, Sumber, Urutkan |
 | 5 | Ukuran sebagai "pil" bergaris di kanan, mudah dipindai | B | 🟡 | Ukuran ada di baris teks, belum sebagai pil |
@@ -30,8 +30,8 @@ Status di PackPeek 2.0.0-alpha.6:
 
 | # | Keunggulan | Dari | PackPeek | Catatan |
 |---|---|---|---|---|
-| 9 | Snackbar "Extracted Apk Saved ✓ **SHARE**" langsung setelah ekstrak | A | ❌ | PackPeek berbagi lewat Riwayat |
-| 10 | Dialog ringkasan sebelum ekstrak yang **bisa dimatikan** ("Show App Details") | A | 🟡 | PackPeek selalu menampilkan konfirmasi |
+| 9 | Snackbar "Extracted Apk Saved ✓ **SHARE**" langsung setelah ekstrak | A | ✅ | alpha.7: bilah "Tersimpan · Bagikan" untuk satu aplikasi; dialog hasil untuk banyak aplikasi |
+| 10 | Dialog ringkasan sebelum ekstrak yang **bisa dimatikan** ("Show App Details") | A | ✅ | Sudah ada: "Jangan tanya lagi" di dialog konfirmasi |
 | 11 | Format nama berkas bisa diatur | A | ✅ | |
 | 12 | Split APK diekstrak ke `.xapk` | B | ✅ | PackPeek: `.apks`, `.xapk`, `.zip`, `.apk` gabungan |
 | 13 | Proses ekstrak terasa cepat, dengan dialog progres sederhana | A | 🟡 *(cek)* | Perlu dibandingkan langsung di HP yang sama |
@@ -40,26 +40,26 @@ Status di PackPeek 2.0.0-alpha.6:
 
 | # | Keunggulan | Dari | PackPeek | Catatan |
 |---|---|---|---|---|
-| 14 | **Lembar detail cepat (bottom sheet)**: info utama dan tombol tanpa pindah halaman | B | ❌ | PackPeek membuka halaman penuh |
-| 15 | Nama versi Android yang manusiawi: "Android 16.0 (Baklava, API 36)" | B | ❌ | PackPeek hanya menampilkan angka API |
-| 16 | Lencana "API 36" di header | B | ❌ | |
-| 17 | Tanggal pasang **pertama** dan pembaruan terakhir | B | 🟡 | PackPeek baru menampilkan pembaruan terakhir; data pasang pertama sudah dibaca tetapi belum ditampilkan |
-| 18 | Installer ditampilkan dengan nama ("Debug", "Galaxy Store") | B | ✅ | |
-| 19 | Tombol jumlah: Permissions (15), Activities (11), Services (10), Receivers (6), Providers (3) | B | 🟡 | PackPeek punya tab Izin dan Komponen; jumlahnya belum tampil di tombol |
+| 14 | **Lembar detail cepat (bottom sheet)**: info utama dan tombol tanpa pindah halaman | B | ✅ | alpha.7: Detail cepat lewat menu ⋮, atau jadikan bawaan di Pengaturan |
+| 15 | Nama versi Android yang manusiawi: "Android 16.0 (Baklava, API 36)" | B | ✅ | alpha.7 |
+| 16 | Lencana "API 36" di header | B | ✅ | |
+| 17 | Tanggal pasang **pertama** dan pembaruan terakhir | B | ✅ | alpha.7 |
+| 18 | Installer ditampilkan dengan nama ("Debug", "Galaxy Store") | B | ✅ | alpha.7: nama aplikasi installer + nama paket |
+| 19 | Tombol jumlah: Permissions (15), Activities (11), Services (10), Receivers (6), Providers (3) | B | ✅ | alpha.7: di tab detail dan chip Detail cepat |
 | 20 | Tombol Google Play / Extract App / Launch dalam satu baris | B | ✅ | |
-| 21 | UID ditampilkan | A | ❌ | Info teknis kecil |
+| 21 | UID ditampilkan | A | ✅ | Sudah ada di detail; juga di Detail cepat |
 | 22 | Simpan ikon aplikasi | A | ✅ | PNG 512×512 |
 
 ## 4. Analisis dan ringkasan (App Analyzer)
 
 | # | Keunggulan | Dari | PackPeek | Catatan |
 |---|---|---|---|---|
-| 23 | Kelompok per **Installer** dengan grafik donat dan persentase | B | 🟡 | PackPeek memakai batang, tanpa persentase |
+| 23 | Kelompok per **Installer** dengan grafik donat dan persentase | B | 🟡 | alpha.7: batang dengan persentase; belum grafik donat |
 | 24 | Kelompok per **Target SDK** | B | ✅ | |
-| 25 | Kelompok per **Minimum SDK** | B | ❌ | |
-| 26 | Kelompok per **Signature** (sertifikat) | B | ❌ | Sangat berguna untuk keamanan, misalnya aplikasi yang memakai sertifikat debug atau berbagi kunci |
-| 27 | Kelompok per **Platform** (ABI / arsitektur) | B | ❌ | |
-| 28 | Baris kelompok bisa diketuk untuk membuka daftar aplikasinya *(cek)* | B | ❌ | Baris di Ringkasan PackPeek belum bisa diketuk |
+| 25 | Kelompok per **Minimum SDK** | B | ✅ | |
+| 26 | Kelompok per **Signature** (sertifikat) | B | ✅ | Sangat berguna untuk keamanan, misalnya aplikasi yang memakai sertifikat debug atau berbagi kunci |
+| 27 | Kelompok per **Platform** (ABI / arsitektur) | B | ✅ | |
+| 28 | Baris kelompok bisa diketuk untuk membuka daftar aplikasinya *(cek)* | B | ✅ | alpha.7 |
 | 29 | Ikon toko pada tiap kelompok installer | B | ❌ | |
 
 ## 5. Riwayat dan pemasangan

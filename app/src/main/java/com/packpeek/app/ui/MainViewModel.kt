@@ -25,6 +25,8 @@ import java.util.UUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
+data class AppExtras(val signer: Signer?, val abis: Set<String>)
+
 data class DetailState(
     val app: AppRecord? = null,
     val report: AuditReport? = null,
@@ -49,6 +51,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val tech = MutableStateFlow<Map<String, List<String>>>(emptyMap())
     val technologies = tech.asStateFlow()
     val riskScores = MutableStateFlow<Map<String, Int>>(emptyMap())
+    /** Signer and CPU architectures per package, read for the overview groups. */
+    val extras = MutableStateFlow<Map<String, AppExtras>>(emptyMap())
+    val readingExtras = MutableStateFlow(false)
+    /** Detail tab to open next, e.g. Permissions when tapped from the quick sheet. */
+    var requestedTab = 0
     val checkingOverview = MutableStateFlow(false)
     /** True once the first app scan finished (successfully or not). */
     val loaded = MutableStateFlow(false)
@@ -87,6 +94,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var auditJob: Job? = null
     private var filterJob: Job? = null
     private var overviewJob: Job? = null
+    private var extrasJob: Job? = null
     private var imported: ImportedArchive? = null
     private var starting = false
     private var pendingRefresh: Job? = null
@@ -180,6 +188,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         .toSet()
                 tech.value = tech.value.filterKeys { it in unchanged }
                 riskScores.value = riskScores.value.filterKeys { it in unchanged }
+                extras.value = extras.value.filterKeys { it in unchanged }
                 _apps.value = result
                 selected.value = selected.value intersect result.map { it.packageName }.toSet()
                 error.value = null
@@ -252,6 +261,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 checkingOverview.value = false
             }
         }
+    }
+
+    /** Reads signers and native code for apps not read yet; cheap enough to run on open. */
+    fun readExtras() {
+        if (readingExtras.value) return
+        readingExtras.value = true
+        extrasJob = viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Chunked so the overview fills in progressively without a flood of updates.
+                apps.value.filter { it.packageName !in extras.value }.chunked(25).forEach { chunk ->
+                    ensureActive()
+                    extras.value =
+                        extras.value +
+                            chunk.associate {
+                                it.packageName to
+                                    AppExtras(owner.apps.signer(it.packageName), owner.apps.abis(it))
+                            }
+                }
+            } finally {
+                readingExtras.value = false
+            }
+        }
+    }
+
+    /** Shows only [group] in the app list. */
+    fun showGroup(group: AppGroup) {
+        selected.value = emptySet()
+        setQuery(AppQuery(sort = query.value.sort, group = group))
     }
 
     fun cancelOverview() {

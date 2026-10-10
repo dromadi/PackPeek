@@ -187,6 +187,15 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
                 }
                 GroupDivider()
                 ChoiceRow(
+                    stringResource(R.string.tap_opens),
+                    s.tap,
+                    listOf("FULL" to R.string.full_details, "QUICK" to R.string.quick_details),
+                    PackIcons.Apps,
+                ) {
+                    vm.text("tap", it)
+                }
+                GroupDivider()
+                ChoiceRow(
                     stringResource(R.string.language),
                     AppCompatDelegate.getApplicationLocales().toLanguageTags(),
                     listOf(

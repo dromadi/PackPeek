@@ -26,6 +26,8 @@ data class Settings(
     val favorites: Set<String> = emptySet(),
     /** Successful backups kept per app; 0 keeps every backup. */
     val keep: Int = 0,
+    /** What tapping an app in the list opens: FULL details or the QUICK sheet. */
+    val tap: String = "FULL",
 )
 
 class SettingsRepository(context: Context) {
@@ -50,6 +52,7 @@ class SettingsRepository(context: Context) {
                     ),
                     p[stringSetPreferencesKey("favorites")] ?: emptySet(),
                     p[intPreferencesKey("keep")] ?: 0,
+                    p[stringPreferencesKey("tap")] ?: "FULL",
                 )
             }
 

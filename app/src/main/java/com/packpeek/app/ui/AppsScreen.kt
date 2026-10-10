@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
@@ -52,6 +53,29 @@ fun AppsScreen(
     val selecting = selected.isNotEmpty()
     val naming = settings?.naming ?: NamingConfig()
     val favorites = settings?.favorites.orEmpty()
+    val c = LocalContext.current
+    var quick by remember { mutableStateOf<AppRecord?>(null) }
+    fun openFull(app: AppRecord, tab: Int = 0) {
+        vm.requestedTab = tab
+        vm.inspect(app)
+        details()
+    }
+    quick?.let { app ->
+        QuickDetailSheet(
+            vm,
+            app,
+            extractEnabled = !busy,
+            onDismiss = { quick = null },
+            onExtract = {
+                quick = null
+                backup(listOf(app))
+            },
+            full = { tab ->
+                quick = null
+                openFull(app, tab)
+            },
+        )
+    }
     Column(Modifier.fillMaxSize()) {
         if (selecting)
             SelectionBar(
@@ -145,16 +169,27 @@ fun AppsScreen(
                         favorite = app.packageName in favorites,
                         extractEnabled = !busy,
                         onClick = {
-                            if (selecting) vm.toggle(app.packageName)
-                            else {
-                                vm.inspect(app)
-                                details()
+                            when {
+                                selecting -> vm.toggle(app.packageName)
+                                settings?.tap == "QUICK" -> quick = app
+                                else -> openFull(app)
                             }
                         },
                         onLongClick = { vm.toggle(app.packageName) },
                         onToggleSelect = { vm.toggle(app.packageName) },
-                        onFavorite = { vm.toggleFavorite(app.packageName) },
                         onExtract = { backup(listOf(app)) },
+                        menu = { close ->
+                            AppMenuItems(
+                                app,
+                                favorite = app.packageName in favorites,
+                                close = close,
+                                quick = { quick = app },
+                                full = { openFull(app) },
+                                favoriteToggle = { vm.toggleFavorite(app.packageName) },
+                                saveIcon = { vm.saveIcon(app) },
+                                copy = { c.copyText(app.packageName) },
+                            )
+                        },
                     )
                 }
             }
@@ -268,7 +303,8 @@ private fun SelectionBar(
 @Composable
 private fun FilterRow(query: AppQuery, vm: MainViewModel) {
     val active =
-        query.kind != "ALL" ||
+        query.group != null ||
+            query.kind != "ALL" ||
             query.source != "ALL" ||
             query.maxSdk != 0 ||
             query.minMb != 0 ||
@@ -279,6 +315,17 @@ private fun FilterRow(query: AppQuery, vm: MainViewModel) {
             .padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        query.group?.let { group ->
+            InputChip(
+                selected = true,
+                onClick = { vm.setQuery(query.copy(group = null)) },
+                label = { Text(group.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                trailingIcon = {
+                    Icon(Icons.Rounded.Close, stringResource(R.string.show_all_apps), Modifier.size(18.dp))
+                },
+                modifier = Modifier.widthIn(max = 280.dp),
+            )
+        }
         FilterMenuChip(
             stringResource(R.string.app_type),
             query.kind,
@@ -382,8 +429,8 @@ private fun AppRow(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onToggleSelect: () -> Unit,
-    onFavorite: () -> Unit,
     onExtract: () -> Unit,
+    menu: @Composable ColumnScope.(close: () -> Unit) -> Unit,
 ) {
     val selectLabel = stringResource(R.string.select_app, app.label)
     Row(
@@ -422,12 +469,22 @@ private fun AppRow(
             else AppIcon(app, Modifier.size(44.dp))
         }
         Column(Modifier.weight(1f).padding(start = 12.dp)) {
-            Text(
-                app.label,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    app.label,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                if (favorite)
+                    Icon(
+                        Icons.Rounded.Star,
+                        stringResource(R.string.unfavorite),
+                        Modifier.padding(start = 4.dp).size(16.dp),
+                        tint = MaterialTheme.colorScheme.tertiary,
+                    )
+            }
             Text(
                 "${sizeText(app.size)} · .$extension · v${app.version}",
                 style = MaterialTheme.typography.bodyMedium,
@@ -448,7 +505,19 @@ private fun AppRow(
                         )
                 }
         }
-        AppRowMenu(favorite, onFavorite)
+        var open by remember { mutableStateOf(false) }
+        Box {
+            IconButton(onClick = { open = true }) {
+                Icon(
+                    Icons.Rounded.MoreVert,
+                    stringResource(R.string.actions),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                menu { open = false }
+            }
+        }
         FilledTonalIconButton(onClick = onExtract, enabled = extractEnabled) {
             Icon(PackIcons.Download, stringResource(R.string.extract))
         }
@@ -457,14 +526,39 @@ private fun AppRow(
 }
 
 @Composable
-private fun AppRowMenu(favorite: Boolean, onFavorite: () -> Unit) {
-    IconButton(onClick = onFavorite) {
-        Icon(
-            if (favorite) Icons.Rounded.Star else PackIcons.StarOutline,
-            stringResource(if (favorite) R.string.unfavorite else R.string.favorite),
-            tint =
-                if (favorite) MaterialTheme.colorScheme.tertiary
-                else MaterialTheme.colorScheme.onSurfaceVariant,
+private fun AppMenuItems(
+    app: AppRecord,
+    favorite: Boolean,
+    close: () -> Unit,
+    quick: () -> Unit,
+    full: () -> Unit,
+    favoriteToggle: () -> Unit,
+    saveIcon: () -> Unit,
+    copy: () -> Unit,
+) {
+    val c = LocalContext.current
+    @Composable
+    fun item(text: Int, icon: androidx.compose.ui.graphics.vector.ImageVector, action: () -> Unit) =
+        DropdownMenuItem(
+            text = { Text(stringResource(text)) },
+            leadingIcon = { Icon(icon, null) },
+            onClick = {
+                close()
+                action()
+            },
         )
-    }
+    item(R.string.quick_details, Icons.Rounded.Info, quick)
+    item(R.string.full_details, PackIcons.Policy, full)
+    HorizontalDivider()
+    if (c.packageManager.getLaunchIntentForPackage(app.packageName) != null)
+        item(R.string.open_app, PackIcons.OpenInNew) { launchApp(c, app.packageName) }
+    item(R.string.system_info, Icons.Rounded.Settings) { openSystemInfo(c, app.packageName) }
+    item(R.string.open_store, Icons.Rounded.ShoppingCart) { openStore(c, app.packageName) }
+    item(R.string.save_icon, PackIcons.Image, saveIcon)
+    item(R.string.copy_package, Icons.Rounded.Edit, copy)
+    item(
+        if (favorite) R.string.unfavorite else R.string.favorite,
+        if (favorite) Icons.Rounded.Star else PackIcons.StarOutline,
+        favoriteToggle,
+    )
 }

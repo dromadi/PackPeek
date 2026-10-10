@@ -5,6 +5,7 @@ import com.packpeek.app.data.PrunePlan
 import com.packpeek.app.data.inFolder
 import com.packpeek.app.data.prunePlan
 import com.packpeek.app.data.signerChanges
+import com.packpeek.app.data.subjectName
 import com.packpeek.app.engine.ManifestRoot
 import com.packpeek.app.model.*
 import com.packpeek.app.ui.sizeText
@@ -311,4 +312,30 @@ class CoreRulesTest {
 
     private fun fixture() =
         javaClass.getResourceAsStream("/omniextract_manifest.bin")!!.use { it.readBytes() }
+
+    @Test
+    fun androidVersionsHaveReadableNames() {
+        assertEquals("Android 16 (Baklava, API 36)", AndroidVersions.label(36))
+        assertEquals("Android 7.0 (Nougat, API 24)", AndroidVersions.label(24))
+        assertEquals("Android 1.0 (API 1)", AndroidVersions.label(1))
+        assertEquals("API 99", AndroidVersions.label(99))
+        assertEquals("Android 12L", AndroidVersions.short(32))
+    }
+
+    @Test
+    fun certificateSubjectsShowTheirCommonName() {
+        assertEquals("Android Debug", subjectName("CN=Android Debug,O=Android,C=US"))
+        assertEquals("Google Inc.", subjectName("C=US,O=Google Inc.,L=Mountain View"))
+        assertEquals("Acme, Inc", subjectName("CN=\"Acme, Inc\",O=Acme"))
+        assertEquals("plain", subjectName("plain"))
+    }
+
+    @Test
+    fun overviewGroupFiltersTheList() {
+        val a = app(pkg = "a.app")
+        val b = app(pkg = "b.app")
+        val group = AppGroup("Certificates: Android Debug", setOf("b.app"))
+        assertEquals(listOf(b), filterApps(listOf(a, b), AppQuery(group = group)))
+        assertEquals(2, filterApps(listOf(a, b), AppQuery()).size)
+    }
 }

@@ -17,11 +17,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.packpeek.app.R
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.packpeek.app.model.AndroidVersions
+import com.packpeek.app.model.AppGroup
 import com.packpeek.app.model.AppRecord
+import kotlin.math.roundToInt
 
 @Composable
-fun DashboardScreen(vm: MainViewModel, inspect: (AppRecord) -> Unit) {
+fun DashboardScreen(vm: MainViewModel, inspect: (AppRecord) -> Unit, showGroup: (AppGroup) -> Unit) {
     val apps by vm.apps.collectAsStateWithLifecycle()
+    val extras by vm.extras.collectAsStateWithLifecycle()
+    val readingExtras by vm.readingExtras.collectAsStateWithLifecycle()
+    LaunchedEffect(apps) { if (apps.isNotEmpty()) vm.readExtras() }
     val tech by vm.technologies.collectAsStateWithLifecycle()
     val scores by vm.riskScores.collectAsStateWithLifecycle()
     val checking by vm.checkingOverview.collectAsStateWithLifecycle()
@@ -31,11 +40,25 @@ fun DashboardScreen(vm: MainViewModel, inspect: (AppRecord) -> Unit) {
         onPauseOrDispose {}
     }
     val byPackage = remember(apps) { apps.associateBy { it.packageName } }
-    val source = remember(apps) { apps.groupingBy { it.source }.eachCount().toList().sortedByDescending { it.second } }
-    val sdk =
-        remember(apps) {
-            apps.groupingBy { it.targetSdk }.eachCount().toSortedMap().toList().reversed()
+    val source = remember(apps) { groups(apps) { listOf(it.source) }.sortedByDescending { it.second.size } }
+    val target = remember(apps) { groups(apps) { listOf(it.targetSdk) }.sortedByDescending { it.first } }
+    val minimum = remember(apps) { groups(apps) { listOf(it.minSdk) }.sortedByDescending { it.first } }
+    val signers =
+        remember(apps, extras) {
+            groups(apps.filter { it.packageName in extras }) {
+                    listOf(extras[it.packageName]?.signer)
+                }
+                .sortedByDescending { it.second.size }
         }
+    val abis =
+        remember(apps, extras) {
+            groups(apps.filter { it.packageName in extras }) {
+                    extras[it.packageName]?.abis?.toList()?.ifEmpty { listOf("") } ?: emptyList()
+                }
+                .sortedByDescending { it.second.size }
+        }
+    val unknown = stringResource(R.string.unknown)
+    val noNative = stringResource(R.string.no_native_code)
     LazyColumn(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -116,19 +139,67 @@ fun DashboardScreen(vm: MainViewModel, inspect: (AppRecord) -> Unit) {
             }
         }
         item {
-            RowGroup(title = stringResource(R.string.source)) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    source.forEach { (key, count) -> CountBar(sourceName(key), count, apps.size) }
-                }
+            Text(
+                stringResource(R.string.group_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp),
+            )
+        }
+        item {
+            GroupSection(stringResource(R.string.source), source, apps.size, showGroup) {
+                sourceName(it)
             }
         }
         item {
-            RowGroup(title = stringResource(R.string.target_sdk)) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    sdk.forEach { (key, count) -> CountBar("API $key", count, apps.size) }
-                }
+            GroupSection(stringResource(R.string.target_android), target, apps.size, showGroup) {
+                AndroidVersions.label(it)
             }
         }
+        item {
+            GroupSection(stringResource(R.string.min_android), minimum, apps.size, showGroup) {
+                AndroidVersions.label(it)
+            }
+        }
+        if (readingExtras)
+            item {
+                Column {
+                    Text(
+                        stringResource(R.string.reading_extras, extras.size, apps.size),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    LinearProgressIndicator(
+                        progress = { if (apps.isEmpty()) 0f else extras.size.toFloat() / apps.size },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    )
+                }
+            }
+        if (signers.isNotEmpty())
+            item {
+                GroupSection(
+                    stringResource(R.string.certificates),
+                    signers,
+                    extras.size,
+                    showGroup,
+                    stringResource(R.string.signer_note),
+                ) {
+                    // Platform keys often share a name like "Android"; the fingerprint tells them apart.
+                    it?.let { "${it.name} · ${it.digest.take(8).uppercase()}" } ?: unknown
+                }
+            }
+        if (abis.isNotEmpty())
+            item {
+                GroupSection(
+                    stringResource(R.string.cpu_architecture),
+                    abis,
+                    extras.size,
+                    showGroup,
+                    stringResource(R.string.abi_note),
+                ) {
+                    it.ifEmpty { noNative }
+                }
+            }
         item {
             RowGroup(title = stringResource(R.string.largest_apps)) {
                 apps.sortedByDescending { it.size }.take(10).forEachIndexed { index, app ->
@@ -177,12 +248,16 @@ fun DashboardScreen(vm: MainViewModel, inspect: (AppRecord) -> Unit) {
                 val frameworks = tech.values.flatten().groupingBy { it }.eachCount().toList()
                 if (frameworks.isNotEmpty()) {
                     GroupDivider()
-                    Column(
-                        Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
+                    Column(Modifier.padding(vertical = 8.dp)) {
                         frameworks.sortedByDescending { it.second }.forEach { (framework, count) ->
-                            CountBar(framework, count, tech.size)
+                            CountBar(framework, count, tech.size) {
+                                showGroup(
+                                    AppGroup(
+                                        framework,
+                                        tech.filterValues { framework in it }.keys,
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -268,13 +343,83 @@ private fun AppLine(
     }
 }
 
+/** Apps grouped by one or more keys each; a key of null or "" is its own group. */
+private fun <K> groups(apps: List<AppRecord>, keys: (AppRecord) -> List<K>): List<Pair<K, Set<String>>> {
+    val result = LinkedHashMap<K, MutableSet<String>>()
+    apps.forEach { app -> keys(app).forEach { result.getOrPut(it) { mutableSetOf() } += app.packageName } }
+    return result.map { it.key to it.value }
+}
+
+/** Grouped counts with tappable bars; long lists start collapsed to the largest groups. */
+@Composable
+private fun <K> GroupSection(
+    title: String,
+    entries: List<Pair<K, Set<String>>>,
+    total: Int,
+    showGroup: (AppGroup) -> Unit,
+    note: String? = null,
+    label: @Composable (K) -> String,
+) {
+    var expanded by rememberSaveable(title) { mutableStateOf(false) }
+    val visible = if (expanded) entries else entries.take(COLLAPSED)
+    RowGroup(title = title) {
+        if (note != null)
+            Text(
+                note,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
+            )
+        Column(Modifier.padding(vertical = 8.dp)) {
+            visible.forEach { (key, packages) ->
+                val name = label(key)
+                val groupTitle = stringResource(R.string.group_title, title, name)
+                CountBar(name, packages.size, total) { showGroup(AppGroup(groupTitle, packages)) }
+            }
+        }
+        if (entries.size > COLLAPSED)
+            TextButton(
+                onClick = { expanded = !expanded },
+                modifier = Modifier.padding(start = 8.dp, bottom = 4.dp),
+            ) {
+                Text(
+                    if (expanded) stringResource(R.string.show_fewer)
+                    else stringResource(R.string.show_all_groups, entries.size)
+                )
+            }
+    }
+}
+
+private const val COLLAPSED = 6
+
 /** Rounded bar without the end dot of Material's progress indicator. */
 @Composable
-private fun CountBar(label: String, count: Int, total: Int) {
-    Column {
-        Row {
-            Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+private fun CountBar(label: String, count: Int, total: Int, onClick: () -> Unit) {
+    val percent = if (total == 0) 0 else (count * 100f / total).roundToInt()
+    Column(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                label,
+                Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                if (percent == 0 && count > 0) "<1%" else "$percent%",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 8.dp),
+            )
             Text(count.toString(), style = MaterialTheme.typography.labelLarge)
+            Icon(
+                Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                null,
+                Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
         Spacer(Modifier.height(6.dp))
         Box(

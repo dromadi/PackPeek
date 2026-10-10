@@ -47,7 +47,7 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
     val report = state.report
     val latest by vm.latestJob.collectAsStateWithLifecycle()
     val installing by vm.installing.collectAsStateWithLifecycle()
-    var tab by remember(app.basePath) { mutableIntStateOf(0) }
+    var tab by remember(app.basePath) { mutableIntStateOf(vm.requestedTab.also { vm.requestedTab = 0 }) }
     var menu by remember { mutableStateOf(false) }
     var confirmInstall by remember { mutableStateOf(false) }
     if (confirmInstall) {
@@ -95,11 +95,17 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text(
-                    "v${app.version} · ${sizeText(app.size)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "v${app.version} · ${sizeText(app.size)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false).padding(end = 6.dp),
+                    )
+                    Tag("API ${app.targetSdk}")
+                }
             }
             val risk = state.risk
             if (risk != null) RiskBadge(risk) else if (report != null) ScoreBadge(report.score)
@@ -228,11 +234,22 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
             edgePadding = 16.dp,
             modifier = Modifier.padding(top = 12.dp),
         ) {
+            val counts =
+                mapOf(
+                    R.string.permissions to report?.permissions?.size,
+                    R.string.components to report?.components?.size,
+                )
             tabs.forEachIndexed { i, title ->
+                val count = counts[title]
                 Tab(
                     selected = tab == i,
                     onClick = { tab = i },
-                    text = { Text(stringResource(title)) },
+                    text = {
+                        Text(
+                            if (count == null) stringResource(title)
+                            else stringResource(R.string.tab_count, stringResource(title), count)
+                        )
+                    },
                 )
             }
         }
@@ -318,12 +335,13 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                                 )
                                 GroupDivider()
                                 InfoLine(
-                                    stringResource(R.string.android_versions),
-                                    stringResource(
-                                        R.string.sdk_range,
-                                        app.minSdk,
-                                        app.targetSdk,
-                                    ),
+                                    stringResource(R.string.min_android),
+                                    AndroidVersions.label(app.minSdk),
+                                )
+                                GroupDivider()
+                                InfoLine(
+                                    stringResource(R.string.target_android),
+                                    AndroidVersions.label(app.targetSdk),
                                 )
                                 GroupDivider()
                                 InfoLine(
@@ -339,11 +357,33 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                                 )
                                 if (!app.fromFile) {
                                     GroupDivider()
+                                    val installerName =
+                                        remember(app.installer) {
+                                            app.installer.takeIf { it.isNotBlank() }?.let {
+                                                vm.owner.apps.label(it)
+                                            }
+                                        }
                                     InfoLine(
                                         stringResource(R.string.installer),
-                                        app.installer.ifBlank {
-                                            resources.getString(R.string.unknown)
+                                        when {
+                                            installerName == null -> resources.getString(R.string.unknown)
+                                            installerName == app.installer -> app.installer
+                                            else ->
+                                                stringResource(
+                                                    R.string.installer_value,
+                                                    installerName,
+                                                    app.installer,
+                                                )
                                         },
+                                    )
+                                    GroupDivider()
+                                    InfoLine(
+                                        stringResource(R.string.first_installed),
+                                        DateFormat.getDateTimeInstance(
+                                                DateFormat.MEDIUM,
+                                                DateFormat.SHORT,
+                                            )
+                                            .format(Date(app.installed)),
                                     )
                                     GroupDivider()
                                     InfoLine(

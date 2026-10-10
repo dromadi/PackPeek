@@ -22,12 +22,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.*
 import com.packpeek.app.R
+import com.packpeek.app.data.BackupJob
+import com.packpeek.app.data.BackupRecord
 import com.packpeek.app.data.Settings
 import com.packpeek.app.model.*
 
@@ -79,7 +82,31 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
         val work by vm.workInfo.collectAsStateWithLifecycle()
         val importing by vm.importing.collectAsStateWithLifecycle()
         val installing by vm.installing.collectAsStateWithLifecycle()
+        val snackbar = remember { SnackbarHostState() }
+        val resources = LocalResources.current
+        // A single successful extract gets a quick "Saved · Share" bar instead of a dialog.
+        val quick = latest?.let { quickResult(it, records) }
+        var announced by remember { mutableStateOf<BackupRecord?>(null) }
+        LaunchedEffect(quick?.id) {
+            if (quick != null) {
+                announced = quick
+                vm.dismissResult()
+            }
+        }
+        // Keyed on the announced record, so dismissing the job does not cancel the bar.
+        LaunchedEffect(announced?.id) {
+            val record = announced ?: return@LaunchedEffect
+            val result =
+                snackbar.showSnackbar(
+                    resources.getString(R.string.saved_file, record.fileName),
+                    actionLabel = resources.getString(R.string.share),
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Long,
+                )
+            if (result == SnackbarResult.ActionPerformed) shareFiles(c, listOf(Uri.parse(record.uri)))
+        }
         Scaffold(
+            snackbarHost = { SnackbarHost(snackbar) },
             topBar = {
                 if (route != "apps")
                     TopAppBar(
@@ -201,10 +228,20 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                     composable("detail") { DetailScreen(vm, ::backup) }
                     composable("history") { HistoryScreen(vm) { nav.navigate("detail") } }
                     composable("dashboard") {
-                        DashboardScreen(vm) {
-                            vm.inspect(it)
-                            nav.navigate("detail")
-                        }
+                        DashboardScreen(
+                            vm,
+                            {
+                                vm.inspect(it)
+                                nav.navigate("detail")
+                            },
+                            {
+                                vm.showGroup(it)
+                                nav.navigate("apps") {
+                                    popUpTo("apps") { inclusive = false }
+                                    launchSingleTop = true
+                                }
+                            },
+                        )
                     }
                     composable("settings") {
                         SettingsScreen(vm, { folderPicker.launch(null) }, { nav.navigate("about") })
@@ -341,7 +378,8 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
         if (
             job != null &&
                 job.state in listOf("COMPLETED", "FAILED", "CANCELLED") &&
-                !job.dismissed
+                !job.dismissed &&
+                quickResult(job, records) == null
         ) {
             val succeeded = records.filter { it.state == "SUCCESS" }
             val failed = records.count { it.state == "FAILED" }
@@ -519,6 +557,12 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
             )
     }
 }
+
+/** The one record of a finished, fully successful single-app job not yet acknowledged. */
+private fun quickResult(job: BackupJob, records: List<BackupRecord>): BackupRecord? =
+    records.singleOrNull()?.takeIf {
+        job.state == "COMPLETED" && !job.dismissed && it.jobId == job.id && it.state == "SUCCESS"
+    }
 
 @Composable
 private fun Onboarding(folder: () -> Unit, finish: () -> Unit, location: String) {
