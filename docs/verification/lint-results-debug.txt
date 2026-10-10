@@ -1,0 +1,188 @@
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/AndroidManifest.xml:11: Warning: Attribute localeConfig is only used in API level 33 and higher (current min is 24) [UnusedAttribute]
+        android:theme="@style/Theme.PackPeek" android:localeConfig="@xml/locales_config"
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/AndroidManifest.xml:12: Warning: Attribute enableOnBackInvokedCallback is only used in API level 33 and higher (current min is 24) [UnusedAttribute]
+        android:enableOnBackInvokedCallback="true" android:usesCleartextTraffic="false">
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedAttribute":
+   This check finds attributes set in XML files that were introduced in a
+   version newer than the oldest version targeted by your application (with
+   the minSdkVersion attribute).
+
+   This is not an error; the application will simply ignore the attribute.
+   However, if the attribute is important to the appearance or functionality
+   of your application, you should consider finding an alternative way to
+   achieve the same result with only available attributes, and then you can
+   optionally create a copy of the layout in a layout-vNN folder which will be
+   used on API NN or higher where you can take advantage of the newer
+   attribute.
+
+   Note: This check does not only apply to attributes. For example, some tags
+   can be unused too, such as the new <tag> element in layouts introduced in
+   API 21.
+
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/UiHelpers.kt:111: Warning: Optional Modifier parameter should have a default value of Modifier [ModifierParameter from androidx.compose.ui]
+fun AppIcon(app: AppRecord, modifier: Modifier = Modifier.size(48.dp)) {
+                            ~~~~~~~~
+
+   Explanation for issues of type "ModifierParameter":
+   The first (or only) Modifier parameter in a Composable function should
+   follow the following rules:
+   - Be named modifier
+   - Have a type of Modifier
+   - Either have no default value, or have a default value of Modifier
+   - If optional, be the first optional parameter in the parameter list
+
+   Vendor: Jetpack Compose
+   Identifier: androidx.compose.ui
+   Feedback: https://issuetracker.google.com/issues/new?component=612128
+
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/AndroidManifest.xml:11: Warning: The language in (Indonesian) is present in this project, but not declared in the localeConfig resource [UnusedTranslation]
+        android:theme="@style/Theme.PackPeek" android:localeConfig="@xml/locales_config"
+                                                                    ~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UnusedTranslation":
+   If an application defines a translation for a language which is not
+   included in the app's localeConfig file (when declared in the manifest),
+   that language will be "unused"; it will not be presented to the user.
+   Usually this means you have forgotten to include it in the locale config
+   file.
+
+   https://developer.android.com/about/versions/13/features/app-languages
+
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/build.gradle.kts:89: Warning: This library supports using KSP instead of kapt, which greatly improves performance. Learn more: https://developer.android.com/studio/build/migrate-to-ksp [KaptUsageInsteadOfKsp]
+    kapt("androidx.room:room-compiler:2.8.4")
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "KaptUsageInsteadOfKsp":
+   KSP is a more efficient replacement for kapt. For libraries that support
+   both, KSP should be used to improve build times.
+
+   https://developer.android.com/studio/build/migrate-to-ksp
+
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml:1: Warning: The application adaptive icon is missing a monochrome tag [MonochromeLauncherIcon]
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@android:color/black"/><foreground android:drawable="@drawable/ic_pack"/></adaptive-icon>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "MonochromeLauncherIcon":
+   If android:roundIcon and android:icon are both in your manifest, you must
+   either remove the reference to android:roundIcon if it is not needed; or,
+   supply the monochrome icon in the drawable defined by the android:roundIcon
+   and android:icon attribute.
+
+   For example, if android:roundIcon and android:icon are both in the
+   manifest, a launcher might choose to use android:roundIcon over
+   android:icon to display the adaptive app icon. Therefore, your themed
+   application iconwill not show if your monochrome attribute is not also
+   specified in android:roundIcon.
+
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/engine/BackupWorker.kt:37: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                        DocumentFile.fromSingleUri(applicationContext, Uri.parse(record.uri))
+                                                                       ~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/engine/BackupWorker.kt:46: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                            Uri.parse(job.folder),
+                            ~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/DetailScreen.kt:75: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                                    Uri.parse("package:${c.packageName}"),
+                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/DetailScreen.kt:106: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                                        Uri.parse("package:${app.packageName}"),
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/DetailScreen.kt:118: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                                        Uri.parse("package:${app.packageName}"),
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/DetailScreen.kt:131: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                                    Uri.parse(
+                                    ^
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/HistoryScreen.kt:68: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                            TextButton(onClick = { shareFiles(c, listOf(Uri.parse(r.uri))) }) {
+                                                                        ~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/HistoryScreen.kt:73: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                                onClick = { vm.import(Uri.parse(r.uri), onInspect) },
+                                                      ~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/MainViewModel.kt:232: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                val folder = Uri.parse(s.folder)
+                             ~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/MainViewModel.kt:352: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                    DocumentFile.fromTreeUri(owner, Uri.parse(folderValue))?.takeIf {
+                                                    ~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/MainViewModel.kt:356: Warning: Use the KTX function createBitmap instead? [UseKtx]
+                val bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888)
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/PackPeekRoot.kt:377: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                                        .map { Uri.parse(it.uri) },
+                                               ~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/SettingsScreen.kt:183: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                                    Uri.parse("mailto:${BuildConfig.SUPPORT_EMAIL}"),
+                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/SettingsScreen.kt:228: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                                Uri.parse(
+                                ^
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/UiHelpers.kt:78: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+        runCatching { DocumentFile.fromTreeUri(context, Uri.parse(value))?.name }.getOrNull()
+                                                        ~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/UiHelpers.kt:85: Warning: Use the KTX extension function String.toUri instead? [UseKtx]
+                .setDataAndType(Uri.parse(folder), "vnd.android.document/directory")
+                                ~~~~~~~~~~~~~~~~~
+/workspace/scratch/4d65a3dc5cc9/PackPeek/app/src/main/java/com/packpeek/app/ui/UiHelpers.kt:120: Warning: Use the KTX function createBitmap instead? [UseKtx]
+                            Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888).also { b ->
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "UseKtx":
+   The Android KTX libraries decorates the Android platform SDK as well as
+   various libraries with more convenient extension functions available from
+   Kotlin, allowing you to use default parameters, named parameters, and
+   more.
+
+   Available options:
+
+   **remove-defaults** (default is true):
+   Whether to skip arguments that match the defaults provided by the extension.
+
+   Extensions often provide default values for some of the parameters. For example:
+   ```kotlin
+   fun Path.readLines(charset: Charset = Charsets.UTF_8): List<String> { return Files.readAllLines(this, charset) }
+   ```
+   This lint check will by default automatically omit parameters that match the default, so if your code was calling
+
+   ```kotlin
+   Files.readAllLines(file, Charset.UTF_8)
+   ```
+   lint would replace this with
+   ```kotlin
+   file.readLines()
+   ```
+   rather than
+
+   ```kotlin
+   file.readLines(Charset.UTF_8
+   ```
+   You can turn this behavior off using this option.
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="remove-defaults" value="true" />
+       </issue>
+   </lint>
+   ```
+
+   **require-present** (default is true):
+   Whether to only offer extensions already available.
+
+   This option lets you only have lint suggest extension replacements if those extensions are already available on the class path (in other words, you're already depending on the library containing the extension method.)
+
+   To configure this option, use a `lint.xml` file with an <option> like this:
+
+   ```xml
+   <lint>
+       <issue id="UseKtx">
+           <option name="require-present" value="true" />
+       </issue>
+   </lint>
+   ```
+
+0 errors, 23 warnings

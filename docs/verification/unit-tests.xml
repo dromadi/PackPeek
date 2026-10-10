@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.packpeek.app.CoreRulesTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-10T03:25:13.836Z" hostname="8e5a6d1874d3" time="0.059">
+  <properties/>
+  <testcase name="scoresDeduplicateAndCap" classname="com.packpeek.app.CoreRulesTest" time="0.012"/>
+  <testcase name="filtersIntersectAtExactSizeBoundary" classname="com.packpeek.app.CoreRulesTest" time="0.014"/>
+  <testcase name="mixedBatchKeepsIndividualFormats" classname="com.packpeek.app.CoreRulesTest" time="0.018"/>
+  <testcase name="collisionSuffixPreservesExtension" classname="com.packpeek.app.CoreRulesTest" time="0.004"/>
+  <testcase name="unsafeAndEmptyNamesAreSanitized" classname="com.packpeek.app.CoreRulesTest" time="0.0"/>
+  <testcase name="zipTraversalRejected" classname="com.packpeek.app.CoreRulesTest" time="0.001"/>
+  <testcase name="abiFollowsDevicePreference" classname="com.packpeek.app.CoreRulesTest" time="0.001"/>
+  <testcase name="originalOwnerManifestIsReadable" classname="com.packpeek.app.CoreRulesTest" time="0.006"/>
+  <testcase name="incompatibleAbiFails" classname="com.packpeek.app.CoreRulesTest" time="0.001"/>
+  <testcase name="packageSearchAndFrameworkIntersect" classname="com.packpeek.app.CoreRulesTest" time="0.0"/>
+  <testcase name="numericSizeSort" classname="com.packpeek.app.CoreRulesTest" time="0.001"/>
+  <testcase name="malformedBinaryXmlFailsClosed" classname="com.packpeek.app.CoreRulesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

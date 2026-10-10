@@ -1,0 +1,12 @@
+<resources>
+    <style name="Theme.PackPeek" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:fontFamily">sans</item><item name="android:windowActionModeOverlay">true</item>
+    </style>
+    <style name="Theme.PackPeek.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#101820</item><item name="windowSplashScreenAnimatedIcon">@drawable/ic_pack</item>
+        <item name="postSplashScreenTheme">@style/Theme.PackPeek</item>
+    </style>
+    <style name="Theme.PackPeek.Transparent" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item><item name="android:windowBackground">@android:color/transparent</item><item name="android:backgroundDimEnabled">false</item>
+    </style>
+</resources>

@@ -1,0 +1,2 @@
+-keep public class com.android.apksig.** { public *; }
+-dontwarn javax.annotation.**
