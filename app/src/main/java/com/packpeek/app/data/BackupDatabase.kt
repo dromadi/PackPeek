@@ -77,6 +77,8 @@ interface BackupDao {
 
     @Query("UPDATE backups SET hidden=1 WHERE id=:id") suspend fun hide(id: Long)
 
+    @Query("UPDATE backups SET hidden=1 WHERE uri=:uri") suspend fun hideUri(uri: String)
+
     @Transaction
     suspend fun create(job: BackupJob, records: List<BackupRecord>) {
         addJob(job)

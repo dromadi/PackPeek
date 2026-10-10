@@ -108,15 +108,22 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
             rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) {
                 vm.installMany(it)
             }
-        fun pickInstallFiles() {
-            if (Build.VERSION.SDK_INT >= 26 && !c.packageManager.canRequestPackageInstalls())
-                c.launchSafe(
-                    android.content.Intent(
-                        android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                        Uri.parse("package:${c.packageName}"),
-                    )
+        fun canInstall(): Boolean {
+            if (Build.VERSION.SDK_INT < 26 || c.packageManager.canRequestPackageInstalls())
+                return true
+            c.launchSafe(
+                android.content.Intent(
+                    android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:${c.packageName}"),
                 )
-            else multiPicker.launch(arrayOf("*/*"))
+            )
+            return false
+        }
+        fun pickInstallFiles() {
+            if (canInstall()) multiPicker.launch(arrayOf("*/*"))
+        }
+        fun installFiles(uris: List<Uri>) {
+            if (canInstall()) vm.installMany(uris)
         }
         val notifyPermission =
             rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
@@ -282,7 +289,14 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                         )
                     }
                     composable("detail") { DetailScreen(vm, ::backup) }
-                    composable("history") { HistoryScreen(vm) { nav.navigate("detail") } }
+                    composable("history") {
+                        HistoryScreen(
+                            vm,
+                            { nav.navigate("detail") },
+                            { uri -> installFiles(listOf(uri)) },
+                            ::backup,
+                        )
+                    }
                     composable("dashboard") {
                         DashboardScreen(vm) {
                             vm.inspect(it)

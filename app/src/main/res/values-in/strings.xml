@@ -266,4 +266,26 @@
     <string name="split_kind_locale">Bahasa</string>
     <string name="split_kind_feature">Modul fitur</string>
     <string name="split_kind_other">Lainnya</string>
+    <string name="rescan">Pindai ulang</string>
+    <string name="folder_intro">Berkas paket di folder backup, dibandingkan dengan aplikasi yang terpasang sekarang.</string>
+    <string name="backup_status">Tampilkan</string>
+    <string name="status_all">Semua backup</string>
+    <string name="status_newer">Lebih baru dari yang terpasang</string>
+    <string name="status_same">Sama dengan yang terpasang</string>
+    <string name="status_older">Lebih lama dari yang terpasang</string>
+    <string name="status_not_installed">Aplikasi tidak terpasang</string>
+    <string name="status_missing">Aplikasi tanpa backup</string>
+    <string name="folder_counts">Berkas: %1$d · lebih baru %2$d · sama %3$d · lebih lama %4$d · tidak terpasang %5$d · tanpa backup %6$d</string>
+    <string name="folder_empty">Tidak ada berkas paket di tampilan ini.</string>
+    <string name="all_backed_up">Setiap aplikasi pengguna punya minimal satu backup di sini.</string>
+    <string name="backup_all_missing">Backup semua (%1$d)</string>
+    <string name="status_newer_body">Lebih baru dari versi terpasang</string>
+    <string name="status_same_body">Versi sama dengan yang terpasang</string>
+    <string name="status_older_body">Lebih lama dari yang terpasang; Android memblokir downgrade</string>
+    <string name="status_not_installed_body">Aplikasi tidak terpasang</string>
+    <string name="restore">Pulihkan</string>
+    <string name="update_from_backup">Perbarui</string>
+    <string name="delete">Hapus</string>
+    <string name="delete_backup_title">Hapus backup?</string>
+    <string name="delete_backup_body">%1$s akan dihapus dari folder backup. Tindakan ini tidak bisa dibatalkan.</string>
 </resources>

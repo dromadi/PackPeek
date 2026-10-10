@@ -266,4 +266,26 @@
     <string name="split_kind_locale">Language</string>
     <string name="split_kind_feature">Feature modules</string>
     <string name="split_kind_other">Other</string>
+    <string name="rescan">Rescan</string>
+    <string name="folder_intro">Package files in the backup folder, compared with the apps installed now.</string>
+    <string name="backup_status">Show</string>
+    <string name="status_all">All backups</string>
+    <string name="status_newer">Newer than installed</string>
+    <string name="status_same">Same as installed</string>
+    <string name="status_older">Older than installed</string>
+    <string name="status_not_installed">App not installed</string>
+    <string name="status_missing">Apps without a backup</string>
+    <string name="folder_counts">Files: %1$d · newer %2$d · same %3$d · older %4$d · not installed %5$d · without backup %6$d</string>
+    <string name="folder_empty">No package files found in this view.</string>
+    <string name="all_backed_up">Every user app has at least one backup here.</string>
+    <string name="backup_all_missing">Back up all (%1$d)</string>
+    <string name="status_newer_body">Newer than the installed version</string>
+    <string name="status_same_body">Same version as installed</string>
+    <string name="status_older_body">Older than installed; Android blocks downgrades</string>
+    <string name="status_not_installed_body">App is not installed</string>
+    <string name="restore">Restore</string>
+    <string name="update_from_backup">Update</string>
+    <string name="delete">Delete</string>
+    <string name="delete_backup_title">Delete backup?</string>
+    <string name="delete_backup_body">%1$s will be deleted from the backup folder. This cannot be undone.</string>
 </resources>

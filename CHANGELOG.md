@@ -9,6 +9,7 @@
 - Pilih bagian APK sebelum memasang: CPU, kepadatan layar, bahasa dan modul fitur, dengan pilihan terbaik untuk perangkat dicentang otomatis; pemasangan dihentikan bila modul kehilangan bagian CPU.
 - Arsip `.apks` bundletool diterima: `standalones/` diabaikan bila `splits/` ada.
 - Pasang beberapa berkas sekaligus melalui antrean dengan progres, batal dan ringkasan hasil.
+- Tab Folder backup di Riwayat: isi folder dibaca langsung dari manifest tiap berkas dan dibandingkan dengan aplikasi terpasang (lebih baru, sama, lebih lama, tidak terpasang), plus daftar aplikasi tanpa backup; aksi Pulihkan/Perbarui, Periksa, Bagikan dan Hapus.
 - Perbaikan: kunci backup yang macet, indikator progres yang hilang terlalu cepat, pembaruan notifikasi backup, ekspor ikon adaptif.
 
 ## 2.0.0-alpha.1 — 2026-10-10

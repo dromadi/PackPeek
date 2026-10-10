@@ -74,6 +74,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val queue = MutableStateFlow<List<QueueEntry>>(emptyList())
     val queueRunning = MutableStateFlow(false)
     private var queueJob: Job? = null
+    private val indexer = BackupIndexer(owner)
+    val backupIndex = MutableStateFlow<List<BackupFile>?>(null)
+    val backups =
+        combine(backupIndex, apps) { files, installed ->
+                files?.let { withInstalled(it, installed.associateBy { a -> a.packageName }) }
+            }
+            .flowOn(Dispatchers.Default)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    val indexProgress = MutableStateFlow<Pair<Int, Int>?>(null)
+    private var indexJob: Job? = null
     val latestJob = dao.latest().stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val jobRecords =
         latestJob
@@ -475,6 +485,48 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 queueRunning.value = false
                 installing.value = false
             }
+        }
+    }
+
+    /** Re-reads the backup folder; unchanged files come from the indexer's cache. */
+    fun scanBackups() {
+        indexJob?.cancel()
+        indexJob = viewModelScope.launch {
+            indexProgress.value = 0 to 0
+            try {
+                val folder = owner.settings.flow.first().folder
+                if (folder.isBlank()) throw AppFailure(ErrorCode.FOLDER)
+                backupIndex.value =
+                    indexer.scan(Uri.parse(folder), apps.value.associateBy { it.packageName }) {
+                        done,
+                        total ->
+                        indexProgress.value = done to total
+                    }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                error.value = (e as? AppFailure)?.code ?: ErrorCode.FOLDER
+            } finally {
+                if (indexJob === coroutineContext.job) indexProgress.value = null
+            }
+        }
+    }
+
+    fun deleteBackup(file: BackupFile) {
+        viewModelScope.launch {
+            val deleted =
+                withContext(Dispatchers.IO) {
+                    runCatching {
+                            DocumentFile.fromSingleUri(owner, Uri.parse(file.uri))?.delete() == true
+                        }
+                        .getOrDefault(false)
+                }
+            if (!deleted) {
+                error.value = ErrorCode.FOLDER
+                return@launch
+            }
+            dao.hideUri(file.uri)
+            backupIndex.value = backupIndex.value?.filterNot { it.uri == file.uri }
         }
     }
 

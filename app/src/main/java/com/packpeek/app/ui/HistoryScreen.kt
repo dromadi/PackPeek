@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -12,11 +13,34 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.packpeek.app.R
+import com.packpeek.app.model.AppRecord
 import java.text.DateFormat
 import java.util.Date
 
 @Composable
-fun HistoryScreen(vm: MainViewModel, onInspect: () -> Unit) {
+fun HistoryScreen(
+    vm: MainViewModel,
+    onInspect: () -> Unit,
+    restore: (Uri) -> Unit,
+    backup: (List<AppRecord>) -> Unit,
+) {
+    var tab by rememberSaveable { mutableIntStateOf(0) }
+    Column(Modifier.fillMaxSize()) {
+        TabRow(selectedTabIndex = tab) {
+            listOf(R.string.history, R.string.backup_folder).forEachIndexed { i, title ->
+                Tab(
+                    selected = tab == i,
+                    onClick = { tab = i },
+                    text = { Text(stringResource(title)) },
+                )
+            }
+        }
+        if (tab == 0) HistoryList(vm, onInspect) else BackupFolderTab(vm, onInspect, restore, backup)
+    }
+}
+
+@Composable
+private fun HistoryList(vm: MainViewModel, onInspect: () -> Unit) {
     val history by vm.history.collectAsStateWithLifecycle()
     val stats by vm.stats.collectAsStateWithLifecycle()
     val importing by vm.importing.collectAsStateWithLifecycle()
@@ -32,7 +56,7 @@ fun HistoryScreen(vm: MainViewModel, onInspect: () -> Unit) {
             }
         }
     Column(Modifier.fillMaxSize()) {
-        Column(Modifier.padding(horizontal = 16.dp)) {
+        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp)) {
             Text(
                 stringResource(R.string.backup_totals, stats.count, sizeText(stats.bytes)),
                 style = MaterialTheme.typography.titleMedium,
