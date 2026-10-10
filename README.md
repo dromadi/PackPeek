@@ -26,7 +26,10 @@ Salin `keystore.properties.example` ke `keystore.properties`, isi secara lokal u
 - Folder SAF, DataStore, background WorkManager dan Room untuk riwayat serta statistik.
 - Detail izin, komponen, sertifikat, tanda tangan dan teknologi; skor konfigurasi transparan.
 - Pemeriksaan APK/APKS lokal dan pemasangan melalui persetujuan sistem Android.
-- Dasbor, ekspor ikon PNG 512 px, quick actions, tema terang/gelap, enam aksen, bahasa EN/ID.
+- Dasbor, ekspor ikon PNG 512 px, quick actions, tema terang/gelap/AMOLED, enam aksen, ekspor daftar aplikasi CSV.
+- Diagnosis gagal pasang, kartu "Siap dipasang?", pilihan bagian split, XAPK/APKM/bundletool `.apks`, antrean pemasangan banyak berkas.
+- Indeks folder backup: status terhadap aplikasi terpasang, aplikasi tanpa backup, pulihkan/perbarui dan hapus.
+- Bahasa: Inggris, Indonesia, Spanyol, Portugis (Brasil), Rusia, Hindi, Vietnam, Turki. Terjemahan selain EN/ID belum ditinjau penutur asli.
 
 ## Memakai alpha
 

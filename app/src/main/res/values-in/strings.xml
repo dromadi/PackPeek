@@ -206,8 +206,6 @@
     <string name="red">Merah</string>
     <string name="gray">Abu-abu</string>
     <string name="language">Bahasa</string>
-    <string name="english">English</string>
-    <string name="indonesian">Bahasa Indonesia</string>
     <string name="about_body">Penulisan ulang OmniExtract untuk Android: backup APK, pemeriksaan arsip lokal, dan peninjauan konfigurasi secara transparan.</string>
     <string name="alpha_notice">Build alfa. Kompatibilitas perangkat dan pengujian penerimaan rilis lengkap masih perlu dilakukan.</string>
     <string name="privacy">Privasi</string>

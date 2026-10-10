@@ -206,8 +206,6 @@
     <string name="red">Red</string>
     <string name="gray">Slate</string>
     <string name="language">Language</string>
-    <string name="english">English</string>
-    <string name="indonesian">Bahasa Indonesia</string>
     <string name="about_body">A fresh Android rewrite of OmniExtract: APK backup, local archive inspection, and transparent configuration checks.</string>
     <string name="alpha_notice">Alpha build. Device compatibility and full release acceptance testing are still pending.</string>
     <string name="privacy">Privacy</string>
