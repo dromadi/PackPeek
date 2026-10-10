@@ -137,4 +137,6 @@ data class DeviceState(
     val granted: Set<String> = emptySet(),
     val usageAccess: Boolean = false,
     val network: NetworkUsage? = null,
+    /** Whether the launcher shows this app right now; null when unknown. */
+    val launcherVisible: Boolean? = null,
 )

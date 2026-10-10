@@ -94,13 +94,19 @@ object RiskRules {
         fun declaredWithGrant(names: List<String>) =
             names.filter(facts::has).flatMap { listOf(permission(it)) + granted(it) }
         val system = context.system
+        // What the launcher shows on this device wins over the manifest: an app can disable its
+        // launcher activity after the first start.
+        val hidden = device?.launcherVisible?.not() ?: !facts.hasLauncher
         fun severity(normal: Severity) = if (system) Severity.INFO else normal
         val systemNote = if (system) ContextNote.SYSTEM_APP else ContextNote.NONE
 
         // Signals that the app or file did not come from a trusted, visible place.
         val untrusted = buildList {
-            if (!facts.hasLauncher && !system)
-                add(Evidence(EvidenceLevel.DECLARED, EvidenceKind.FLAG, "", manifest, StateKey.NO_LAUNCHER))
+            if (hidden && !system)
+                add(
+                    if (device?.launcherVisible == false) observed(StateKey.NO_LAUNCHER)
+                    else Evidence(EvidenceLevel.DECLARED, EvidenceKind.FLAG, "", manifest, StateKey.NO_LAUNCHER)
+                )
             if (context.fromFile)
                 add(Evidence(EvidenceLevel.DECLARED, EvidenceKind.SOURCE, "", "", StateKey.FILE_NOT_INSTALLED))
             else if (context.source == "SIDE") add(observed(StateKey.SIDELOADED))
@@ -243,7 +249,7 @@ object RiskRules {
                 (if (device?.batteryExempt == true) listOf(observed(StateKey.BATTERY_EXEMPT)) else emptyList())
         if (persistence.isNotEmpty())
             findings += RiskFinding(RiskId.PERSISTENCE, Severity.INFO, persistence, systemNote)
-        if (!facts.hasLauncher && !system)
+        if (hidden && !system)
             findings +=
                 RiskFinding(
                     RiskId.HIDDEN_ICON,

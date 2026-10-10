@@ -73,6 +73,7 @@ class DeviceStateReader(private val context: Context, private val apps: AppRepos
             granted = info?.let(::grantedPermissions).orEmpty(),
             usageAccess = usage,
             network = if (usage && uid >= 0) networkUsage(uid) else null,
+            launcherVisible = info?.let { apps.launcherActivities(pkg).isNotEmpty() },
         )
     }
 

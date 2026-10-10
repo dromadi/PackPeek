@@ -1,5 +1,6 @@
 package com.packpeek.app.engine.risk
 
+import android.os.Build
 import com.packpeek.app.model.AppRecord
 import com.packpeek.app.model.AuditReport
 import java.io.File
@@ -11,7 +12,7 @@ import kotlinx.coroutines.withContext
 class RiskEngine(private val device: DeviceStateReader) {
     suspend fun analyze(app: AppRecord, audit: AuditReport?): RiskReport =
         withContext(Dispatchers.IO) {
-            val facts = ManifestScanner.scan(app.paths.map(::File))
+            val facts = ManifestScanner.scan(app.paths.map(::File), Build.VERSION.SDK_INT)
             val certificate = audit?.certificates?.firstOrNull()
             val context =
                 RiskContext(

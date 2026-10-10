@@ -73,7 +73,11 @@ object ManifestScanner {
     private val launcherCategories =
         setOf("android.intent.category.LAUNCHER", "android.intent.category.LEANBACK_LAUNCHER")
 
-    fun scan(paths: List<File>): ManifestFacts {
+    /**
+     * @param deviceSdk API level the app runs (or would run) on; permissions whose
+     *   `maxSdkVersion` is below it are not requested there and are skipped. 0 keeps them all.
+     */
+    fun scan(paths: List<File>, deviceSdk: Int = 0): ManifestFacts {
         var pkg = ""
         val permissions = LinkedHashMap<String, String>()
         val components = mutableListOf<ComponentFacts>()
@@ -92,6 +96,8 @@ object ManifestScanner {
                     }
             if (index == 0) pkg = tree["package"]?.asString().orEmpty()
             tree.child("uses-permission").plus(tree.child("uses-permission-sdk-23")).forEach {
+                val maxSdk = it["maxSdkVersion"]?.asInt()
+                if (maxSdk != null && deviceSdk > maxSdk) return@forEach
                 it["name"]?.asString()?.let { name -> permissions.putIfAbsent(name, apkName) }
             }
             tree.child("application").forEach { app ->

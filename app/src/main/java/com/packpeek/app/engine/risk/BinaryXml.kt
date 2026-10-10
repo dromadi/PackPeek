@@ -59,8 +59,9 @@ class XmlNode(val name: String, val attrs: Map<String, XmlValue>, val children: 
 
 /**
  * Bounded parser for compiled Android XML (manifests and res/xml files). It never executes APK
- * code. Attribute names come from the string pool; when a build strips them, the resource-ID map
- * restores the core android: attributes PackPeek relies on.
+ * code. Android attributes PackPeek relies on are named by their framework resource ID, which the
+ * platform itself trusts, so obfuscated or stripped names in the string pool cannot hide them. Other
+ * attributes keep their string-pool name and never override an ID-named one.
  */
 object BinaryXml {
     const val LIMIT = 4 * 1024 * 1024
@@ -71,16 +72,27 @@ object BinaryXml {
             0x01010002 to "icon",
             0x01010003 to "name",
             0x01010006 to "permission",
+            0x01010007 to "readPermission",
+            0x01010008 to "writePermission",
+            0x0101000c to "hasCode",
             0x0101000e to "enabled",
             0x0101000f to "debuggable",
             0x01010010 to "exported",
             0x0101001c to "priority",
             0x01010024 to "value",
             0x01010025 to "resource",
+            0x01010202 to "targetActivity",
             0x0101020c to "minSdkVersion",
             0x0101021b to "versionCode",
             0x0101021c to "versionName",
             0x01010270 to "targetSdkVersion",
+            0x01010271 to "maxSdkVersion",
+            0x01010380 to "accessibilityEventTypes",
+            0x01010385 to "canRetrieveWindowContent",
+            0x010104ec to "usesCleartextTraffic",
+            0x0101050d to "canPerformGestures",
+            0x01010527 to "networkSecurityConfig",
+            0x01010599 to "foregroundServiceType",
         )
 
     /** Reads one entry of an APK, bounded to [LIMIT]; null when the entry does not exist. */
@@ -150,17 +162,17 @@ object BinaryXml {
                     val count = u16(ext + 12)
                     require(stride >= 20 && count <= 1000 && first + stride.toLong() * count <= end)
                     val attrs = LinkedHashMap<String, XmlValue>()
+                    val byId = HashSet<String>()
                     for (index in 0 until count) {
                         val p = first + stride * index
                         val nameIndex = i32(p + 4)
                         val raw = i32(p + 8)
                         val t = bytes[p + 15].toInt() and 255
                         val data = i32(p + 16)
-                        val name =
-                            str(nameIndex).ifEmpty {
-                                knownIds[resourceIds.getOrNull(nameIndex)].orEmpty()
-                            }
-                        if (name.isEmpty()) continue
+                        val known = knownIds[resourceIds.getOrNull(nameIndex)]
+                        val name = known ?: str(nameIndex)
+                        if (name.isEmpty() || (known == null && name in byId)) continue
+                        if (known != null) byId += known
                         val text =
                             when {
                                 raw >= 0 -> str(raw)
@@ -212,11 +224,11 @@ object BinaryXml {
             if (utf8) {
                 len8()
                 val n = len8()
-                require(n <= 32768 && p + n <= end)
+                require(p + n.toLong() <= end)
                 String(bytes, p, n, Charsets.UTF_8)
             } else {
                 val n = len16()
-                require(n <= 32768 && p + 2 * n <= end)
+                require(p + 2L * n <= end)
                 String(bytes, p, n * 2, Charsets.UTF_16LE)
             }
         }

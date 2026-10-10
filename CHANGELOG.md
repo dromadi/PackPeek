@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.0-alpha.6 — 2026-10-10
+
+Perbaikan keamanan data dan ketelitian parser, sebelum digabung ke `main`.
+
+- **Hapus backup lama lebih aman:** hanya berkas di folder backup yang sedang dipakai yang boleh dihapus; berkas yang masih dipakai backup terbaru (URI yang sama) tidak pernah dihapus; catatan riwayat tetap disimpan bila berkas gagal dihapus; berkas yang ukurannya berubah (sudah ditimpa) dibiarkan.
+- **Nama atribut lewat resource ID:** atribut Android dibaca berdasarkan resource ID-nya (seperti yang dilakukan sistem), sehingga nama yang diobfuskasi atau atribut "tiruan" tanpa ID tidak bisa menyembunyikan izin, komponen, atau konfigurasi aksesibilitas.
+- **String panjang:** batas 32.768 karakter dihapus; batas tetap dijaga terhadap ukuran chunk.
+- **`maxSdkVersion`:** izin yang hanya diminta pada versi Android lebih lama tidak lagi dihitung di perangkat yang lebih baru.
+- **Ikon tersembunyi teramati (T4):** untuk aplikasi terpasang, PackPeek memeriksa apakah launcher benar-benar menampilkannya, sehingga aplikasi yang menyembunyikan ikonnya setelah dibuka pertama kali tetap terdeteksi.
+- Tes baru: nama atribut terobfuskasi, atribut tiruan, string > 32K, `maxSdkVersion`, launcher teramati, dan fuzz 3.000 manifest rusak (harus gagal dengan rapi, tidak crash).
+
 ## 2.0.0-alpha.5 — 2026-10-10
 
 Analisis risiko berbasis bukti, tahap 1 (lihat `docs/ANALISIS_RISIKO.md`).
