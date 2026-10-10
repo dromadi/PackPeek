@@ -4,7 +4,7 @@
     <string-array name="risk_otp_theft">
         <item>OTP theft / account takeover pattern</item>
         <item>The app can receive SMS, including bank and WhatsApp one-time codes, and can reach the internet. Fake invitation, traffic-ticket and parcel APKs use this combination to take over accounts.</item>
-        <item>This pattern appears because SMS access comes together with concealment or untrusted-source signs: a hidden icon, a file from outside an app store, a debug or brand-new certificate, or a luring name.</item>
+        <item>This pattern appears because SMS access comes together with concealment or untrusted-source signs (a hidden icon, a file from outside an app store, a debug or brand-new certificate, a luring name), or with code that sends SMS content out, a hidden destination or call forwarding.</item>
         <item>The app\'s code has not been analysed yet, so it is not proven that SMS are read or sent anywhere. This assessment comes from the manifest and context only.</item>
         <item>Do not install this file. If it is installed: revoke SMS permission, uninstall it, then change passwords and re-enable two-step verification for important accounts (WhatsApp, bank, email).</item>
     </string-array>
@@ -205,7 +205,6 @@
         <item quantity="one">%1$d configuration file could not be read</item>
         <item quantity="other">%1$d configuration files could not be read</item>
     </plurals>
-    <string name="coverage_no_code">App code (DEX) is not analysed yet. The next phase adds T2–T3 evidence.</string>
     <string name="coverage_device">Device state read (enabled services, granted permissions)</string>
     <string name="coverage_file">The file is not installed, so device state is unavailable</string>
     <string name="coverage_usage_on">Data usage read through Usage access</string>
@@ -225,9 +224,104 @@
     <string name="active_notifications">Notification listeners</string>
     <string name="active_admins">Device admins</string>
     <string name="active_default_sms">Default SMS app</string>
-    <string name="active_none">None</string>
     <string name="usage_access">Usage access</string>
     <string name="usage_access_on">Allowed: per-app data usage is shown as observed evidence</string>
     <string name="usage_access_off">Not allowed. Optional: shows per-app data usage (not its content or destination).</string>
     <string name="risk_analysis">Risk analysis</string>
+    <string-array name="risk_data_theft">
+        <item>Personal data sent to a hidden destination</item>
+        <item>The app\'s own code reads personal data (such as SMS, contacts, notifications or screen text) and, in the same code path, sends data to a Telegram bot or Discord webhook. Scam apps use these channels because they need no server of their own.</item>
+        <item>Ordinary apps send data to their own servers, not to chat bots or webhooks. Developers sometimes use bots for crash reports, but those do not read personal data.</item>
+        <item></item>
+        <item>Do not install this file. If it is installed: uninstall it, change passwords of accounts whose codes or messages it could read, and turn two-step verification back on.</item>
+    </string-array>
+    <string-array name="risk_hidden_destination">
+        <item>Hidden destination in the code</item>
+        <item>The code contains the address of a Telegram bot, a Discord webhook or a bare IP address. Data sent there is hard to trace back to a company.</item>
+        <item>Some apps use bots or webhooks for alerts, and IP addresses for local devices (cameras, routers). It is a concern when combined with access to personal data.</item>
+        <item></item>
+        <item>Check whether the app needs to talk to chat services or raw IP addresses for its purpose. Prefer apps from known developers.</item>
+    </string-array>
+    <string-array name="risk_call_forwarding">
+        <item>Call forwarding codes</item>
+        <item>The code contains phone codes that forward your calls (for example **21*) or sends USSD requests. Account thieves forward calls so voice OTP codes reach them instead of you.</item>
+        <item>Phone, carrier and call-management apps can use these codes legitimately.</item>
+        <item></item>
+        <item>Check your call forwarding settings (dial *#21#). Remove forwarding you did not set up, and uninstall the app if you do not recognise it.</item>
+    </string-array>
+    <string-array name="risk_dynamic_code">
+        <item>Loads extra code</item>
+        <item>The app can load or run code that is not part of what was checked: a hidden DEX/APK inside the package, an encrypting packer, a class loader or shell commands.</item>
+        <item>Large apps use dynamic loading for plug-ins and updates, and some companies protect their code with packers.</item>
+        <item></item>
+        <item>Treat the result of this check as incomplete for this app. Be cautious if the app also comes from outside an app store.</item>
+    </string-array>
+    <string-array name="risk_clipboard">
+        <item>Reads the clipboard</item>
+        <item>The app can read text you copy, which may include passwords, OTP codes or account numbers.</item>
+        <item>Download and link-sharing apps often read the clipboard to pick up a copied link. Since Android 10 apps can only read it while they are on screen, and Android 12+ shows a notice.</item>
+        <item></item>
+        <item>Avoid copying passwords or OTP codes while this app is open.</item>
+    </string-array>
+    <string-array name="risk_web_login">
+        <item>Reads WebView cookies</item>
+        <item>The app reads cookies from its built-in browser. Cookies can keep you logged in, so whoever holds them may act as you on that website.</item>
+        <item>Apps that let you log in to a website inside the app (for example to download your own posts) need cookies for that session.</item>
+        <item></item>
+        <item>Log in to important accounts only in their official app or browser. Log out and change the password if you are unsure.</item>
+    </string-array>
+    <string-array name="risk_ad_sdks">
+        <item>Advertising and analytics SDKs</item>
+        <item>Third-party code that shows ads or measures how you use the app. These SDKs can collect device identifiers and usage data.</item>
+        <item>Very common in free apps; usually covered by the app\'s privacy policy.</item>
+        <item>Which data each SDK actually collects is not visible from the code check.</item>
+        <item>Check the Data safety section in Google Play and reset your advertising ID in Settings → Privacy → Ads if you like.</item>
+    </string-array>
+    <string-array name="risk_destinations">
+        <item>Addresses in the code</item>
+        <item>Web addresses written in the app\'s own code: where the app is likely to connect.</item>
+        <item>Every connected app has these. Unknown domains are not suspicious by themselves.</item>
+        <item>Whether these addresses are contacted, and what is sent, is not visible from the code alone.</item>
+        <item>Look for addresses that do not match the app\'s developer, and for unencrypted http.</item>
+    </string-array>
+    <string name="cap_sms_read">SMS</string>
+    <string name="cap_contacts">contacts</string>
+    <string name="cap_call_log">call history</string>
+    <string name="cap_clipboard">the clipboard</string>
+    <string name="cap_notification_read">notifications</string>
+    <string name="cap_screen_read">screen text</string>
+    <string name="cap_cookies">login cookies</string>
+    <string name="cap_phone_id">phone number or device ID</string>
+    <string name="cap_accounts">accounts</string>
+    <string name="cap_location">location</string>
+    <string name="cap_network">the internet</string>
+    <string name="cap_sms_send">SMS</string>
+    <string name="cap_telegram">a Telegram bot</string>
+    <string name="cap_discord">a Discord webhook</string>
+    <string name="ev_code_call">Calls %1$s</string>
+    <string name="ev_code_string">Contains the text %1$s</string>
+    <string name="ev_flow">Reads %1$s and sends it to %2$s</string>
+    <string name="ev_destination">Connects to %1$s</string>
+    <string name="ev_destination_cleartext">%1$s (unencrypted http)</string>
+    <string name="ev_destination_ip">%1$s (IP address, no domain name)</string>
+    <string name="ev_origin_app">app\'s own code</string>
+    <string name="ev_origin_library">library: %1$s</string>
+    <string name="ev_hidden_code">Hidden code file: %1$s</string>
+    <string name="ev_packer">Code packer: %1$s</string>
+    <string name="unproven_flow">A code path reads this data and sends it out (T3). It is still not proven that this path has run on your device; only watching the app while it runs could show that.</string>
+    <string name="unproven_calls">The code calls the functions this needs (T2), but no path that sends the data out was found. Code that never runs, or code loaded later, cannot be ruled out.</string>
+    <string name="unproven_none">The app\'s own code was checked and does not call the functions this needs. Libraries or code loaded later could still use it.</string>
+    <string name="unproven_gaps">Parts of the app could not be analysed (see Check coverage), so the code result may be incomplete.</string>
+    <string name="evidence_strength">Strongest evidence: %1$s</string>
+    <string name="strength_t1">written in the manifest only</string>
+    <string name="strength_t2">the code makes these calls</string>
+    <string name="strength_t3">a code path reads data and sends it out</string>
+    <string name="strength_t4">observed on this device</string>
+    <string name="coverage_code">Code (DEX) analysed: %1$d DEX files, %2$d classes, %3$d in the app\'s own code</string>
+    <string name="coverage_code_failed">App code (DEX) could not be analysed</string>
+    <string name="coverage_gap_hidden">Hidden code not analysed: %1$s</string>
+    <string name="coverage_gap_packer">Code is protected by a packer (%1$s); the real code is encrypted</string>
+    <string name="coverage_gap_cross">%1$s logic runs outside DEX and is not analysed</string>
+    <string name="coverage_gap_unreadable">Could not read code in %1$s</string>
+    <string name="coverage_gap_limit">Code analysis stopped at its time or size limit; results are partial</string>
 </resources>

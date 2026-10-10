@@ -92,7 +92,7 @@ class AppRepository(context: Context) {
                     MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") {
                         "%02x".format(it)
                     }
-                Signer(digest, subjectName(cert.subjectX500Principal.name))
+                Signer(digest, subjectName(cert.subjectX500Principal.name), cert.notBefore.time)
             }
             .getOrNull()
 
@@ -197,7 +197,7 @@ class AppRepository(context: Context) {
         }
 }
 
-data class Signer(val digest: String, val name: String)
+data class Signer(val digest: String, val name: String, val notBefore: Long = 0)
 
 data class ComponentCounts(
     val permissions: Int,

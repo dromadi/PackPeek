@@ -19,13 +19,34 @@ import com.packpeek.app.PackPeekApp
 import com.packpeek.app.data.*
 import com.packpeek.app.engine.*
 import com.packpeek.app.engine.risk.ActiveServices
+import com.packpeek.app.engine.risk.RiskFinding
 import com.packpeek.app.engine.risk.RiskReport
+import com.packpeek.app.engine.risk.Severity
+import com.packpeek.app.engine.risk.codeAnalyzed
 import com.packpeek.app.model.*
 import java.util.UUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 data class AppExtras(val signer: Signer?, val abis: Set<String>)
+
+/** What the overview needs from one app's evidence check. */
+data class RiskBrief(
+    val strong: Int,
+    val attention: Int,
+    val top: RiskFinding?,
+    val codeAnalyzed: Boolean,
+) {
+    companion object {
+        fun of(report: RiskReport) =
+            RiskBrief(
+                report.count(Severity.STRONG),
+                report.count(Severity.ATTENTION),
+                report.findings.firstOrNull { it.severity != Severity.INFO },
+                report.coverage.codeAnalyzed,
+            )
+    }
+}
 
 data class DetailState(
     val app: AppRecord? = null,
@@ -50,7 +71,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val selected = MutableStateFlow<Set<String>>(emptySet())
     private val tech = MutableStateFlow<Map<String, List<String>>>(emptyMap())
     val technologies = tech.asStateFlow()
-    val riskScores = MutableStateFlow<Map<String, Int>>(emptyMap())
+    /** Evidence check results per installed app, from the overview check or opened details. */
+    val riskBriefs = MutableStateFlow<Map<String, RiskBrief>>(emptyMap())
+    /** App being checked by the overview check, for its progress line. */
+    val checkingApp = MutableStateFlow<String?>(null)
     /** Signer and CPU architectures per package, read for the overview groups. */
     val extras = MutableStateFlow<Map<String, AppExtras>>(emptyMap())
     val readingExtras = MutableStateFlow(false)
@@ -187,7 +211,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         .map { it.packageName }
                         .toSet()
                 tech.value = tech.value.filterKeys { it in unchanged }
-                riskScores.value = riskScores.value.filterKeys { it in unchanged }
+                riskBriefs.value = riskBriefs.value.filterKeys { it in unchanged }
                 extras.value = extras.value.filterKeys { it in unchanged }
                 _apps.value = result
                 selected.value = selected.value intersect result.map { it.packageName }.toSet()
@@ -240,24 +264,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         else filtering.value = false
     }
 
-    fun scanOverview() {
+    /**
+     * Runs the evidence check (manifest, code, device state) on every user app not checked yet,
+     * plus the technology detection. System apps are skipped: their findings stay informational.
+     */
+    fun scanOverview(again: Boolean = false) {
         if (checkingOverview.value) return
+        checkingOverview.value = true
+        if (again) riskBriefs.value = emptyMap()
         overviewJob = viewModelScope.launch {
-            checkingOverview.value = true
             try {
-                for (app in apps.value) {
+                for (app in apps.value.filter { !it.system && it.packageName !in riskBriefs.value }) {
                     ensureActive()
+                    checkingApp.value = app.label
                     try {
-                        val report = owner.audit.audit(app, false)
-                        tech.value = tech.value + (app.packageName to report.frameworks)
-                        riskScores.value = riskScores.value + (app.packageName to report.score)
+                        val report = owner.risk.analyze(app, null)
+                        riskBriefs.value = riskBriefs.value + (app.packageName to RiskBrief.of(report))
+                        if (app.packageName !in tech.value)
+                            tech.value = tech.value + (app.packageName to owner.audit.technology(app).frameworks)
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
-                        /* Outside scan coverage. */
+                        /* Outside check coverage. */
                     }
                 }
             } finally {
+                checkingApp.value = null
                 checkingOverview.value = false
             }
         }
@@ -442,7 +474,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 detail.value = DetailState(app, report, signerChangedSince = changed, risk = risk)
                 if (!app.fromFile) {
-                    riskScores.value = riskScores.value + (app.packageName to report.score)
+                    if (risk != null) riskBriefs.value = riskBriefs.value + (app.packageName to RiskBrief.of(risk))
                     tech.value = tech.value + (app.packageName to report.frameworks)
                 }
             } catch (e: CancellationException) {

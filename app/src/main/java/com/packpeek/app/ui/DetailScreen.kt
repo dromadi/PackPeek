@@ -285,7 +285,9 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                                 SectionTitle(stringResource(R.string.concerns))
                                 RiskSummary(risk)
                             }
-                            items(risk.findings, key = { "risk:${it.id}" }) { FindingCard(it) }
+                            items(risk.findings, key = { "risk:${it.id}" }) {
+                                FindingCard(it, codeGaps = risk.coverage.code?.gaps?.isNotEmpty() == true)
+                            }
                             item { CoverageCard(risk.coverage) { openUsageAccess(c) } }
                         }
                         state.signerChangedSince?.let { previous ->

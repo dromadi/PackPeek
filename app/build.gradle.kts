@@ -19,8 +19,8 @@ android {
         applicationId = "com.packpeek.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 20007
-        versionName = "2.0.0-alpha.7"
+        versionCode = 20008
+        versionName = "2.0.0-alpha.8"
         buildConfigField("boolean", "SHOW_RATE", "false")
         buildConfigField("String", "SUPPORT_EMAIL", "\"\"")
     }

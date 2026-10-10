@@ -1,5 +1,31 @@
 # Changelog
 
+## 2.0.0-alpha.8 — 2026-10-10
+
+Analisis risiko tahap 2 dan 3: PackPeek kini membaca **kode** aplikasi (DEX) untuk mencari bukti, tanpa menjalankannya. Ringkasan dirombak.
+
+- **Bukti T2 (di kode):** pemanggilan fungsi sensitif beserta lokasinya, misalnya `SmsMessage.createFromPdu` di `com.x.SmsReceiver.onReceive`. Setiap bukti diberi asal: kode aplikasi sendiri atau library yang dikenal (AndroidX, Firebase, AdMob, …). Hanya kode aplikasi sendiri yang dihitung untuk pola.
+- **Bukti T3 (jalur data):** metode yang membaca data pribadi (SMS, kontak, notifikasi, teks layar, clipboard, cookie, ID telepon, lokasi) lalu mengirimnya (internet, SMS, bot Telegram, webhook Discord), langsung atau lewat metode yang dipanggilnya.
+- **Temuan baru:**
+  - **Data pribadi dikirim ke tujuan tersembunyi** (indikator kuat);
+  - Tujuan tersembunyi di kode (bot Telegram, webhook Discord, alamat IP);
+  - Kode pengalihan panggilan (`**21*`, USSD);
+  - Memuat kode tambahan (DexClassLoader, DEX/APK tersembunyi di aset, packer);
+  - Membaca clipboard;
+  - Membaca cookie WebView;
+  - SDK iklan/analitik;
+  - Alamat di dalam kode.
+- **"Belum terbukti" kini mengikuti hasil kode:** jalur ditemukan (T3), hanya pemanggilan (T2), atau kode sudah diperiksa dan tidak memanggil fungsinya. Pola kuat menampilkan "Bukti terkuat".
+- **Cakupan kode:** jumlah DEX, kelas, dan kelas kode aplikasi, serta bagian yang tidak bisa dianalisis (kode tersembunyi, packer, Flutter/React Native/Unity, batas waktu 30 detik).
+- **Lebih sedikit salah tuduh:** bila kode terbaca penuh, "dipasang dari luar toko", overlay, admin, atau akses notifikasi saja tidak lagi membuat pola kuat. Pola kuat membutuhkan bukti di kode atau tanda penyamaran (ikon tersembunyi, nama memancing, sertifikat debug/baru, berkas yang belum dipasang). Teks seperti `api.telegram.org` hanya dihitung bila kodenya juga mengirim data.
+- **Ringkasan baru:**
+  - kartu **Periksa aplikasimu** (memeriksa semua aplikasi pengguna dengan manifest, kode, dan kondisi perangkat);
+  - daftar **Perlu ditinjau**;
+  - "Aktif di perangkat ini" yang ringkas;
+  - baris statistik;
+  - kartu **Analisis aplikasi** dengan pilihan Sumber, Android target/minimum, Sertifikat, Arsitektur, dan Teknologi, berupa satu batang bertumpuk dan legenda yang bisa diketuk.
+- Sampel uji `tools/undangan-sim/` kini berisi kode tiruan (tetap `hasCode="false"`, jadi tidak pernah dijalankan; token bot palsu), termasuk kelas "detektor" untuk memastikan teks saja tidak dianggap pengiriman data.
+
 ## 2.0.0-alpha.7 — 2026-10-10
 
 Fitur dari analisis pesaing (`docs/ANALISIS_PESAING.md`).

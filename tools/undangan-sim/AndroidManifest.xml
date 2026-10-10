@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Harmless test sample for PackPeek. It imitates the manifest of the fake wedding-invitation APK
-  scam ("undangan.apk") so the risk checks can be tested. It contains NO code (hasCode="false"):
-  the declared components do not exist, so nothing can run even if it were installed.
+  scam ("undangan.apk") so the risk checks can be tested. The APK carries imitation code for the
+  code analysis (see src/), but android:hasCode="false" means Android never loads or runs it, even if
+  the APK were installed.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="sim.packpeek.undangan"

@@ -165,11 +165,6 @@
     <string name="hide_history_body">The backup file stays in your folder. Only this history entry is hidden.</string>
     <string name="apk_storage">APK file size</string>
     <string name="largest_apps">10 largest apps</string>
-    <string name="technology_and_risk">Technology and review signals</string>
-    <string name="overview_scan_note">Scan on demand for framework counts and configuration scores. Signature verification runs when app details open.</string>
-    <string name="cancel_scan">Cancel scan</string>
-    <string name="scan_overview">Scan apps</string>
-    <string name="scan_coverage">Reviewed apps: %1$d / %2$d</string>
     <string name="sample_app">Example App</string>
     <string name="filename_parts">File name parts</string>
     <string name="app_label">App name</string>
@@ -247,7 +242,6 @@
     <string name="backup_done">Backup complete</string>
     <string name="backup_partial">Backup finished with errors</string>
     <string name="result_summary">%1$d of %2$d saved · %3$s</string>
-    <string name="review_title">Configuration review</string>
     <string name="app_info">App info</string>
     <string name="score_short">score</string>
     <string name="history_empty_title">No backups yet</string>
@@ -273,13 +267,10 @@
     <string name="installer_value" translatable="false">%1$s (%2$s)</string>
     <string name="cpu_architecture">CPU architecture</string>
     <string name="no_native_code">No native code</string>
-    <string name="reading_extras">Reading certificates and native code… %1$d/%2$d</string>
     <string name="show_all_groups">Show all (%1$d)</string>
     <string name="show_fewer">Show fewer</string>
-    <string name="group_hint">Tap a group to see its apps.</string>
     <string name="abi_note">Apps with native code for several architectures appear in each of them.</string>
     <string name="signer_note">Apps signed with the same key come from the same developer or build system. \"Android Debug\" marks a test build.</string>
-    <string name="group_title" translatable="false">%1$s: %2$s</string>
     <string name="show_all_apps">Show all apps</string>
     <string name="quick_details">Quick details</string>
     <string name="full_details">Full details</string>
@@ -288,4 +279,32 @@
     <string name="receivers">Receivers</string>
     <string name="providers">Providers</string>
     <string name="tap_opens">Tapping an app opens</string>
+    <string name="needs_review">Needs review</string>
+    <string name="security_check_title">Check your apps</string>
+    <string name="security_check_body">PackPeek reads the manifest and the code of every app you installed and looks for evidence: what it can do, what its code calls, and whether data is sent somewhere hidden. Everything runs on this phone.</string>
+    <plurals name="security_check_button">
+        <item quantity="one">Check %1$d app</item>
+        <item quantity="other">Check %1$d apps</item>
+    </plurals>
+    <string name="security_checking">Checking %1$d of %2$d…</string>
+    <plurals name="security_strong">
+        <item quantity="one">%1$d app with a strong indicator</item>
+        <item quantity="other">%1$d apps with a strong indicator</item>
+    </plurals>
+    <plurals name="security_attention">
+        <item quantity="one">No strong indicators · %1$d app needs attention</item>
+        <item quantity="other">No strong indicators · %1$d apps need attention</item>
+    </plurals>
+    <string name="security_clear">No strong indicators found</string>
+    <string name="security_checked">%1$d of %2$d installed apps checked (manifest, code and device state). This is not a guarantee that an app is safe.</string>
+    <string name="security_continue">Continue</string>
+    <string name="security_again">Check again</string>
+    <string name="active_all_clear">No app has accessibility, notification access or device admin switched on.</string>
+    <string name="app_analysis">App analysis</string>
+    <string name="tech_after_check">Technology is detected during the app check above.</string>
+    <string name="reading_groups">Reading certificates and native code…</string>
+    <plurals name="other_groups">
+        <item quantity="one">%1$d other group</item>
+        <item quantity="other">%1$d other groups</item>
+    </plurals>
 </resources>

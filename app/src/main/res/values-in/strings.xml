@@ -165,11 +165,6 @@
     <string name="hide_history_body">Berkas backup tetap di foldermu. Hanya entri riwayat ini yang disembunyikan.</string>
     <string name="apk_storage">Ukuran berkas APK</string>
     <string name="largest_apps">10 aplikasi terbesar</string>
-    <string name="technology_and_risk">Teknologi dan sinyal peninjauan</string>
-    <string name="overview_scan_note">Pindai untuk mengisi jumlah framework dan skor konfigurasi. Verifikasi tanda tangan berjalan saat detail dibuka.</string>
-    <string name="cancel_scan">Batalkan pemindaian</string>
-    <string name="scan_overview">Pindai aplikasi</string>
-    <string name="scan_coverage">Ditinjau: %1$d / %2$d aplikasi</string>
     <string name="sample_app">Contoh Aplikasi</string>
     <string name="filename_parts">Bagian nama berkas</string>
     <string name="app_label">Nama aplikasi</string>
@@ -247,7 +242,6 @@
     <string name="backup_done">Backup selesai</string>
     <string name="backup_partial">Backup selesai dengan galat</string>
     <string name="result_summary">%1$d dari %2$d tersimpan · %3$s</string>
-    <string name="review_title">Tinjauan konfigurasi</string>
     <string name="app_info">Info aplikasi</string>
     <string name="score_short">skor</string>
     <string name="history_empty_title">Belum ada backup</string>
@@ -268,10 +262,8 @@
     <string name="first_installed">Pertama dipasang</string>
     <string name="cpu_architecture">Arsitektur CPU</string>
     <string name="no_native_code">Tanpa kode native</string>
-    <string name="reading_extras">Membaca sertifikat dan kode native… %1$d/%2$d</string>
     <string name="show_all_groups">Tampilkan semua (%1$d)</string>
     <string name="show_fewer">Tampilkan lebih sedikit</string>
-    <string name="group_hint">Ketuk kelompok untuk melihat aplikasinya.</string>
     <string name="abi_note">Aplikasi dengan kode native untuk beberapa arsitektur muncul di setiap arsitektur tersebut.</string>
     <string name="signer_note">Aplikasi yang ditandatangani kunci yang sama berasal dari pengembang atau sistem build yang sama. \"Android Debug\" menandakan build uji.</string>
     <string name="show_all_apps">Tampilkan semua aplikasi</string>
@@ -282,4 +274,28 @@
     <string name="receivers">Receiver</string>
     <string name="providers">Provider</string>
     <string name="tap_opens">Ketuk aplikasi membuka</string>
+    <string name="needs_review">Perlu ditinjau</string>
+    <string name="security_check_title">Periksa aplikasimu</string>
+    <string name="security_check_body">PackPeek membaca manifest dan kode setiap aplikasi yang kamu pasang lalu mencari bukti: apa yang bisa dilakukannya, fungsi apa yang dipanggil kodenya, dan apakah data dikirim ke tempat tersembunyi. Semua berjalan di HP ini.</string>
+    <plurals name="security_check_button">
+        <item quantity="other">Periksa %1$d aplikasi</item>
+    </plurals>
+    <string name="security_checking">Memeriksa %1$d dari %2$d…</string>
+    <plurals name="security_strong">
+        <item quantity="other">%1$d aplikasi dengan indikator kuat</item>
+    </plurals>
+    <plurals name="security_attention">
+        <item quantity="other">Tidak ada indikator kuat · %1$d aplikasi perlu perhatian</item>
+    </plurals>
+    <string name="security_clear">Tidak ditemukan indikator kuat</string>
+    <string name="security_checked">%1$d dari %2$d aplikasi terpasang sudah diperiksa (manifest, kode, dan kondisi perangkat). Ini bukan jaminan bahwa aplikasi aman.</string>
+    <string name="security_continue">Lanjutkan</string>
+    <string name="security_again">Periksa ulang</string>
+    <string name="active_all_clear">Tidak ada aplikasi yang sedang memakai aksesibilitas, akses notifikasi, atau admin perangkat.</string>
+    <string name="app_analysis">Analisis aplikasi</string>
+    <string name="tech_after_check">Teknologi dideteksi saat pemeriksaan aplikasi di atas.</string>
+    <string name="reading_groups">Membaca sertifikat dan kode native…</string>
+    <plurals name="other_groups">
+        <item quantity="other">%1$d kelompok lainnya</item>
+    </plurals>
 </resources>

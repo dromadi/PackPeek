@@ -68,7 +68,27 @@ object RiskRules {
             "pajak",
         )
 
-    fun evaluate(facts: ManifestFacts, context: RiskContext, device: DeviceState?): RiskReport {
+    /** Personal data that should never go to a hidden destination. */
+    private val personalSources =
+        listOf(
+            Capability.SMS_READ,
+            Capability.CONTACTS,
+            Capability.CALL_LOG,
+            Capability.NOTIFICATION_READ,
+            Capability.SCREEN_READ,
+            Capability.CLIPBOARD,
+            Capability.COOKIES,
+            Capability.PHONE_ID,
+            Capability.ACCOUNTS,
+            Capability.LOCATION,
+        )
+
+    fun evaluate(
+        facts: ManifestFacts,
+        context: RiskContext,
+        device: DeviceState?,
+        code: CodeFacts? = null,
+    ): RiskReport {
         val findings = mutableListOf<RiskFinding>()
         val manifest = "AndroidManifest.xml"
         fun permission(name: String) =
@@ -93,6 +113,49 @@ object RiskRules {
             else emptyList()
         fun declaredWithGrant(names: List<String>) =
             names.filter(facts::has).flatMap { listOf(permission(it)) + granted(it) }
+        // Code evidence (phase 2/3). Only the app's own code counts for patterns; known libraries
+        // are listed for context on capability findings.
+        fun calls(vararg caps: Capability, libraries: Boolean = false): List<Evidence> =
+            caps.flatMap { cap ->
+                code?.hits?.get(cap).orEmpty()
+                    .filter { libraries || it.library == null }
+                    .map {
+                        Evidence(
+                            EvidenceLevel.CODE,
+                            if (it.string) EvidenceKind.STRING else EvidenceKind.CODE,
+                            it.api,
+                            it.method,
+                            library = it.library,
+                        )
+                    }
+            }
+        fun flowsFrom(vararg sources: Capability, sinks: Set<Capability>? = null): List<Evidence> =
+            code?.flows.orEmpty()
+                .filter { it.source in sources && (sinks == null || it.sink in sinks) }
+                .map {
+                    Evidence(
+                        EvidenceLevel.FLOW,
+                        EvidenceKind.FLOW,
+                        "${it.source}>${it.sink}|${it.sourceApi}|${it.sinkApi}",
+                        it.method,
+                    )
+                }
+        fun state(evidence: List<Evidence>): CodeState =
+            when {
+                code == null -> CodeState.NOT_ANALYZED
+                evidence.any { it.level == EvidenceLevel.FLOW } -> CodeState.FLOW
+                evidence.any { it.level == EvidenceLevel.CODE && it.library == null } -> CodeState.CALLS
+                else -> CodeState.NOT_FOUND
+            }
+        fun finding(id: RiskId, severity: Severity, evidence: List<Evidence>, note: ContextNote = ContextNote.NONE) =
+            RiskFinding(id, severity, evidence, note, code = state(evidence))
+        val hiddenDestinations = calls(Capability.TELEGRAM, Capability.DISCORD)
+        val ipDestinations =
+            code?.destinations.orEmpty().filter { it.ipAddress }.map {
+                Evidence(EvidenceLevel.CODE, EvidenceKind.DESTINATION, "${it.host}|${it.cleartext}|true", "")
+            }
+        val forwarding = calls(Capability.CALL_FORWARDING)
+
         val system = context.system
         // What the launcher shows on this device wins over the manifest: an app can disable its
         // launcher activity after the first start.
@@ -129,6 +192,14 @@ object RiskRules {
                     add(Evidence(EvidenceLevel.DECLARED, EvidenceKind.LABEL, context.label, manifest, StateKey.LURE_LABEL))
                 }
         }
+        // Installing outside a store is common for ordinary apps. On its own it only counts when
+        // the code could not be checked fully; hidden icons, lures and test certificates always count.
+        val concealment = untrusted.filter { it.stateKey != StateKey.SIDELOADED }
+        val sideloaded = untrusted.any { it.stateKey == StateKey.SIDELOADED }
+        // The app's main code could not be read: no analysis, an encrypting packer, or a limit.
+        // Embedded files are reported separately (DYNAMIC_CODE) and do not hide the main code.
+        val codeIncomplete =
+            code == null || code.gaps.any { it.kind in setOf(GapKind.PACKER, GapKind.UNREADABLE, GapKind.LIMIT) }
         val internet =
             if (facts.has(INTERNET))
                 listOf(Evidence(EvidenceLevel.DECLARED, EvidenceKind.PERMISSION, INTERNET, "$manifest · ${facts.permissions[INTERNET]}"))
@@ -137,26 +208,45 @@ object RiskRules {
         // SMS / OTP
         val defaultSms = device?.defaultSmsApp == true
         val smsReceivers = facts.receiversFor(SMS_RECEIVED)
-        val sms =
+        val smsDeclared =
             declaredWithGrant(smsPermissions) +
                 smsReceivers.map { component(it, " · priority ${it.maxPriority(SMS_RECEIVED)}") } +
                 (if (defaultSms) listOf(observed(StateKey.DEFAULT_SMS_APP)) else emptyList())
+        val smsCode = if (smsDeclared.isEmpty()) emptyList() else calls(Capability.SMS_READ) + flowsFrom(Capability.SMS_READ)
+        val sms = smsDeclared + smsCode
         if (sms.isNotEmpty())
             findings +=
-                RiskFinding(
+                finding(
                     RiskId.SMS,
                     if (defaultSms) Severity.INFO else severity(Severity.ATTENTION),
                     sms,
                     if (defaultSms) ContextNote.DEFAULT_SMS_APP else systemNote,
                 )
-        if (sms.isNotEmpty() && internet.isNotEmpty() && untrusted.isNotEmpty() && !defaultSms && !system)
-            findings += RiskFinding(RiskId.OTP_THEFT, Severity.STRONG, sms + internet + untrusted)
-        declaredWithGrant(listOf("android.permission.SEND_SMS")).takeIf { it.isNotEmpty() }?.let {
+        val sendSms = declaredWithGrant(listOf("android.permission.SEND_SMS"))
+        // OTP theft: SMS access plus a way out plus at least one sign that it is meant to be hidden
+        // or that code actually sends SMS content somewhere.
+        val smsOut = flowsFrom(Capability.SMS_READ)
+        val otpSigns = concealment + smsOut + hiddenDestinations + forwarding
+        if (
+            smsDeclared.isNotEmpty() &&
+                (internet.isNotEmpty() || sendSms.isNotEmpty()) &&
+                (otpSigns.isNotEmpty() || (sideloaded && codeIncomplete)) &&
+                !defaultSms &&
+                !system
+        )
             findings +=
-                RiskFinding(
+                finding(
+                    RiskId.OTP_THEFT,
+                    Severity.STRONG,
+                    sms + internet + untrusted + hiddenDestinations + forwarding,
+                )
+        if (sendSms.isNotEmpty()) {
+            val evidence = sendSms + calls(Capability.SMS_SEND) + flowsFrom(*personalSources.toTypedArray(), sinks = setOf(Capability.SMS_SEND))
+            findings +=
+                finding(
                     RiskId.SMS_SEND,
                     if (defaultSms) Severity.INFO else severity(Severity.ATTENTION),
-                    it,
+                    evidence.distinct(),
                     if (defaultSms) ContextNote.DEFAULT_SMS_APP else systemNote,
                 )
         }
@@ -179,26 +269,32 @@ object RiskRules {
                     if (device != null && service.name in device.accessibilityEnabled)
                         add(observed(StateKey.ACCESSIBILITY_ENABLED, service.name))
                 }
-            }
+            } +
+                (if (accessibilityServices.isEmpty()) emptyList()
+                else calls(Capability.SCREEN_READ, Capability.GESTURES) + flowsFrom(Capability.SCREEN_READ))
         if (accessibility.isNotEmpty())
-            findings += RiskFinding(RiskId.ACCESSIBILITY, severity(Severity.ATTENTION), accessibility, systemNote)
+            findings += finding(RiskId.ACCESSIBILITY, severity(Severity.ATTENTION), accessibility, systemNote)
 
         // Notifications, device admin, overlay
+        val listeners = facts.servicesBoundBy(BIND_NOTIFICATIONS)
         val notifications =
-            facts.servicesBoundBy(BIND_NOTIFICATIONS).map { component(it) } +
+            listeners.map { component(it) } +
                 (if (device?.notificationListenerEnabled == true)
                     listOf(observed(StateKey.NOTIFICATION_LISTENER_ENABLED))
-                else emptyList())
+                else emptyList()) +
+                (if (listeners.isEmpty()) emptyList()
+                else calls(Capability.NOTIFICATION_READ) + flowsFrom(Capability.NOTIFICATION_READ))
         if (notifications.isNotEmpty())
-            findings += RiskFinding(RiskId.NOTIFICATIONS, severity(Severity.ATTENTION), notifications, systemNote)
+            findings += finding(RiskId.NOTIFICATIONS, severity(Severity.ATTENTION), notifications, systemNote)
         val admins = facts.components.filter { it.kind == "receiver" && it.permission == BIND_DEVICE_ADMIN }
         val admin =
             admins.map { a ->
                 val policies = facts.deviceAdminPolicies[a.name].orEmpty()
                 component(a, if (policies.isEmpty()) "" else " · ${policies.joinToString()}")
-            } + (if (device?.deviceAdminActive == true) listOf(observed(StateKey.DEVICE_ADMIN_ACTIVE)) else emptyList())
+            } + (if (device?.deviceAdminActive == true) listOf(observed(StateKey.DEVICE_ADMIN_ACTIVE)) else emptyList()) +
+                (if (admins.isEmpty()) emptyList() else calls(Capability.DEVICE_ADMIN_ACTION))
         if (admin.isNotEmpty())
-            findings += RiskFinding(RiskId.DEVICE_ADMIN, severity(Severity.ATTENTION), admin, systemNote)
+            findings += finding(RiskId.DEVICE_ADMIN, severity(Severity.ATTENTION), admin, systemNote)
         val overlay =
             declaredWithGrant(listOf("android.permission.SYSTEM_ALERT_WINDOW")).filter {
                 it.kind == EvidenceKind.PERMISSION
@@ -211,28 +307,50 @@ object RiskRules {
             accessibilityServices.any { s ->
                 facts.accessibility[s.name]?.canRetrieveWindowContent ?: true
             }
+        // Overlay, device admin and notification access amplify the pattern only when the code
+        // could not be checked; with readable code, the code itself must show it (or concealment).
         val amplifiers =
-            untrusted + overlay.filter { it.kind == EvidenceKind.PERMISSION } + admin + notifications
-        if (accessibilityServices.isNotEmpty() && readsScreen && internet.isNotEmpty() && amplifiers.isNotEmpty() && !system)
-            findings += RiskFinding(RiskId.SCREEN_SPYING, Severity.STRONG, accessibility + internet + amplifiers)
+            concealment +
+                if (codeIncomplete)
+                    untrusted.filter { it.stateKey == StateKey.SIDELOADED } +
+                        overlay.filter { it.kind == EvidenceKind.PERMISSION } +
+                        admin +
+                        notifications
+                else emptyList()
+        val screenOut = flowsFrom(Capability.SCREEN_READ)
+        val spying = accessibilityServices.isNotEmpty() && readsScreen && internet.isNotEmpty() && !system
+        if (spying && (amplifiers.isNotEmpty() || screenOut.isNotEmpty() || hiddenDestinations.isNotEmpty()))
+            findings +=
+                finding(
+                    RiskId.SCREEN_SPYING,
+                    Severity.STRONG,
+                    (accessibility + internet + amplifiers + hiddenDestinations).distinct(),
+                )
 
         // Other personal data and capabilities
         declaredWithGrant(contactPermissions).takeIf { it.isNotEmpty() }?.let {
-            findings += RiskFinding(RiskId.CONTACTS_CALLS, severity(Severity.ATTENTION), it, systemNote)
+            val evidence =
+                it + calls(Capability.CONTACTS, Capability.CALL_LOG) +
+                    flowsFrom(Capability.CONTACTS, Capability.CALL_LOG)
+            findings += finding(RiskId.CONTACTS_CALLS, severity(Severity.ATTENTION), evidence, systemNote)
         }
         declaredWithGrant(identityPermissions).takeIf { it.isNotEmpty() }?.let {
-            findings += RiskFinding(RiskId.PHONE_IDENTITY, Severity.INFO, it, systemNote)
+            val evidence =
+                it + calls(Capability.PHONE_ID, Capability.ACCOUNTS) +
+                    flowsFrom(Capability.PHONE_ID, Capability.ACCOUNTS)
+            findings += finding(RiskId.PHONE_IDENTITY, Severity.INFO, evidence, systemNote)
         }
         declaredWithGrant(cameraMicPermissions).takeIf { it.isNotEmpty() }?.let {
-            findings += RiskFinding(RiskId.CAMERA_MIC, Severity.INFO, it, systemNote)
+            findings +=
+                finding(RiskId.CAMERA_MIC, Severity.INFO, it + calls(Capability.CAMERA_MIC, libraries = true), systemNote)
         }
         declaredWithGrant(locationPermissions).takeIf { it.isNotEmpty() }?.let {
             val background = facts.has("android.permission.ACCESS_BACKGROUND_LOCATION")
             findings +=
-                RiskFinding(
+                finding(
                     RiskId.LOCATION,
                     if (background) severity(Severity.ATTENTION) else Severity.INFO,
-                    it,
+                    it + calls(Capability.LOCATION, libraries = true) + flowsFrom(Capability.LOCATION),
                     systemNote,
                 )
         }
@@ -242,7 +360,8 @@ object RiskRules {
                     .filter { it.kind == "service" && it.foregroundServiceType and MEDIA_PROJECTION_TYPE != 0 }
                     .map { component(it, " · mediaProjection") }
         if (capture.isNotEmpty())
-            findings += RiskFinding(RiskId.SCREEN_CAPTURE, severity(Severity.ATTENTION), capture, systemNote)
+            findings +=
+                finding(RiskId.SCREEN_CAPTURE, severity(Severity.ATTENTION), capture + calls(Capability.SCREEN_CAPTURE), systemNote)
         val persistence =
             facts.receiversFor(BOOT_COMPLETED).map { component(it, " · BOOT_COMPLETED") } +
                 declaredWithGrant(listOf("android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS")) +
@@ -254,10 +373,11 @@ object RiskRules {
                 RiskFinding(
                     RiskId.HIDDEN_ICON,
                     Severity.ATTENTION,
-                    untrusted.filter { it.stateKey == StateKey.NO_LAUNCHER },
+                    untrusted.filter { it.stateKey == StateKey.NO_LAUNCHER } + calls(Capability.HIDE_ICON),
                 )
         declaredWithGrant(listOf("android.permission.REQUEST_INSTALL_PACKAGES")).takeIf { it.isNotEmpty() }?.let {
-            findings += RiskFinding(RiskId.INSTALL_APPS, severity(Severity.ATTENTION), it, systemNote)
+            findings +=
+                finding(RiskId.INSTALL_APPS, severity(Severity.ATTENTION), it + calls(Capability.INSTALL_PACKAGE), systemNote)
         }
         declaredWithGrant(listOf("android.permission.MANAGE_EXTERNAL_STORAGE")).takeIf { it.isNotEmpty() }?.let {
             findings += RiskFinding(RiskId.ALL_FILES, severity(Severity.ATTENTION), it, systemNote)
@@ -272,6 +392,63 @@ object RiskRules {
         val signer = untrusted.filter { it.kind == EvidenceKind.CERTIFICATE }
         if (signer.isNotEmpty() && !system)
             findings += RiskFinding(RiskId.UNTRUSTED_SIGNER, Severity.ATTENTION, signer)
+        if (code != null) {
+            // Personal data sent to a hidden destination (bot, webhook): the clearest code evidence.
+            val alreadyCovered = findings.map { it.id }.toSet()
+            val theftSources =
+                personalSources.filterNot {
+                    (it == Capability.SMS_READ && RiskId.OTP_THEFT in alreadyCovered) ||
+                        (it == Capability.SCREEN_READ && RiskId.SCREEN_SPYING in alreadyCovered)
+                }
+            val theft = flowsFrom(*theftSources.toTypedArray(), sinks = Capability.hiddenDestinations)
+            if (theft.isNotEmpty() && !system)
+                findings += finding(RiskId.DATA_THEFT, Severity.STRONG, theft + hiddenDestinations + untrusted)
+            if (hiddenDestinations.isNotEmpty() || ipDestinations.isNotEmpty())
+                findings += finding(RiskId.HIDDEN_DESTINATION, severity(Severity.ATTENTION), hiddenDestinations + ipDestinations)
+            if (forwarding.isNotEmpty())
+                findings += finding(RiskId.CALL_FORWARDING, severity(Severity.ATTENTION), forwarding)
+            val dynamic =
+                calls(Capability.DYNAMIC_CODE, Capability.SHELL) +
+                    code.gaps
+                        .filter { it.kind == GapKind.HIDDEN_CODE || it.kind == GapKind.PACKER }
+                        .map { Evidence(EvidenceLevel.CODE, EvidenceKind.STRING, it.detail, it.kind.name) }
+            if (dynamic.isNotEmpty())
+                findings += finding(RiskId.DYNAMIC_CODE, severity(Severity.ATTENTION), dynamic, systemNote)
+            val clipboard = calls(Capability.CLIPBOARD) + flowsFrom(Capability.CLIPBOARD)
+            if (clipboard.isNotEmpty())
+                findings +=
+                    finding(
+                        RiskId.CLIPBOARD,
+                        if (clipboard.any { it.level == EvidenceLevel.FLOW }) severity(Severity.ATTENTION) else Severity.INFO,
+                        clipboard,
+                        systemNote,
+                    )
+            val cookies = calls(Capability.COOKIES)
+            if (cookies.isNotEmpty())
+                findings +=
+                    finding(
+                        RiskId.WEB_LOGIN,
+                        severity(Severity.ATTENTION),
+                        cookies + calls(Capability.JS_BRIDGE) + flowsFrom(Capability.COOKIES),
+                        systemNote,
+                    )
+            if (code.sdks.isNotEmpty())
+                findings +=
+                    RiskFinding(
+                        RiskId.AD_SDKS,
+                        Severity.INFO,
+                        code.sdks.map { Evidence(EvidenceLevel.CODE, EvidenceKind.SDK, it, "") },
+                    )
+            if (internet.isNotEmpty() && code.destinations.isNotEmpty())
+                findings +=
+                    RiskFinding(
+                        RiskId.DESTINATIONS,
+                        Severity.INFO,
+                        code.destinations.take(12).map {
+                            Evidence(EvidenceLevel.CODE, EvidenceKind.DESTINATION, "${it.host}|${it.cleartext}|${it.ipAddress}", "")
+                        },
+                    )
+        }
         device?.network?.let { usage ->
             findings +=
                 RiskFinding(
@@ -300,7 +477,7 @@ object RiskRules {
                 apks = facts.apks.size,
                 unreadable = facts.unreadable,
                 unresolvedConfigs = facts.unresolvedConfigs,
-                codeAnalyzed = false,
+                code = code?.let { CodeCoverage(it.dexFiles, it.classes, it.appClasses, it.gaps) },
                 deviceStateRead = device != null,
                 usageAccess = if (device == null) null else device.usageAccess,
             ),

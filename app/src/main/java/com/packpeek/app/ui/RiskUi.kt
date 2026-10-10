@@ -47,10 +47,50 @@ fun riskTexts(id: RiskId): Int =
         RiskId.CLEARTEXT -> R.array.risk_cleartext
         RiskId.NETWORK_USAGE -> R.array.risk_network_usage
         RiskId.UNTRUSTED_SIGNER -> R.array.risk_untrusted_signer
+        RiskId.DATA_THEFT -> R.array.risk_data_theft
+        RiskId.HIDDEN_DESTINATION -> R.array.risk_hidden_destination
+        RiskId.CALL_FORWARDING -> R.array.risk_call_forwarding
+        RiskId.DYNAMIC_CODE -> R.array.risk_dynamic_code
+        RiskId.CLIPBOARD -> R.array.risk_clipboard
+        RiskId.WEB_LOGIN -> R.array.risk_web_login
+        RiskId.AD_SDKS -> R.array.risk_ad_sdks
+        RiskId.DESTINATIONS -> R.array.risk_destinations
     }
 
 @Composable
-private fun severityColors(severity: Severity): Pair<Color, Color> {
+fun capabilityName(capability: Capability): String =
+    stringResource(
+        when (capability) {
+            Capability.SMS_READ -> R.string.cap_sms_read
+            Capability.CONTACTS -> R.string.cap_contacts
+            Capability.CALL_LOG -> R.string.cap_call_log
+            Capability.CLIPBOARD -> R.string.cap_clipboard
+            Capability.NOTIFICATION_READ -> R.string.cap_notification_read
+            Capability.SCREEN_READ -> R.string.cap_screen_read
+            Capability.COOKIES -> R.string.cap_cookies
+            Capability.PHONE_ID -> R.string.cap_phone_id
+            Capability.ACCOUNTS -> R.string.cap_accounts
+            Capability.LOCATION -> R.string.cap_location
+            Capability.SMS_SEND -> R.string.cap_sms_send
+            Capability.TELEGRAM -> R.string.cap_telegram
+            Capability.DISCORD -> R.string.cap_discord
+            else -> R.string.cap_network
+        }
+    )
+
+@Composable
+fun strengthText(level: EvidenceLevel): String =
+    stringResource(
+        when (level) {
+            EvidenceLevel.DECLARED -> R.string.strength_t1
+            EvidenceLevel.CODE -> R.string.strength_t2
+            EvidenceLevel.FLOW -> R.string.strength_t3
+            EvidenceLevel.OBSERVED -> R.string.strength_t4
+        }
+    )
+
+@Composable
+fun severityColors(severity: Severity): Pair<Color, Color> {
     val scheme = MaterialTheme.colorScheme
     return when (severity) {
         Severity.STRONG -> scheme.errorContainer to scheme.onErrorContainer
@@ -155,7 +195,7 @@ fun RiskSummary(report: RiskReport) {
 }
 
 @Composable
-fun FindingCard(finding: RiskFinding) {
+fun FindingCard(finding: RiskFinding, codeGaps: Boolean = false) {
     val texts = stringArrayResource(riskTexts(finding.id))
     var open by rememberSaveable(finding.id) { mutableStateOf(finding.severity == Severity.STRONG) }
     val (container, content) = severityColors(finding.severity)
@@ -189,6 +229,12 @@ fun FindingCard(finding: RiskFinding) {
             ) {
                 finding.levels.forEach { LevelTag(it) }
             }
+            if (finding.severity == Severity.STRONG)
+                Text(
+                    stringResource(R.string.evidence_strength, strengthText(finding.strongestLevel)),
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(top = 6.dp),
+                )
             if (!open)
                 Text(
                     texts[1],
@@ -210,7 +256,19 @@ fun FindingCard(finding: RiskFinding) {
                         }
                     )
                 }
-                Part(stringResource(R.string.risk_unproven)) { Body(texts[3]) }
+                Part(stringResource(R.string.risk_unproven)) {
+                    Body(
+                        when (finding.code) {
+                            null,
+                            CodeState.NOT_ANALYZED -> texts[3]
+                            CodeState.FLOW -> stringResource(R.string.unproven_flow)
+                            CodeState.CALLS -> stringResource(R.string.unproven_calls)
+                            CodeState.NOT_FOUND -> stringResource(R.string.unproven_none)
+                        }
+                    )
+                    if (codeGaps && finding.code != null && finding.code != CodeState.NOT_ANALYZED)
+                        Body(stringResource(R.string.unproven_gaps))
+                }
                 Part(stringResource(R.string.risk_action)) { Body(texts[4]) }
             }
         }
@@ -255,9 +313,19 @@ private fun EvidenceLine(e: Evidence) {
         )
         Column {
             Text(evidenceText(e), style = MaterialTheme.typography.bodyMedium)
-            if (e.location.isNotBlank())
+            val origin =
+                when {
+                    e.kind !in listOf(EvidenceKind.CODE, EvidenceKind.STRING, EvidenceKind.FLOW) -> null
+                    e.library != null -> stringResource(R.string.ev_origin_library, e.library)
+                    e.location.isNotBlank() -> stringResource(R.string.ev_origin_app)
+                    else -> null
+                }
+            val where =
+                if (e.kind == EvidenceKind.STRING && e.location in GapKind.entries.map { it.name }) ""
+                else listOfNotNull(e.location.takeIf { it.isNotBlank() }, origin).joinToString(" · ")
+            if (where.isNotBlank())
                 Text(
-                    e.location,
+                    where,
                     style = MaterialTheme.typography.bodySmall,
                     color = LocalContentColor.current.copy(alpha = 0.7f),
                 )
@@ -303,6 +371,29 @@ fun evidenceText(e: Evidence): String =
                         sizeText(parts.getOrElse(1) { 0 }),
                     )
                 }
+                EvidenceKind.CODE -> stringResource(R.string.ev_code_call, e.detail)
+                EvidenceKind.STRING ->
+                    when (e.location) {
+                        GapKind.HIDDEN_CODE.name -> stringResource(R.string.ev_hidden_code, e.detail)
+                        GapKind.PACKER.name -> stringResource(R.string.ev_packer, e.detail)
+                        else -> stringResource(R.string.ev_code_string, e.detail)
+                    }
+                EvidenceKind.FLOW -> {
+                    val parts = e.detail.split('|')
+                    val (source, sink) =
+                        parts[0].split('>').map { runCatching { Capability.valueOf(it) }.getOrDefault(Capability.NETWORK) }
+                    stringResource(R.string.ev_flow, capabilityName(source), capabilityName(sink)) +
+                        if (parts.size >= 3) "\n${parts[1]} → ${parts[2]}" else ""
+                }
+                EvidenceKind.DESTINATION -> {
+                    val parts = e.detail.split('|')
+                    val host = parts[0]
+                    when {
+                        parts.getOrNull(2) == "true" -> stringResource(R.string.ev_destination_ip, host)
+                        parts.getOrNull(1) == "true" -> stringResource(R.string.ev_destination_cleartext, host)
+                        else -> stringResource(R.string.ev_destination, host)
+                    }
+                }
                 else -> e.detail
             }
     }
@@ -325,7 +416,23 @@ fun CoverageCard(coverage: Coverage, onGrantUsage: () -> Unit) {
                         coverage.unresolvedConfigs,
                     ),
                 )
-            CoverageLine(coverage.codeAnalyzed, stringResource(R.string.coverage_no_code))
+            val code = coverage.code
+            if (code == null) CoverageLine(false, stringResource(R.string.coverage_code_failed))
+            else {
+                CoverageLine(true, stringResource(R.string.coverage_code, code.dexFiles, code.classes, code.appClasses))
+                code.gaps.distinctBy { it.kind to (if (it.kind == GapKind.LIMIT) "" else it.detail) }.take(6).forEach { gap ->
+                    CoverageLine(
+                        false,
+                        when (gap.kind) {
+                            GapKind.HIDDEN_CODE -> stringResource(R.string.coverage_gap_hidden, gap.detail.substringAfter('!'))
+                            GapKind.PACKER -> stringResource(R.string.coverage_gap_packer, gap.detail)
+                            GapKind.CROSS_PLATFORM -> stringResource(R.string.coverage_gap_cross, gap.detail)
+                            GapKind.UNREADABLE -> stringResource(R.string.coverage_gap_unreadable, gap.detail)
+                            GapKind.LIMIT -> stringResource(R.string.coverage_gap_limit)
+                        },
+                    )
+                }
+            }
             CoverageLine(
                 coverage.deviceStateRead,
                 stringResource(if (coverage.deviceStateRead) R.string.coverage_device else R.string.coverage_file),

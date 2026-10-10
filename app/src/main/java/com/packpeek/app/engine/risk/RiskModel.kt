@@ -21,7 +21,27 @@ enum class Severity {
     INFO,
 }
 
-enum class EvidenceKind { PERMISSION, COMPONENT, CONFIG, FLAG, CERTIFICATE, SOURCE, LABEL, STATE, NETWORK }
+enum class EvidenceKind {
+    PERMISSION,
+    COMPONENT,
+    CONFIG,
+    FLAG,
+    CERTIFICATE,
+    SOURCE,
+    LABEL,
+    STATE,
+    NETWORK,
+    /** A call in DEX code; detail is the API, location the calling method. */
+    CODE,
+    /** A text constant in DEX code, e.g. a Telegram bot URL. */
+    STRING,
+    /** A read-then-send path; detail is "SOURCE>SINK|sourceApi|sinkApi". */
+    FLOW,
+    /** A known advertising or analytics SDK. */
+    SDK,
+    /** A host the app's code connects to; detail is "host|cleartext|ip". */
+    DESTINATION,
+}
 
 /** Device facts with translated wording in the UI. */
 enum class StateKey {
@@ -52,6 +72,8 @@ data class Evidence(
     val detail: String,
     val location: String,
     val stateKey: StateKey? = null,
+    /** For code evidence: the known library it sits in, or null for the app's own code. */
+    val library: String? = null,
 )
 
 enum class RiskId {
@@ -75,6 +97,26 @@ enum class RiskId {
     CLEARTEXT,
     NETWORK_USAGE,
     UNTRUSTED_SIGNER,
+    DATA_THEFT,
+    HIDDEN_DESTINATION,
+    CALL_FORWARDING,
+    DYNAMIC_CODE,
+    CLIPBOARD,
+    WEB_LOGIN,
+    AD_SDKS,
+    DESTINATIONS,
+}
+
+/** What the code analysis says about a finding, for the "not yet proven" text. */
+enum class CodeState {
+    /** Code was not analysed (phase 1 or analysis failed). */
+    NOT_ANALYZED,
+    /** Code was analysed; the app's own code makes none of the calls this needs. */
+    NOT_FOUND,
+    /** The calls exist (T2) but no read-then-send path was found. */
+    CALLS,
+    /** A read-then-send path was found (T3). */
+    FLOW,
 }
 
 /** Why a capability is expected here, shown instead of the generic context. */
@@ -87,6 +129,8 @@ data class RiskFinding(
     val note: ContextNote = ContextNote.NONE,
     /** Extra number for the text, e.g. background bytes for [RiskId.NETWORK_USAGE]. */
     val amount: Long = 0,
+    /** Set for findings the code analysis can confirm; null when code says nothing about it. */
+    val code: CodeState? = null,
 ) {
     val strongestLevel
         get() = evidence.maxOf { it.level }
@@ -100,13 +144,18 @@ data class Coverage(
     val apks: Int,
     val unreadable: List<String>,
     val unresolvedConfigs: Int,
-    /** DEX code is analysed from phase 2 on. */
-    val codeAnalyzed: Boolean,
+    /** DEX analysis summary; null when code was not analysed. */
+    val code: CodeCoverage?,
     /** Device state is only available for installed apps. */
     val deviceStateRead: Boolean,
     /** null when not applicable (files); false when usage access was not granted. */
     val usageAccess: Boolean?,
 )
+
+data class CodeCoverage(val dexFiles: Int, val classes: Int, val appClasses: Int, val gaps: List<CodeGap>)
+
+val Coverage.codeAnalyzed
+    get() = code != null
 
 data class RiskReport(val findings: List<RiskFinding>, val coverage: Coverage) {
     fun count(severity: Severity) = findings.count { it.severity == severity }

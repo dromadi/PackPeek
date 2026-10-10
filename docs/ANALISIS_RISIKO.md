@@ -6,7 +6,14 @@
 
 Dokumen ini adalah rencana yang sudah disetujui pemilik: model T1–T4, skor diganti daftar kekhawatiran, pilihan B (Akses penggunaan), dan sampel `undangan-sim`.
 
-**Status:** tahap 1 selesai di 2.0.0-alpha.5. Tahap 2 (DEX) adalah langkah berikutnya.
+**Status:**
+- Tahap 1 selesai di 2.0.0-alpha.5.
+- Tahap 2 (DEX, bukti T2) dan tahap 3 (indikasi jalur data, T3) selesai di 2.0.0-alpha.8.
+- Tahap 4 (perilaku saat berjalan) tetap terbatas pada bukti kondisi perangkat (T4).
+
+**Catatan uji salah tuduh (alpha.8, emulator):**
+- **API Demos** (sampel Google berisi demo SMS, aksesibilitas, overlay, dan admin) sempat diberi indikator kuat karena dipasang lewat adb. Kini cukup "perlu perhatian", karena kodenya terbaca penuh dan tidak ada jalur kirim.
+- **PackPeek sendiri** sempat dianggap mengirim ke bot Telegram, karena daftar tanda pengenalnya berisi teks `api.telegram.org`. Kini teks hanya dihitung bila ada pemanggilan jaringan atau query.
 
 ## 1. Kondisi saat ini (2.0.0-alpha.4)
 

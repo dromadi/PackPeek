@@ -21,7 +21,7 @@ class PackPeekApp : Application() {
     val apps by lazy { AppRepository(this) }
     val audit by lazy { AuditEngine(apps) }
     val deviceState by lazy { DeviceStateReader(this, apps) }
-    val risk by lazy { RiskEngine(deviceState) }
+    val risk by lazy { RiskEngine(deviceState, apps) }
 
     val crashFile
         get() = File(filesDir, "last_crash.txt")
