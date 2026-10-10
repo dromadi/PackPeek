@@ -67,6 +67,11 @@ data class CodeFlow(
     val sinkApi: String,
     /** Public IP literal in the sending code's class, when the data goes to a bare address. */
     val ipHost: String? = null,
+    /**
+     * True when the value read from the source was followed through registers, fields and app
+     * calls into the sending call's arguments. False: reading and sending only share a code path.
+     */
+    val traced: Boolean = false,
 )
 
 /** A host found in a URL string in the app's own code. */

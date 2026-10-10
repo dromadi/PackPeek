@@ -41,7 +41,7 @@ class EvidenceReportTest {
         val res = ApplicationProvider.getApplicationContext<Application>().resources
         val text = EvidenceReport.text(res, app, report, code, HashLookup.NotFound)
         assertTrue(text.contains("SHA-256: ${code.deep!!.sha256}"))
-        assertTrue(text.contains("T3 Reads SMS and sends it to a Telegram bot"))
+        assertTrue(text, text.contains("T3 Value of SMS traced into the call that sends to a Telegram bot"))
         assertTrue(text.contains("OtpReceiver"))
         assertTrue(text.contains("Decoded with XOR key 0x2a"))
         assertTrue(text.contains("assets/payload.bin"))

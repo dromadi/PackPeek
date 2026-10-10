@@ -6,7 +6,7 @@
     <string name="deep_failed">Analisis mendalam tidak bisa membaca kode aplikasi ini.</string>
     <string name="deep_done">Selesai dalam %1$d detik · %2$d jejak data · %3$d teks tersamar · %4$d berkas kode tersembunyi</string>
     <string name="section_chains">Jejak data</string>
-    <string name="chains_note">Bagaimana data berpindah dari tempat kode membacanya ke tempat kode mengirimnya, ditelusuri hingga tiga tingkat pemanggilan, termasuk perpindahan ke komponen lain.</string>
+    <string name="chains_note">Jalur kode dari tempat kode membaca data ke tempat kode mengirim, ditelusuri hingga tiga tingkat pemanggilan, termasuk perpindahan ke komponen lain. Jalur ini menunjukkan bahwa membaca dan mengirim terhubung di kode, bukan bahwa nilai yang sama yang dikirim.</string>
     <string name="chains_none">Tidak ditemukan jalur dari data pribadi ke pengiriman, bahkan sampai tiga tingkat.</string>
     <string name="chain_read">Membaca dengan %1$s</string>
     <string name="chain_send">Mengirim dengan %1$s</string>
@@ -74,7 +74,7 @@
     <string name="report_from_file">Diperiksa sebagai berkas APK; belum terpasang</string>
     <string name="report_installed">Terpasang · sumber: %1$s</string>
     <string name="report_counts">%1$d indikator kuat · %2$d perlu perhatian · %3$d informasi</string>
-    <string name="report_disclaimer">Hasil ini tidak membuktikan bahwa aplikasi berbahaya atau aman. Tingkat bukti: T1 tertulis di manifest, T2 ditemukan di kode, T3 jalur kode yang membaca data lalu mengirimnya, T4 teramati di perangkat ini.</string>
+    <string name="report_disclaimer">Hasil ini tidak membuktikan bahwa aplikasi berbahaya atau aman. Tingkat bukti: T1 tertulis di manifest, T2 ditemukan di kode, T3 membaca dan mengirim di satu jalur kode (ditandai bila nilainya sendiri berhasil dilacak), T4 teramati di perangkat ini.</string>
     <string name="report_findings">Temuan</string>
     <string name="report_deep">Analisis mendalam</string>
     <string name="report_lookup">VirusTotal</string>

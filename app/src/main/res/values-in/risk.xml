@@ -161,9 +161,9 @@
     <string name="risk_action">Tindakan yang disarankan</string>
     <string name="level_declared">T1 Dideklarasikan</string>
     <string name="level_code">T2 Dalam kode</string>
-    <string name="level_flow">T3 Aliran data</string>
+    <string name="level_flow">T3 Jalur kode</string>
     <string name="level_observed">T4 Teramati</string>
-    <string name="levels_explained">T1: tertulis di manifest. T2: fungsi ditemukan dalam kode. T3: aliran data terindikasi. T4: teramati di perangkat ini.</string>
+    <string name="levels_explained">T1: tertulis di manifest. T2: fungsi ditemukan dalam kode. T3: membaca dan mengirim di satu jalur kode; ditandai bila nilainya sendiri berhasil dilacak. T4: teramati di perangkat ini.</string>
 
     <string name="ev_permission">Meminta izin %1$s</string>
     <string name="ev_component">Komponen %1$s</string>
@@ -285,7 +285,7 @@
     <string name="cap_discord">webhook Discord</string>
     <string name="ev_code_call">Memanggil %1$s</string>
     <string name="ev_code_string">Berisi teks %1$s</string>
-    <string name="ev_flow">Membaca %1$s lalu mengirimnya ke %2$s</string>
+    <string name="ev_flow">Membaca %1$s dan mengirim ke %2$s di jalur kode yang sama (nilainya belum dilacak)</string>
     <string name="ev_destination">Terhubung ke %1$s</string>
     <string name="ev_destination_cleartext">%1$s (http tanpa enkripsi)</string>
     <string name="ev_destination_ip">%1$s (alamat IP, tanpa nama domain)</string>
@@ -293,14 +293,14 @@
     <string name="ev_origin_library">library: %1$s</string>
     <string name="ev_hidden_code">Berkas kode tersembunyi: %1$s</string>
     <string name="ev_packer">Packer kode: %1$s</string>
-    <string name="unproven_flow">Ada jalur kode yang membaca data ini lalu mengirimnya ke luar (T3). Tetap belum terbukti jalur itu pernah berjalan di HP-mu; hanya pengamatan saat aplikasi berjalan yang bisa menunjukkannya.</string>
+    <string name="unproven_flow">Nilai yang dibaca dari data ini dilacak sampai ke panggilan yang mengirimnya ke luar (T3). Tetap belum terbukti jalur itu pernah berjalan di HP-mu; hanya pengamatan saat aplikasi berjalan yang bisa menunjukkannya.</string>
     <string name="unproven_calls">Kode memanggil fungsi yang dibutuhkan (T2), tetapi tidak ditemukan jalur yang mengirim data itu ke luar. Kode yang tidak pernah dijalankan, atau kode yang dimuat belakangan, tidak bisa dikesampingkan.</string>
     <string name="unproven_none">Kode aplikasi sendiri sudah diperiksa dan tidak memanggil fungsi yang dibutuhkan. Library atau kode yang dimuat belakangan masih mungkin memakainya.</string>
     <string name="unproven_gaps">Sebagian aplikasi tidak bisa dianalisis (lihat Cakupan pemeriksaan), jadi hasil kode mungkin belum lengkap.</string>
     <string name="evidence_strength">Bukti terkuat: %1$s</string>
     <string name="strength_t1">hanya tertulis di manifest</string>
     <string name="strength_t2">kode memanggil fungsi tersebut</string>
-    <string name="strength_t3">ada jalur kode yang membaca data lalu mengirimnya</string>
+    <string name="strength_t3">membaca dan mengirim di satu jalur kode</string>
     <string name="strength_t4">teramati di perangkat ini</string>
     <string name="coverage_code">Kode (DEX) dianalisis: %1$d berkas DEX, %2$d kelas, %3$d di kode aplikasi sendiri</string>
     <string name="coverage_code_failed">Kode aplikasi (DEX) tidak bisa dianalisis</string>
@@ -309,4 +309,6 @@
     <string name="coverage_gap_cross">Logika %1$s berjalan di luar DEX dan tidak dianalisis</string>
     <string name="coverage_gap_unreadable">Kode di %1$s tidak bisa dibaca</string>
     <string name="coverage_gap_limit">Analisis kode berhenti di batas waktu atau ukuran; hasilnya sebagian</string>
+    <string name="ev_flow_traced">Nilai %1$s dilacak sampai ke panggilan yang mengirim ke %2$s</string>
+    <string name="unproven_flow_untraced">Membaca data ini dan mengirim terjadi di jalur kode yang sama (T3), tetapi nilai yang dibaca belum terlacak sampai ke yang dikirim, jadi keduanya bisa saja tidak berhubungan. Hanya pengamatan saat aplikasi berjalan yang bisa menunjukkan apa yang dikirim.</string>
 </resources>

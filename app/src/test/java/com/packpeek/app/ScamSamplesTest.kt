@@ -69,4 +69,33 @@ class ScamSamplesTest {
         assertTrue(code.flows.none { it.source == Capability.CLIPBOARD })
         assertTrue(analyse("control-overload", "Penghitung").findings.none { it.severity == Severity.STRONG })
     }
+
+    /** Reading a cookie and sending in one method is a shared path, not a traced value. */
+    @Test
+    fun sharedPathIsNotATracedFlow() {
+        val apk = File(requireNotNull(javaClass.getResource("/samples/control-unlinked.apk")).toURI())
+        val flow = DexScanner.scan(listOf(apk)).flows.single { it.source == Capability.COOKIES }
+        assertFalse(flow.traced)
+        val report = analyse("control-unlinked", "Info Cuaca", source = "PLAY")
+        val cookies = report.findings.firstOrNull { it.evidence.any { e -> e.kind == EvidenceKind.FLOW } }
+        assertTrue(cookies == null || cookies.evidence.none(RiskRules::isTraced))
+        assertTrue(report.findings.none { it.severity == Severity.STRONG })
+    }
+
+    /** Values followed through calls, builders and fields into the sending call. */
+    @Test
+    fun valuesAreTracedIntoTheSend() {
+        fun traced(name: String) =
+            DexScanner.scan(listOf(File(requireNotNull(javaClass.getResource("/samples/$name.apk")).toURI())))
+                .flows.filter { it.traced }.map { it.source }.toSet()
+        assertEquals(
+            setOf(Capability.CONTACTS, Capability.CALL_LOG, Capability.PHONE_ID, Capability.LOCATION),
+            traced("spyware-exfil"),
+        )
+        assertTrue(Capability.NOTIFICATION_READ in traced("notif-webhook"))
+        assertTrue(Capability.SCREEN_READ in traced("bank-overlay"))
+        assertTrue(Capability.CLIPBOARD in traced("clipboard-swap"))
+        val strong = analyse("spyware-exfil", "Cleaner Pro").findings.single { it.id == RiskId.DATA_THEFT }
+        assertTrue(strong.evidence.any(RiskRules::isTraced))
+    }
 }

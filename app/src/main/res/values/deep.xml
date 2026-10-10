@@ -7,7 +7,7 @@
     <string name="deep_failed">The deep analysis could not read this app\'s code.</string>
     <string name="deep_done">Finished in %1$d s · %2$d data paths · %3$d hidden texts · %4$d hidden code files</string>
     <string name="section_chains">Data paths</string>
-    <string name="chains_note">How data moves from where the code reads it to where it sends it, followed up to three calls deep, including handovers to other components.</string>
+    <string name="chains_note">Code paths from where the code reads data to where it sends, followed up to three calls deep, including handovers to other components. A path shows that reading and sending are connected in the code, not that the same value is sent.</string>
     <string name="chains_none">No path from personal data to sending was found, even three calls deep.</string>
     <string name="chain_read">Reads with %1$s</string>
     <string name="chain_send">Sends with %1$s</string>
@@ -75,7 +75,7 @@
     <string name="report_from_file">Checked as an APK file; not installed</string>
     <string name="report_installed">Installed · source: %1$s</string>
     <string name="report_counts">%1$d strong indicators · %2$d need attention · %3$d notes</string>
-    <string name="report_disclaimer">These results do not prove that an app is harmful or safe. Evidence levels: T1 written in the manifest, T2 found in the code, T3 a code path that reads data and sends it, T4 observed on this device.</string>
+    <string name="report_disclaimer">These results do not prove that an app is harmful or safe. Evidence levels: T1 written in the manifest, T2 found in the code, T3 reading and sending in one code path (marked when the value itself was traced), T4 observed on this device.</string>
     <string name="report_findings">Findings</string>
     <string name="report_deep">Deep analysis</string>
     <string name="report_lookup">VirusTotal</string>

@@ -8,6 +8,12 @@ import java.util.Locale
  * the combined patterns ([RiskId.OTP_THEFT], [RiskId.SCREEN_SPYING]) do.
  */
 object RiskRules {
+    /** Flow evidence: "SOURCE>SINK|source api|sink api|v" where v marks a traced value. */
+    fun flowDetail(flow: CodeFlow) =
+        "${flow.source}>${flow.sink}|${flow.sourceApi}|${flow.sinkApi}|${if (flow.traced) "v" else "p"}"
+
+    fun isTraced(e: Evidence) = e.kind == EvidenceKind.FLOW && e.detail.endsWith("|v")
+
     const val INTERNET = "android.permission.INTERNET"
     const val SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED"
     const val SMS_DELIVER = "android.provider.Telephony.SMS_DELIVER"
@@ -136,7 +142,7 @@ object RiskRules {
                     Evidence(
                         EvidenceLevel.FLOW,
                         EvidenceKind.FLOW,
-                        "${it.source}>${it.sink}|${it.sourceApi}|${it.sinkApi}",
+                        flowDetail(it),
                         it.method,
                     )
                 }
@@ -408,7 +414,7 @@ object RiskRules {
             // some legitimate apps do talk to raw IPs.
             val ipFlows = code.flows.filter { it.source in theftSources && it.sink == Capability.NETWORK && it.ipHost != null }
             val ipExfil = ipFlows.map {
-                Evidence(EvidenceLevel.FLOW, EvidenceKind.FLOW, "${it.source}>${it.sink}|${it.sourceApi}|${it.sinkApi}", it.method)
+                Evidence(EvidenceLevel.FLOW, EvidenceKind.FLOW, flowDetail(it), it.method)
             }
             val ipUsed = ipDestinations.filter { e -> ipFlows.any { e.detail.startsWith("${it.ipHost}|") } }
             if (!system && (theftHidden.isNotEmpty() || (ipExfil.isNotEmpty() && untrusted.isNotEmpty())))

@@ -170,9 +170,9 @@
     <string name="risk_action">Suggested action</string>
     <string name="level_declared">T1 Declared</string>
     <string name="level_code">T2 In code</string>
-    <string name="level_flow">T3 Data flow</string>
+    <string name="level_flow">T3 Code path</string>
     <string name="level_observed">T4 Observed</string>
-    <string name="levels_explained">T1: written in the manifest. T2: function found in code. T3: data flow indicated. T4: observed on this device.</string>
+    <string name="levels_explained">T1: written in the manifest. T2: function found in code. T3: reading and sending in one code path; marked when the value itself was traced. T4: observed on this device.</string>
 
     <string name="ev_permission">Requests %1$s</string>
     <string name="ev_component">Component %1$s</string>
@@ -300,7 +300,7 @@
     <string name="cap_discord">a Discord webhook</string>
     <string name="ev_code_call">Calls %1$s</string>
     <string name="ev_code_string">Contains the text %1$s</string>
-    <string name="ev_flow">Reads %1$s and sends it to %2$s</string>
+    <string name="ev_flow">Reads %1$s and sends to %2$s in the same code path (the value was not traced)</string>
     <string name="ev_destination">Connects to %1$s</string>
     <string name="ev_destination_cleartext">%1$s (unencrypted http)</string>
     <string name="ev_destination_ip">%1$s (IP address, no domain name)</string>
@@ -308,14 +308,14 @@
     <string name="ev_origin_library">library: %1$s</string>
     <string name="ev_hidden_code">Hidden code file: %1$s</string>
     <string name="ev_packer">Code packer: %1$s</string>
-    <string name="unproven_flow">A code path reads this data and sends it out (T3). It is still not proven that this path has run on your device; only watching the app while it runs could show that.</string>
+    <string name="unproven_flow">The value read from this data was traced into a call that sends it out (T3). It is still not proven that this path has run on your device; only watching the app while it runs could show that.</string>
     <string name="unproven_calls">The code calls the functions this needs (T2), but no path that sends the data out was found. Code that never runs, or code loaded later, cannot be ruled out.</string>
     <string name="unproven_none">The app\'s own code was checked and does not call the functions this needs. Libraries or code loaded later could still use it.</string>
     <string name="unproven_gaps">Parts of the app could not be analysed (see Check coverage), so the code result may be incomplete.</string>
     <string name="evidence_strength">Strongest evidence: %1$s</string>
     <string name="strength_t1">written in the manifest only</string>
     <string name="strength_t2">the code makes these calls</string>
-    <string name="strength_t3">a code path reads data and sends it out</string>
+    <string name="strength_t3">reading and sending in one code path</string>
     <string name="strength_t4">observed on this device</string>
     <string name="coverage_code">Code (DEX) analysed: %1$d DEX files, %2$d classes, %3$d in the app\'s own code</string>
     <string name="coverage_code_failed">App code (DEX) could not be analysed</string>
@@ -324,4 +324,6 @@
     <string name="coverage_gap_cross">%1$s logic runs outside DEX and is not analysed</string>
     <string name="coverage_gap_unreadable">Could not read code in %1$s</string>
     <string name="coverage_gap_limit">Code analysis stopped at its time or size limit; results are partial</string>
+    <string name="ev_flow_traced">Value of %1$s traced into the call that sends to %2$s</string>
+    <string name="unproven_flow_untraced">Reading this data and sending happen in the same code path (T3), but the value read was not traced into what is sent, so the two may be unrelated. Only watching the app while it runs could show what is sent.</string>
 </resources>

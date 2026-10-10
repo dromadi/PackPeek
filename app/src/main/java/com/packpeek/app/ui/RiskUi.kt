@@ -269,7 +269,11 @@ fun FindingCard(finding: RiskFinding, codeGaps: Boolean = false) {
                         when (finding.code) {
                             null,
                             CodeState.NOT_ANALYZED -> texts[3]
-                            CodeState.FLOW -> stringResource(R.string.unproven_flow)
+                            CodeState.FLOW ->
+                                stringResource(
+                                    if (finding.evidence.any(RiskRules::isTraced)) R.string.unproven_flow
+                                    else R.string.unproven_flow_untraced
+                                )
                             CodeState.CALLS -> stringResource(R.string.unproven_calls)
                             CodeState.NOT_FOUND -> stringResource(R.string.unproven_none)
                         }
@@ -389,8 +393,11 @@ fun evidenceText(res: Resources, e: Evidence): String =
                     val parts = e.detail.split('|')
                     val (source, sink) =
                         parts[0].split('>').map { runCatching { Capability.valueOf(it) }.getOrDefault(Capability.NETWORK) }
-                    res.getString(R.string.ev_flow, capabilityName(res, source), capabilityName(res, sink)) +
-                        if (parts.size >= 3) "\n${parts[1]} → ${parts[2]}" else ""
+                    res.getString(
+                        if (parts.getOrNull(3) == "v") R.string.ev_flow_traced else R.string.ev_flow,
+                        capabilityName(res, source),
+                        capabilityName(res, sink),
+                    ) + if (parts.size >= 3) "\n${parts[1]} → ${parts[2]}" else ""
                 }
                 EvidenceKind.DESTINATION -> {
                     val parts = e.detail.split('|')

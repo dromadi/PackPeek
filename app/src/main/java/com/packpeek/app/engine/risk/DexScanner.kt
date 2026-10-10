@@ -335,6 +335,17 @@ object DexScanner {
         val constClasses = HashSet<String>()
         var launches = false
         val listing = ArrayList<String>()
+        /** Value tracking: per sink bit, the source bits whose values reach that call's arguments. */
+        val traced = HashMap<Int, Int>()
+        /** Sinks reached by the method's own parameters. */
+        var paramSinks = 0
+        /** Sources whose values the method returns, and app methods whose results it returns. */
+        var returnSources = 0
+        val returnCallees = HashSet<String>()
+        /** Calls to app methods: callee, source bits of the arguments, whether a parameter is passed. */
+        val calls = ArrayList<TaintCall>()
+        /** Per sink bit, app methods whose results reach that sink here. */
+        val sinkCallees = HashMap<Int, MutableSet<String>>()
 
         fun merge(other: MethodInfo) {
             sources = sources or other.sources
@@ -347,8 +358,20 @@ object DexScanner {
             constClasses += other.constClasses
             launches = launches || other.launches
             if (listing.isEmpty()) listing += other.listing
+            other.traced.forEach { (k, v) -> traced[k] = (traced[k] ?: 0) or v }
+            paramSinks = paramSinks or other.paramSinks
+            returnSources = returnSources or other.returnSources
+            returnCallees += other.returnCallees
+            calls += other.calls
+            other.sinkCallees.forEach { (k, v) -> sinkCallees.getOrPut(k) { HashSet() } += v }
         }
     }
+
+    /** An app-method call seen by value tracking; [results] are callees whose results are passed. */
+    private class TaintCall(val callee: String, val sources: Int, val param: Boolean, val results: Set<String>)
+
+    /** Value-tracking label for "comes from a parameter"; capability bits use the low bits. */
+    private const val PARAM = 1 shl 30
 
     private class State(val deadline: Long, val deep: Boolean = false) {
         val decoded = mutableListOf<DecodedText>()
@@ -364,6 +387,8 @@ object DexScanner {
         val classMethods = HashMap<String, MutableList<String>>()
         val names = HashMap<String, String>()
         val destinations = LinkedHashMap<String, Destination>()
+        /** Value tracking through fields: source bits stored into each field so far. */
+        val fieldTaint = HashMap<String, Int>()
         /** App classes (descriptors) that contain a public IP literal, with the first one found. */
         val classIps = HashMap<String, String>()
         /**
@@ -616,6 +641,8 @@ object DexScanner {
         return out.copyOf(n)
     }
 
+    private val sourceBits = Capability.entries.filter { it.source }.fold(0) { acc, c -> acc or c.bit }
+
     private fun methodName(key: String) = key.substringAfter("->").substringBefore('(')
 
     private fun isConstructor(key: String) = methodName(key) == "<init>"
@@ -634,6 +661,8 @@ object DexScanner {
                     if (members.size <= CONSTRUCTOR_EXPANSION_LIMIT) members else listOf(key)
                 } else listOf(key)
             }
+        val traced = tracedFlows(state)
+        val candidates = ArrayList<CodeFlow>()
         for ((key, info) in state.methods) {
             val reachKeys = (calleeKeys(info) + key).filter { it in state.methods }
             val reach = reachKeys.map { state.methods.getValue(it) }
@@ -653,11 +682,16 @@ object DexScanner {
             val sources = all.sources or (if (queries) all.stringSources else 0)
             val sinks = all.sinks or (if (network) all.stringSinks else 0)
             if (sources == 0 || sinks == 0) continue
+            val here = traced[key].orEmpty()
             for (source in Capability.entries.filter { it.source && sources and it.bit != 0 })
                 for (sink in Capability.entries.filter { it.sink && sinks and it.bit != 0 }) {
-                    val id = "$source>$sink"
-                    if (result.keys.count { it.startsWith(id) } >= 2 || result.size >= MAX_FLOWS) continue
-                    result["$id|$key"] =
+                    if (candidates.size >= MAX_FLOWS * 20) break
+                    // Traced: the value read from the source reaches the sending call's arguments.
+                    // A bot address in the same path makes a traced network send a traced bot send.
+                    val valueTraced =
+                        (here[sink.bit] ?: 0) and source.bit != 0 ||
+                            (sink in Capability.hiddenDestinations && (here[NETWORK.bit] ?: 0) and source.bit != 0)
+                    candidates +=
                         CodeFlow(
                             source,
                             sink,
@@ -665,11 +699,66 @@ object DexScanner {
                             reach.firstNotNullOf { it.apis[source] },
                             reach.firstNotNullOf { it.apis[sink] },
                             ipHost.takeIf { sink == NETWORK },
+                            valueTraced,
                         )
                 }
         }
+        // Traced paths first, then a few per kind.
+        for (flow in candidates.sortedBy { if (it.traced) 0 else 1 }) {
+            val id = "${flow.source}>${flow.sink}"
+            if (result.keys.count { it.startsWith("$id|") } >= 2 || result.size >= MAX_FLOWS) continue
+            result["$id|${flow.method}|${result.size}"] = flow
+        }
         // Hidden destinations first: they are the strongest sign.
         return result.values.sortedBy { if (it.sink in Capability.hiddenDestinations) 0 else 1 } to Classes(sending, querying)
+    }
+
+    /**
+     * Per method, sink bit -> source bits whose values are traced into that sink: in the method
+     * itself, through app methods it passes them to (whose parameters reach a sink), and through
+     * app methods whose results (holding source values) it sends.
+     */
+    private fun tracedFlows(state: State): Map<String, Map<Int, Int>> {
+        val returns = HashMap<String, Int>()
+        val paramSinks = HashMap<String, Int>()
+        state.methods.forEach { (k, m) ->
+            returns[k] = m.returnSources
+            paramSinks[k] = m.paramSinks
+        }
+        // A few rounds of propagation through callers cover chains of helpers.
+        repeat(6) {
+            var changed = false
+            state.methods.forEach { (k, m) ->
+                var r = returns.getValue(k)
+                m.returnCallees.forEach { r = r or (returns[it] ?: 0) }
+                var p = paramSinks.getValue(k)
+                m.calls.forEach { if (it.param) p = p or (paramSinks[it.callee] ?: 0) }
+                if (r != returns[k] || p != paramSinks[k]) changed = true
+                returns[k] = r
+                paramSinks[k] = p
+            }
+            if (!changed) return@repeat
+        }
+        val out = HashMap<String, Map<Int, Int>>()
+        state.methods.forEach { (k, m) ->
+            val map = HashMap(m.traced)
+            fun add(sinkBits: Int, sources: Int) {
+                if (sources == 0) return
+                for (c in Capability.entries) if (c.sink && sinkBits and c.bit != 0) map[c.bit] = (map[c.bit] ?: 0) or sources
+            }
+            m.calls.forEach { call ->
+                var sources = call.sources
+                call.results.forEach { sources = sources or (returns[it] ?: 0) }
+                add(paramSinks[call.callee] ?: 0, sources)
+            }
+            m.sinkCallees.forEach { (sinkBit, callees) ->
+                var sources = 0
+                callees.forEach { sources = sources or (returns[it] ?: 0) }
+                add(sinkBit, sources)
+            }
+            if (map.isNotEmpty()) out[k] = map
+        }
+        return out
     }
 
     /**
@@ -892,6 +981,26 @@ object DexScanner {
                 out.append(')').append(returns).toString()
             }
 
+        fun fieldKey(f: Int): String {
+            val p = fieldIdsOff + 8 * f
+            return type(u16(p)) + "->" + string(b.getInt(p + 4))
+        }
+
+        /** Source bits of a field: a source field itself, or values stored into it earlier. */
+        fun fieldBits(f: Int): Int {
+            if (f >= fieldCount) return 0
+            val rule = fieldRule.getOrNull(f)
+            val own = if (rule != null && rule.capability.source) rule.capability.bit else 0
+            return own or (state.fieldTaint[fieldKey(f)] ?: 0)
+        }
+
+        fun storeField(f: Int, bits: Int) {
+            val sources = bits and PARAM.inv()
+            if (sources == 0 || f >= fieldCount || state.fieldTaint.size > 20000) return
+            val key = fieldKey(f)
+            state.fieldTaint[key] = (state.fieldTaint[key] ?: 0) or sources
+        }
+
         fun stringRule(index: Int): Rule? = stringRules.getOrPut(index) { DexScanner.stringRule(string(index)) }
 
         fun scan() {
@@ -922,20 +1031,38 @@ object DexScanner {
                     var methodIndex = 0
                     repeat(group) {
                         methodIndex += uleb(cursor)
-                        uleb(cursor)
+                        val access = uleb(cursor)
                         val codeOff = uleb(cursor)
                         if (codeOff != 0 && methodIndex in 0 until methodCount)
-                            method(methodIndex, codeOff, className, descriptor, lib)
+                            method(methodIndex, codeOff, className, descriptor, lib, access and 0x8 != 0)
                     }
                 }
             }
         }
 
-        fun method(index: Int, codeOff: Int, className: String, descriptor: String, lib: Library?) {
+        fun method(index: Int, codeOff: Int, className: String, descriptor: String, lib: Library?, static: Boolean) {
             require(codeOff in 0 until bytes.size - 16)
             val size = b.getInt(codeOff + 12)
             val start = codeOff + 16
             require(size >= 0 && start.toLong() + 2L * size <= bytes.size)
+            // Value tracking (app code only): register -> source bits, and register -> app methods
+            // whose results it holds. Straight-line and flow-insensitive: an approximation that
+            // only claims a link when a value read from a source is passed to the sending call.
+            val taint = HashMap<Int, Int>()
+            val results = HashMap<Int, Set<String>>()
+            var pending = 0
+            var pendingResults: Set<String> = emptySet()
+            run {
+                val registers = u16(codeOff)
+                val ins = u16(codeOff + 2)
+                // Parameters sit in the last registers; `this` is not a parameter.
+                val first = registers - ins + (if (static) 0 else 1)
+                for (r in first until registers) taint[r] = PARAM
+            }
+            fun set(reg: Int, bits: Int, from: Set<String> = emptySet()) {
+                if (bits == 0) taint.remove(reg) else taint[reg] = bits
+                if (from.isEmpty()) results.remove(reg) else results[reg] = from
+            }
             val name = string(b.getInt(methodIdsOff + 8 * index + 4))
             val key = methodKey(index)
             val readable = if (origin.isEmpty()) "$className.$name" else "$className.$name [$origin]"
@@ -960,6 +1087,107 @@ object DexScanner {
                     decodeArray(data, width, readable, key)
                 }
             }
+            fun reg2(i: Int) = if (i + 2 < size) u16(start + 2 * (i + 2)) else 0
+
+            /** Arguments of an invoke at [i]: 35c lists up to five registers, 3rc a range. */
+            fun args(op: Int, unit: Int, i: Int): IntArray =
+                if (op in 0x6e..0x72 || op == 0xfa || op == 0xfc) {
+                    val count = (unit shr 12) and 0xf
+                    val w = reg2(i)
+                    intArrayOf(w and 0xf, (w shr 4) and 0xf, (w shr 8) and 0xf, (w shr 12) and 0xf, (unit shr 8) and 0xf)
+                        .copyOf(count.coerceAtMost(5))
+                } else {
+                    val count = (unit shr 8) and 0xff
+                    val first = reg2(i)
+                    IntArray(count) { first + it }
+                }
+
+            fun track(op: Int, unit: Int, next: Int, i: Int) {
+                val mi = info!!
+                val a8 = (unit shr 8) and 0xff
+                val a4 = (unit shr 8) and 0xf
+                val b4 = (unit shr 12) and 0xf
+                if (op !in 0x0a..0x0c && op !in 0x6e..0x78 && op !in 0xfa..0xfd) pending = 0
+                when (op) {
+                    0x01, 0x04, 0x07 -> set(a4, taint[b4] ?: 0, results[b4].orEmpty())
+                    0x02, 0x05, 0x08 -> set(a8, taint[next] ?: 0, results[next].orEmpty())
+                    0x03, 0x06, 0x09 -> set(next, taint[reg2(i)] ?: 0, results[reg2(i)].orEmpty())
+                    0x0a, 0x0b, 0x0c -> {
+                        set(a8, pending, pendingResults)
+                        pending = 0
+                        pendingResults = emptySet()
+                    }
+                    0x0f, 0x10, 0x11 -> {
+                        mi.returnSources = mi.returnSources or ((taint[a8] ?: 0) and PARAM.inv())
+                        results[a8]?.let { mi.returnCallees += it }
+                    }
+                    in 0x12..0x19 -> set(if (op == 0x12) a4 else a8, 0)
+                    0x1a, 0x1b -> {
+                        val idx = if (op == 0x1a) next else next or (reg2(i) shl 16)
+                        val rule = stringRule(idx)
+                        // Content URIs carry their source (read once queried); bot URLs mark the destination.
+                        val bits = rule?.capability?.let { if (it.source || it in Capability.hiddenDestinations) it.bit else 0 } ?: 0
+                        set(a8, bits)
+                    }
+                    0x1c, 0x22 -> set(a8, 0)
+                    0x1f -> Unit // check-cast keeps the value
+                    in 0x44..0x4a -> set(a8, taint[next and 0xff] ?: 0, results[next and 0xff].orEmpty())
+                    in 0x4b..0x51 -> {
+                        val arr = next and 0xff
+                        val value = taint[a8] ?: 0
+                        if (value != 0) set(arr, (taint[arr] ?: 0) or value, results[arr].orEmpty() + results[a8].orEmpty())
+                    }
+                    // A field of an object read from a source holds that source: notification.extras.
+                    in 0x52..0x58 -> set(a4, fieldBits(next) or ((taint[b4] ?: 0) and PARAM.inv()), results[b4].orEmpty())
+                    in 0x59..0x5f -> storeField(next, taint[a4] ?: 0)
+                    in 0x60..0x66 -> set(a8, fieldBits(next))
+                    in 0x67..0x6d -> storeField(next, taint[a8] ?: 0)
+                    in 0x6e..0x72, in 0x74..0x78, 0xfa, 0xfb, 0xfc, 0xfd -> {
+                        val regs = args(op, unit, i)
+                        var mask = 0
+                        val from = HashSet<String>()
+                        regs.forEach { r ->
+                            mask = mask or (taint[r] ?: 0)
+                            results[r]?.let { from += it }
+                        }
+                        val sources = mask and PARAM.inv()
+                        val rule = if (op == 0xfc || op == 0xfd) null else methodRule.getOrNull(next)
+                        val cap = rule?.capability
+                        if (cap != null && cap.sink) {
+                            val reached = sources and sourceBits
+                            if (reached != 0) mi.traced[cap.bit] = (mi.traced[cap.bit] ?: 0) or reached
+                            // Data sent together with a bot or webhook address goes to that destination.
+                            for (d in Capability.hiddenDestinations)
+                                if (sources and d.bit != 0 && reached != 0)
+                                    mi.traced[d.bit] = (mi.traced[d.bit] ?: 0) or reached
+                            if (mask and PARAM != 0) {
+                                mi.paramSinks = mi.paramSinks or cap.bit
+                                for (d in Capability.hiddenDestinations)
+                                    if (sources and d.bit != 0) mi.paramSinks = mi.paramSinks or d.bit
+                            }
+                            if (from.isNotEmpty()) mi.sinkCallees.getOrPut(cap.bit) { HashSet() } += from
+                        }
+                        var result = mask
+                        var resultFrom: Set<String> = from
+                        if (cap != null && cap.source) result = result or cap.bit
+                        val called = if (op == 0xfc || op == 0xfd || next >= methodCount) null else methodKey(next)
+                        if (called != null && library(called.substringBefore("->")) == null && called.startsWith("L")) {
+                            mi.calls += TaintCall(called, sources and sourceBits, mask and PARAM != 0, from)
+                            resultFrom = from + called
+                        }
+                        // A builder or collection that receives a value carries it: url(x), append(x), put(k, x).
+                        val instance = op != 0x71 && op != 0x77 && op != 0xfc && op != 0xfd && regs.isNotEmpty()
+                        if (instance && regs.size > 1) {
+                            var rest = 0
+                            for (k in 1 until regs.size) rest = rest or (taint[regs[k]] ?: 0)
+                            if (rest != 0) set(regs[0], (taint[regs[0]] ?: 0) or rest, results[regs[0]].orEmpty() + from)
+                        }
+                        pending = result
+                        pendingResults = resultFrom
+                    }
+                }
+            }
+
             fun record(rule: Rule) {
                 val cap = rule.capability
                 val needsConfirmation = rule.string && (cap in Capability.hiddenDestinations || cap.source)
@@ -982,6 +1210,7 @@ object DexScanner {
                 val unit = u16(start + 2 * i)
                 val op = unit and 0xff
                 val next = if (i + 1 < size) u16(start + 2 * (i + 1)) else 0
+                if (info != null) track(op, unit, next, i)
                 when (op) {
                     0x1a ->
                         if (info != null) {
