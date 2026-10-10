@@ -161,9 +161,9 @@
     <string name="find_cleartext">Cleartext flag · +10</string>
     <string name="find_cleartext_body">The app flag permits unencrypted traffic. Network Security Configuration and actual behavior are not evaluated.</string>
     <string name="find_target">Older target SDK · +15</string>
-    <string name="find_target_body">Target SDK is more than five API levels behind this device. Some newer protections may not apply.</string>
+    <string name="find_target_body">Target SDK is below API 31 (Android 12). Some newer protections may not apply.</string>
     <string name="find_exported">Unprotected exported components · +20</string>
-    <string name="find_exported_body">Enabled exported components without a component permission: %1$d. Legitimate launcher entry points are included.</string>
+    <string name="find_exported_body">Enabled exported components without a component permission: %1$d. Launcher entry points are not counted.</string>
     <string name="find_permissions">Sensitive permissions · +10</string>
     <string name="find_permissions_body">Dangerous permissions requested: %1$d. Review whether app features need them.</string>
     <string name="find_source">Unknown install source · +5</string>

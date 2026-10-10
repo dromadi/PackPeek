@@ -135,46 +135,84 @@ class ArchiveImporter(private val context: Context, private val apps: AppReposit
         }
 }
 
-/** Bounded parser for the binary XML root only. It never executes APK code. */
+/** Bounded binary XML parser for manifest metadata. It never executes APK code. */
 object ManifestRoot {
-    fun read(apk: File): Map<String, String> =
-        ZipFile(apk).use { zip ->
-            val entry = zip.getEntry("AndroidManifest.xml") ?: throw AppFailure(ErrorCode.ARCHIVE)
-            val bytes =
-                zip.getInputStream(entry).use { input ->
-                    val out = ByteArrayOutputStream()
-                    val buffer = ByteArray(8192)
-                    while (true) {
-                        val n = input.read(buffer)
-                        if (n < 0) break
-                        require(out.size() + n <= 2 * 1024 * 1024)
-                        out.write(buffer, 0, n)
+    private const val LIMIT = 2 * 1024 * 1024
+    private val launcherCategories =
+        setOf("android.intent.category.LAUNCHER", "android.intent.category.LEANBACK_LAUNCHER")
+
+    class Manifest(val root: Map<String, String>, val launchers: Set<String>)
+
+    fun read(apk: File): Map<String, String> = parseFile(apk).root
+
+    /** Fully qualified names of activities and aliases with a launcher category. */
+    fun launcherActivities(apk: File): Set<String> = parseFile(apk).launchers
+
+    fun decode(bytes: ByteArray): Map<String, String> = parse(bytes).root
+
+    private fun parseFile(apk: File): Manifest =
+        failClosed {
+            ZipFile(apk).use { zip ->
+                val entry =
+                    zip.getEntry("AndroidManifest.xml") ?: throw AppFailure(ErrorCode.ARCHIVE)
+                val bytes =
+                    zip.getInputStream(entry).use { input ->
+                        val out = ByteArrayOutputStream()
+                        val buffer = ByteArray(8192)
+                        while (true) {
+                            val n = input.read(buffer)
+                            if (n < 0) break
+                            require(out.size() + n <= LIMIT)
+                            out.write(buffer, 0, n)
+                        }
+                        out.toByteArray()
                     }
-                    out.toByteArray()
-                }
-            decode(bytes)
+                parse(bytes)
+            }
         }
 
-    fun decode(bytes: ByteArray): Map<String, String> {
+    fun parse(bytes: ByteArray): Manifest = failClosed { walk(bytes) }
+
+    private inline fun <T> failClosed(block: () -> T): T =
+        try {
+            block()
+        } catch (e: AppFailure) {
+            throw e
+        } catch (e: Exception) {
+            throw AppFailure(ErrorCode.ARCHIVE, e)
+        }
+
+    private fun walk(bytes: ByteArray): Manifest {
         val b = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
         fun u16(p: Int) = b.getShort(p).toInt() and 65535
         fun i32(p: Int) = b.getInt(p)
-        require(bytes.size >= 8 && u16(0) == 3)
+        require(bytes.size >= 8 && bytes.size <= LIMIT && u16(0) == 3)
         var pos = u16(2)
         var strings = emptyList<String>()
+        fun str(index: Int): String {
+            require(index in strings.indices)
+            return strings[index]
+        }
+        var root: Map<String, String>? = null
+        val launchers = mutableSetOf<String>()
+        val stack = ArrayList<String>()
+        var activity: String? = null
         while (pos + 8 <= bytes.size) {
             val type = u16(pos)
             val header = u16(pos + 2)
             val size = i32(pos + 4)
-            require(size >= 8 && size <= bytes.size - pos)
+            require(size >= 8 && size <= bytes.size - pos && header in 8..size)
+            val end = pos + size
             if (type == 1) {
                 val count = i32(pos + 8)
                 val utf8 = i32(pos + 16) and 256 != 0
                 val start = pos + i32(pos + 20)
-                require(count in 0..100000)
+                require(count in 0..100000 && pos + header + 4L * count <= end)
+                require(start in pos..end)
                 strings =
                     (0 until count).map { index ->
                         var p = start + i32(pos + header + 4 * index)
+                        require(p in start until end)
                         fun len8(): Int {
                             val n = bytes[p++].toInt() and 255
                             return if (n and 128 != 0)
@@ -191,34 +229,63 @@ object ManifestRoot {
                         if (utf8) {
                             len8()
                             val n = len8()
-                            require(n <= 32768 && p + n <= bytes.size)
+                            require(n <= 32768 && p + n <= end)
                             String(bytes, p, n, Charsets.UTF_8)
                         } else {
                             val n = len16()
-                            require(n <= 32768 && p + 2 * n <= bytes.size)
+                            require(n <= 32768 && p + 2 * n <= end)
                             String(bytes, p, n * 2, Charsets.UTF_16LE)
                         }
                     }
             } else if (type == 0x102) {
                 val ext = pos + header
-                require(strings[i32(ext + 4)] == "manifest")
+                require(ext + 20 <= end)
+                val element = str(i32(ext + 4))
                 val first = ext + u16(ext + 8)
                 val stride = u16(ext + 10)
                 val count = u16(ext + 12)
-                require(stride >= 20 && count <= 1000)
-                return (0 until count).associate { index ->
-                    val p = first + stride * index
-                    val name = strings[i32(p + 4)]
-                    val raw = i32(p + 8)
-                    val t = bytes[p + 15].toInt() and 255
-                    val value = i32(p + 16)
-                    name to
-                        if (raw >= 0) strings[raw]
-                        else if (t == 3) strings[value] else value.toUInt().toString()
+                require(stride >= 20 && count <= 1000 && first + stride.toLong() * count <= end)
+                val attributes =
+                    (0 until count).associate { index ->
+                        val p = first + stride * index
+                        val raw = i32(p + 8)
+                        val t = bytes[p + 15].toInt() and 255
+                        val value = i32(p + 16)
+                        str(i32(p + 4)) to
+                            if (raw >= 0) str(raw)
+                            else if (t == 3) str(value) else value.toUInt().toString()
+                    }
+                if (root == null) {
+                    require(element == "manifest")
+                    root = attributes
                 }
+                val parent = stack.lastOrNull()
+                if (
+                    parent == "application" &&
+                        (element == "activity" || element == "activity-alias")
+                )
+                    activity = qualify(root["package"].orEmpty(), attributes["name"].orEmpty())
+                if (
+                    element == "category" &&
+                        parent == "intent-filter" &&
+                        attributes["name"] in launcherCategories
+                )
+                    activity?.let { launchers += it }
+                stack += element
+                require(stack.size <= 64)
+            } else if (type == 0x103) {
+                val closed = stack.removeLastOrNull()
+                if (closed == "activity" || closed == "activity-alias") activity = null
             }
-            pos += size
+            pos = end
         }
-        throw AppFailure(ErrorCode.ARCHIVE)
+        return Manifest(root ?: throw AppFailure(ErrorCode.ARCHIVE), launchers)
     }
+
+    private fun qualify(pkg: String, name: String): String =
+        when {
+            name.startsWith('.') -> pkg + name
+            '.' !in name -> "$pkg.$name"
+            else -> name
+        }
 }

@@ -6,6 +6,7 @@ import android.os.ParcelFileDescriptor
 import androidx.documentfile.provider.DocumentFile
 import com.packpeek.app.model.*
 import java.io.*
+import java.util.zip.Deflater
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlinx.coroutines.*
@@ -28,9 +29,11 @@ class Extractor(private val context: Context) {
             if (app.paths.any { !File(it).canRead() }) throw AppFailure(ErrorCode.SOURCE)
             val total = app.paths.sumOf { File(it).length() }.coerceAtLeast(1)
             val base = FileNames.format(app, naming)
+            // One listing instead of a provider query per findFile() call.
+            val existing = folder.listFiles().mapNotNullTo(HashSet()) { it.name }
             var n = 0
             var name = base
-            while (folder.findFile(name) != null) {
+            while (name in existing) {
                 name = FileNames.numbered(base, ++n)
                 if (n > 9999) throw AppFailure(ErrorCode.FOLDER)
             }
@@ -92,7 +95,7 @@ class Extractor(private val context: Context) {
                         context.contentResolver.openOutputStream(document.uri, "w")
                             ?: throw AppFailure(ErrorCode.FOLDER)
                     ZipOutputStream(BufferedOutputStream(stream)).use { zip ->
-                        zip.setLevel(1)
+                        zip.setLevel(Deflater.NO_COMPRESSION) // APKs are already compressed and aligned.
                         val names = mutableSetOf<String>()
                         app.paths.forEachIndexed { index, path ->
                             ensureActive()

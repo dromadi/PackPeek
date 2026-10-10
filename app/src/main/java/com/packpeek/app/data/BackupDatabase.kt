@@ -75,6 +75,14 @@ interface BackupDao {
     @Query("UPDATE backups SET state='CANCELLED' WHERE jobId=:id AND state IN ('QUEUED','RUNNING')")
     suspend fun cancelPending(id: String)
 
+    @Query(
+        "UPDATE backups SET state='FAILED',error='UNKNOWN' WHERE jobId=:id AND state IN ('QUEUED','RUNNING')"
+    )
+    suspend fun failPending(id: String)
+
+    @Query("UPDATE backups SET state='QUEUED' WHERE jobId=:id AND state='RUNNING'")
+    suspend fun requeue(id: String)
+
     @Query("UPDATE backups SET hidden=1 WHERE id=:id") suspend fun hide(id: Long)
 
     @Transaction

@@ -1,6 +1,7 @@
 package com.packpeek.app.data
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -23,6 +24,21 @@ class AppRepository(context: Context) {
         if (Build.VERSION.SDK_INT >= 33)
             pm.getPackageArchiveInfo(path, PackageManager.PackageInfoFlags.of(flags.toLong()))
         else pm.getPackageArchiveInfo(path, flags)
+
+    @Suppress("DEPRECATION")
+    fun launcherActivities(pkg: String): Set<String> =
+        listOf(Intent.CATEGORY_LAUNCHER, Intent.CATEGORY_LEANBACK_LAUNCHER)
+            .flatMap { category ->
+                val intent = Intent(Intent.ACTION_MAIN).addCategory(category).setPackage(pkg)
+                runCatching {
+                        if (Build.VERSION.SDK_INT >= 33)
+                            pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0))
+                        else pm.queryIntentActivities(intent, 0)
+                    }
+                    .getOrDefault(emptyList())
+            }
+            .map { it.activityInfo.name }
+            .toSet()
 
     fun installed(pkg: String): AppRecord = fromInfo(packageInfo(pkg))
 

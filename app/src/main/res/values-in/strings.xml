@@ -161,9 +161,9 @@
     <string name="find_cleartext">Flag cleartext · +10</string>
     <string name="find_cleartext_body">Flag aplikasi mengizinkan lalu lintas tanpa enkripsi. Network Security Configuration dan perilaku sebenarnya tidak dievaluasi.</string>
     <string name="find_target">Target SDK lama · +15</string>
-    <string name="find_target_body">Target SDK tertinggal lebih dari lima tingkat API dari perangkat ini. Sebagian perlindungan baru mungkin tidak berlaku.</string>
+    <string name="find_target_body">Target SDK di bawah API 31 (Android 12). Sebagian perlindungan baru mungkin tidak berlaku.</string>
     <string name="find_exported">Komponen exported tanpa izin · +20</string>
-    <string name="find_exported_body">%1$d komponen exported aktif tidak mendeklarasikan izin komponen. Titik masuk launcher yang sah juga dihitung.</string>
+    <string name="find_exported_body">%1$d komponen exported aktif tidak mendeklarasikan izin komponen. Titik masuk launcher tidak dihitung.</string>
     <string name="find_permissions">Izin sensitif · +10</string>
     <string name="find_permissions_body">%1$d izin berbahaya diminta. Periksa apakah fitur aplikasi membutuhkannya.</string>
     <string name="find_source">Sumber instalasi tidak diketahui · +5</string>

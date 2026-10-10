@@ -97,9 +97,32 @@ class CoreRulesTest {
             filterApps(
                 listOf(one, two),
                 AppQuery(text = "EXAMPLE", framework = "Flutter"),
-                mapOf(one.packageName to "Flutter", two.packageName to "Unity"),
+                mapOf(one.packageName to listOf("Flutter"), two.packageName to listOf("Unity")),
             ),
         )
+    }
+
+    @Test
+    fun frameworkFilterMatchesAnyDetectedFramework() {
+        val hybrid = app(pkg = "hybrid.app")
+        assertEquals(
+            listOf(hybrid),
+            filterApps(
+                listOf(hybrid, app(pkg = "native.app")),
+                AppQuery(framework = "React Native"),
+                mapOf(
+                    hybrid.packageName to listOf("Flutter", "React Native"),
+                    "native.app" to listOf("Android"),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun oldTargetDoesNotDependOnDevice() {
+        assertTrue(isOldTarget(30))
+        assertFalse(isOldTarget(31))
+        assertFalse(isOldTarget(36))
     }
 
     @Test
@@ -156,9 +179,27 @@ class CoreRulesTest {
     }
 
     @Test
+    fun launcherActivitiesAreQualified() {
+        assertEquals(
+            setOf("io.github.omniextract.claude.MainActivity"),
+            ManifestRoot.parse(fixture()).launchers,
+        )
+    }
+
+    @Test
     fun malformedBinaryXmlFailsClosed() {
-        listOf(byteArrayOf(), byteArrayOf(3, 0, 8, 0), fixture().copyOf(30), ByteArray(100))
-            .forEach { assertTrue(runCatching { ManifestRoot.decode(it) }.isFailure) }
+        val truncated = fixture().let { it.copyOf(it.size - 4) }
+        listOf(
+                byteArrayOf(),
+                byteArrayOf(3, 0, 8, 0),
+                fixture().copyOf(30),
+                ByteArray(100),
+                truncated,
+            )
+            .forEach {
+                val failure = runCatching { ManifestRoot.decode(it) }.exceptionOrNull()
+                assertEquals(ErrorCode.ARCHIVE, (failure as? AppFailure)?.code)
+            }
     }
 
     private fun fixture() =

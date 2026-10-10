@@ -88,7 +88,7 @@ fun DashboardScreen(vm: MainViewModel, inspect: (AppRecord) -> Unit) {
             )
             if (checking) LinearProgressIndicator(Modifier.fillMaxWidth())
         }
-        items(tech.values.groupingBy { it }.eachCount().toList()) { (framework, count) ->
+        items(tech.values.flatten().groupingBy { it }.eachCount().toList()) { (framework, count) ->
             CountBar(framework, count, tech.size)
         }
         items(

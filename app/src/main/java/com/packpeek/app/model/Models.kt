@@ -90,7 +90,7 @@ data class AppQuery(
 fun filterApps(
     apps: List<AppRecord>,
     query: AppQuery,
-    technologies: Map<String, String> = emptyMap(),
+    technologies: Map<String, List<String>> = emptyMap(),
 ): List<AppRecord> {
     val result = apps.filter { a ->
         (query.text.isBlank() ||
@@ -105,7 +105,8 @@ fun filterApps(
             (query.source == "ALL" || a.source == query.source) &&
             (query.maxSdk == 0 || a.targetSdk <= query.maxSdk) &&
             a.size >= query.minMb.toLong() * 1024 * 1024 &&
-            (query.framework == "ALL" || technologies[a.packageName] == query.framework)
+            (query.framework == "ALL" ||
+                query.framework in technologies[a.packageName].orEmpty())
     }
     return when (query.sort) {
         "NAME_DESC" -> result.sortedByDescending { it.label.lowercase(Locale.ROOT) }
@@ -127,6 +128,14 @@ enum class FindingCode(val weight: Int) {
     SIDELOAD(5),
     DEBUG_CERT(20),
 }
+
+/**
+ * Fixed threshold so the same app scores the same on every device. API 31 (Android 12) brought
+ * explicit exported flags, exact-alarm and pending-intent mutability rules.
+ */
+const val OLD_TARGET_SDK = 31
+
+fun isOldTarget(targetSdk: Int) = targetSdk < OLD_TARGET_SDK
 
 data class Finding(val code: FindingCode, val count: Int = 1)
 

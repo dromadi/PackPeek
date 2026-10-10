@@ -1,12 +1,16 @@
 package com.packpeek.app.ui
 
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.net.Uri
 import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,7 +40,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val apps = _apps.asStateFlow()
     val query = MutableStateFlow(AppQuery())
     val selected = MutableStateFlow<Set<String>>(emptySet())
-    private val tech = MutableStateFlow<Map<String, String>>(emptyMap())
+    private val tech = MutableStateFlow<Map<String, List<String>>>(emptyMap())
     val technologies = tech.asStateFlow()
     val riskScores = MutableStateFlow<Map<String, Int>>(emptyMap())
     val checkingOverview = MutableStateFlow(false)
@@ -72,6 +76,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var overviewJob: Job? = null
     private var imported: ImportedArchive? = null
     private var starting = false
+    private var pendingRefresh: Job? = null
+    private val packageReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action == Intent.ACTION_PACKAGE_CHANGED) {
+                    // Only whole-package enable/disable changes the list, not component toggles.
+                    val pkg = intent.data?.schemeSpecificPart
+                    val changed =
+                        intent.getStringArrayExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST)
+                    if (pkg == null || changed?.contains(pkg) != true) return
+                }
+                // Updates send REMOVED, ADDED and REPLACED together; rescan once.
+                pendingRefresh?.cancel()
+                pendingRefresh = viewModelScope.launch {
+                    delay(500)
+                    refresh()
+                }
+            }
+        }
 
     init {
         viewModelScope.launch {
@@ -82,14 +105,47 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 .collect { if (it) refresh() }
         }
         viewModelScope.launch {
-            workInfo.filterNotNull().collect { info ->
-                if (info.state == WorkInfo.State.CANCELLED)
-                    latestJob.value?.let {
-                        dao.cancelPending(it.id)
-                        dao.jobState(it.id, "CANCELLED")
-                    }
-            }
+            latestJob
+                .filterNotNull()
+                .flatMapLatest { job ->
+                    work.getWorkInfoByIdFlow(UUID.fromString(job.id)).map { job to it }
+                }
+                .collect { (job, info) -> reconcile(job, info) }
         }
+        ContextCompat.registerReceiver(
+            owner,
+            packageReceiver,
+            IntentFilter().apply {
+                addAction(Intent.ACTION_PACKAGE_ADDED)
+                addAction(Intent.ACTION_PACKAGE_REMOVED)
+                addAction(Intent.ACTION_PACKAGE_REPLACED)
+                addAction(Intent.ACTION_PACKAGE_CHANGED)
+                addDataScheme("package")
+            },
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+    }
+
+    /**
+     * Keeps the job row in step with WorkManager so a stale QUEUED/RUNNING row never blocks new
+     * backups: work cancelled before it ran, a worker that died, or work WorkManager has pruned.
+     */
+    private suspend fun reconcile(job: BackupJob, info: WorkInfo?) {
+        if (job.state !in ACTIVE) return
+        when {
+            // The row is written before the work is enqueued.
+            info == null -> if (!starting) fail(job.id)
+            info.state == WorkInfo.State.CANCELLED -> {
+                dao.cancelPending(job.id)
+                dao.jobState(job.id, "CANCELLED")
+            }
+            info.state.isFinished -> fail(job.id)
+        }
+    }
+
+    private suspend fun fail(jobId: String) {
+        dao.failPending(jobId)
+        dao.jobState(jobId, "FAILED")
     }
 
     fun refresh() {
@@ -145,12 +201,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         if (app.packageName !in tech.value) {
                             val fw =
                                 try {
-                                    owner.audit.technology(app).frameworks.firstOrNull()
-                                        ?: "Android"
+                                    owner.audit.technology(app).frameworks
                                 } catch (e: CancellationException) {
                                     throw e
                                 } catch (e: Exception) {
-                                    "Unknown"
+                                    listOf("Unknown")
                                 }
                             tech.value = tech.value + (app.packageName to fw)
                         }
@@ -171,9 +226,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     ensureActive()
                     try {
                         val report = owner.audit.audit(app, false)
-                        tech.value =
-                            tech.value +
-                                (app.packageName to (report.frameworks.firstOrNull() ?: "Android"))
+                        tech.value = tech.value + (app.packageName to report.frameworks)
                         riskScores.value = riskScores.value + (app.packageName to report.score)
                     } catch (e: CancellationException) {
                         throw e
@@ -222,8 +275,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startBackup(items: List<AppRecord>) {
         confirmation.value = null
-        if (starting || items.isEmpty() || latestJob.value?.state in listOf("QUEUED", "RUNNING"))
-            return
+        if (starting || items.isEmpty() || latestJob.value?.state in ACTIVE) return
         starting = true
         viewModelScope.launch {
             var jobId: String? = null
@@ -239,6 +291,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     owner.settings.text("folder", "")
                     throw AppFailure(ErrorCode.FOLDER)
                 }
+                // KEEP silently drops a new request while older work is unfinished, which would
+                // leave the new job row QUEUED forever.
+                if (work.getWorkInfosForUniqueWorkFlow(UNIQUE_WORK).first().any { !it.state.isFinished })
+                    throw AppFailure(ErrorCode.UNKNOWN)
                 val id = UUID.randomUUID()
                 jobId = id.toString()
                 dao.create(
@@ -258,11 +314,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         .setId(id)
                         .setInputData(workDataOf("job" to id.toString()))
                         .build()
-                work.enqueueUniqueWork("packpeek-backup", ExistingWorkPolicy.KEEP, request).await()
+                work.enqueueUniqueWork(UNIQUE_WORK, ExistingWorkPolicy.KEEP, request).await()
+                if (work.getWorkInfoByIdFlow(id).first() == null) throw AppFailure(ErrorCode.UNKNOWN)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                jobId?.let { dao.jobState(it, "FAILED") }
+                jobId?.let { fail(it) }
                 error.value = (e as? AppFailure)?.code ?: ErrorCode.UNKNOWN
             } finally {
                 starting = false
@@ -291,9 +348,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 detail.value = DetailState(app, report)
                 if (!app.fromFile) {
                     riskScores.value = riskScores.value + (app.packageName to report.score)
-                    tech.value =
-                        tech.value +
-                            (app.packageName to (report.frameworks.firstOrNull() ?: "Android"))
+                    tech.value = tech.value + (app.packageName to report.frameworks)
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -380,6 +435,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     bitmap.recycle()
                 }
                 iconSaved.value = doc.uri
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 error.value = (e as? AppFailure)?.code ?: ErrorCode.UNKNOWN
             }
@@ -388,6 +445,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
+        owner.unregisterReceiver(packageReceiver)
         imported?.close()
+    }
+
+    private companion object {
+        const val UNIQUE_WORK = "packpeek-backup"
+        val ACTIVE = listOf("QUEUED", "RUNNING")
     }
 }

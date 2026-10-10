@@ -225,9 +225,20 @@ class AuditEngine(private val apps: AppRepository) {
                     add(Finding(FindingCode.BACKUP))
                 if (info.flags and ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC != 0)
                     add(Finding(FindingCode.CLEARTEXT))
-                if (app.targetSdk < Build.VERSION.SDK_INT - 5) add(Finding(FindingCode.OLD_TARGET))
+                if (isOldTarget(app.targetSdk)) add(Finding(FindingCode.OLD_TARGET))
+                // Launcher entry points must be exported; counting them flags nearly every app.
+                val launchers =
+                    if (app.fromFile)
+                        runCatching { ManifestRoot.launcherActivities(File(app.basePath)) }
+                            .getOrDefault(emptySet())
+                    else apps.launcherActivities(app.packageName)
                 components
-                    .count { it.exported && it.permission.isBlank() && it.enabled }
+                    .count {
+                        it.exported &&
+                            it.permission.isBlank() &&
+                            it.enabled &&
+                            !(it.kind == "ACTIVITY" && it.name in launchers)
+                    }
                     .takeIf { it > 0 }
                     ?.let { add(Finding(FindingCode.EXPORTED, it)) }
                 permissions

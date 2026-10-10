@@ -73,15 +73,21 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
             return Result.success()
         } catch (e: CancellationException) {
             withContext(NonCancellable) {
-                dao.cancelPending(jobId)
-                dao.jobState(jobId, "CANCELLED")
+                val work = WorkManager.getInstance(applicationContext)
+                if (work.getWorkInfoByIdFlow(id).first()?.state == WorkInfo.State.CANCELLED) {
+                    dao.cancelPending(jobId)
+                    dao.jobState(jobId, "CANCELLED")
+                } else {
+                    // Stopped by the system (quota, Doze, process limits): WorkManager runs this
+                    // work again, and finished records are skipped on the next attempt.
+                    dao.requeue(jobId)
+                    dao.jobState(jobId, "QUEUED")
+                }
             }
             throw e
         } catch (e: Exception) {
             withContext(NonCancellable) {
-                dao.records(jobId)
-                    .filter { it.state in listOf("RUNNING", "QUEUED") }
-                    .forEach { dao.finish(it.id, "FAILED", error = "UNKNOWN") }
+                dao.failPending(jobId)
                 dao.jobState(jobId, "FAILED")
             }
             return Result.failure()
