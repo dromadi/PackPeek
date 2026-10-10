@@ -500,4 +500,5 @@
     <string name="find_target_body">टारगेट SDK, API 31 (Android 12) से नीचे है। कुछ नई सुरक्षाएँ लागू नहीं हो सकतीं।</string>
     <string name="find_exported_body">बिना कंपोनेंट अनुमति वाले चालू एक्सपोर्टेड कंपोनेंट: %1$d। लॉन्चर एंट्री पॉइंट गिने नहीं जाते।</string>
     <string name="format_explanation">सामान्य ऐप्स हमेशा .apk के रूप में सेव होते हैं। Split ऐप्स ऊपर चुना गया फ़ॉर्मैट इस्तेमाल करते हैं। पहले से मौजूद नामों में संख्या जोड़ दी जाती है।</string>
+    <string name="report_share_quick">सबूत रिपोर्ट साझा करें (PDF)</string>
 </resources>

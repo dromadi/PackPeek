@@ -512,4 +512,5 @@
     <string name="find_target_body">O SDK de destino é inferior à API 31 (Android 12). Algumas proteções mais recentes podem não se aplicar.</string>
     <string name="find_exported_body">Componentes exportados ativados sem permissão de componente: %1$d. Pontos de entrada do launcher não são contados.</string>
     <string name="format_explanation">Apps independentes são sempre salvos como .apk. Apps divididos usam o formato escolhido acima. Nomes existentes recebem um sufixo numerado.</string>
+    <string name="report_share_quick">Compartilhar relatório de evidências (PDF)</string>
 </resources>

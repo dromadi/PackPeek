@@ -488,4 +488,5 @@
     <string name="find_target_body">SDK mục tiêu thấp hơn API 31 (Android 12). Một số cơ chế bảo vệ mới hơn có thể không được áp dụng.</string>
     <string name="find_exported_body">Thành phần được xuất đang bật mà không có quyền thành phần: %1$d. Không tính điểm vào từ launcher.</string>
     <string name="format_explanation">Ứng dụng đơn lẻ luôn được lưu dạng .apk. Ứng dụng chia nhỏ dùng định dạng đã chọn ở trên. Tên đã tồn tại sẽ được thêm hậu tố số.</string>
+    <string name="report_share_quick">Chia sẻ báo cáo bằng chứng (PDF)</string>
 </resources>

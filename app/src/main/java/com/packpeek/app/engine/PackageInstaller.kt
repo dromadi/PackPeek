@@ -1,7 +1,7 @@
 package com.packpeek.app.engine
 
 import android.app.Activity
-import android.app.AlertDialog
+import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -57,12 +57,38 @@ suspend fun installPackage(context: Context, pkg: String, files: List<File>) =
                 val flags =
                     PendingIntent.FLAG_UPDATE_CURRENT or
                         if (Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0
-                session.commit(PendingIntent.getActivity(context, id, intent, flags).intentSender)
+                session.commit(
+                    PendingIntent.getActivity(context, id, intent, flags, creatorMayStart())
+                        .intentSender
+                )
             }
         } catch (e: Exception) {
             installer.abandonSession(id)
             throw e
         }
+    }
+
+/**
+ * The system installer reports through this PendingIntent while PackPeek is on screen. From
+ * Android 15 (target SDK 35+) the creator must opt in, or the launch of [InstallStatusActivity],
+ * and with it the confirmation prompt, is blocked as a background activity start.
+ */
+@Suppress("DEPRECATION")
+private fun creatorMayStart(): Bundle? =
+    when {
+        Build.VERSION.SDK_INT >= 36 ->
+            ActivityOptions.makeBasic()
+                .setPendingIntentCreatorBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE
+                )
+                .toBundle()
+        Build.VERSION.SDK_INT >= 34 ->
+            ActivityOptions.makeBasic()
+                .setPendingIntentCreatorBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                )
+                .toBundle()
+        else -> null
     }
 
 class InstallStatusActivity : Activity() {

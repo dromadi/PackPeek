@@ -66,6 +66,8 @@ fun DeepContent(state: DeepState, app: AppRecord, lookUp: () -> Unit, openSettin
         item {
             RiskSummary(report)
         }
+        // The full report section sits at the bottom of a long screen; offer it up front too.
+        item { QuickReport(app, report, state) }
         items(report.findings.filter { it.severity == Severity.STRONG }, key = { "deep:${it.id}" }) {
             FindingCard(it, codeGaps = report.coverage.code?.gaps?.isNotEmpty() == true)
         }
@@ -311,6 +313,20 @@ private fun ActionsSection(app: AppRecord, report: RiskReport) {
             GroupDivider()
             ActionRow(stringResource(R.string.action_secure_accounts), icon = Icons.Rounded.Lock, onClick = { secure = true })
         }
+    }
+}
+
+@Composable
+private fun QuickReport(app: AppRecord, report: RiskReport, state: DeepState) {
+    val c = LocalContext.current
+    val res = LocalResources.current
+    FilledTonalButton(
+        onClick = { EvidenceReport.sharePdf(c, EvidenceReport.text(res, app, report, state.code, state.lookup), app.packageName) },
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Icon(Icons.Rounded.Share, null, Modifier.size(18.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(stringResource(R.string.report_share_quick))
     }
 }
 

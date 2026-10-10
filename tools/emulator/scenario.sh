@@ -84,13 +84,26 @@ if step "Start the app check" yes "$E" tapre 'Check [0-9]+ apps?'; then
     shot overview-analysis "App analysis"
 fi
 
+# Back to PackPeek's app list (the start destination) from wherever the previous step ended.
+to_app_list() {
+    for _ in 1 2 3 4 5 6; do
+        "$E" texts 2>/dev/null | grep -q "Select all results" && return 0
+        if "$ADB" shell dumpsys window | grep mCurrentFocus | grep -q "$PKG"; then
+            "$ADB" shell input keyevent 4
+        else
+            "$E" launch "$PKG" >/dev/null
+        fi
+        sleep 3
+    done
+    "$E" wait "Select all results" 60 >/dev/null 2>&1
+}
+
 # Open a file in PackPeek: first through the system file picker like a user, then, when the
 # picker layout is not recognised, through a VIEW intent on PackPeek's own FileProvider (the same
 # import path the picker leads to). The summary says which way was used.
 open_file() {
     local file="$1" name="${1%.apk}"
-    "$ADB" shell input keyevent 4 # back to the app list (the start destination)
-    "$E" wait "Select all results" 60 >/dev/null 2>&1 || true
+    to_app_list
     if "$E" tap "Inspect file" >>"$OUT/steps.log" 2>&1; then
         sleep 4
         "$E" tap "$name" >>"$OUT/steps.log" 2>&1 ||
@@ -125,14 +138,17 @@ if open_file undangan-sim.apk; then
     for _ in 1 2 3 4; do "$E" tap "Deep analysis" >/dev/null 2>&1 && break; "$E" scroll; done
     if step "Deep analysis finishes" yes "$E" wait "Finished in" 300; then
         shot deep "Deep analysis"
-        for k in 1 2 3; do "$E" scroll; shot "deep-$k" "Deep analysis, part $k"; done
-        # Evidence report: the PDF is written, then handed to the share sheet.
-        for _ in 1 2 3 4 5 6 7 8; do "$E" tap "Share as PDF" >/dev/null 2>&1 && break; "$E" scroll; done
+        # Evidence report: the PDF is written, then handed to the share sheet. The shortcut sits
+        # under the summary; the full section is at the bottom.
+        "$E" tap "Share evidence report" >>"$OUT/steps.log" 2>&1 ||
+            for _ in $(seq 30); do "$E" tap "Share as PDF" >/dev/null 2>&1 && break; "$E" scroll; done
         sleep 5
+        shot report-tapped "After tapping the report button"
         if step "Report PDF reaches the share sheet" yes sh -c "'$ADB' shell dumpsys activity activities | grep -q -E 'ChooserActivity|ResolverActivity|intentresolver'"; then
-            shot report-share "Report: share sheet with the PDF"
             "$ADB" shell input keyevent 4
+            sleep 2
         fi
+        for k in 1 2 3; do "$E" scroll; shot "deep-$k" "Deep analysis, part $k"; done
     fi
 fi
 
@@ -142,11 +158,11 @@ if [ -n "$CONTROL" ]; then
     "$ADB" push "$CONTROL" /data/local/tmp/control-clean.apk >/dev/null
     "$ADB" push "$CONTROL" /sdcard/Download/control-clean.apk >/dev/null
     "$ADB" shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1 || true
-    for _ in 1 2 3 4 5 6; do "$ADB" shell input keyevent 4; done
-    "$E" launch "$PKG" >/dev/null
     if open_file control-clean.apk; then
         shot control "control-clean: ready to install"
         "$E" tap "Install backup" >>"$OUT/steps.log" 2>&1
+        sleep 8
+        shot install-tapped "After tapping Install backup"
         # The system asks for confirmation; its button is "Install" (or "Update").
         if step "System install prompt" yes sh -c "for i in \$(seq 30); do '$ADB' shell dumpsys window | grep mCurrentFocus | grep -qi packageinstaller && exit 0; sleep 2; done; exit 1"; then
             shot install-prompt "System install prompt"

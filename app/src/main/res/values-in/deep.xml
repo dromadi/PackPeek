@@ -79,4 +79,5 @@
     <string name="report_deep">Analisis mendalam</string>
     <string name="report_lookup">VirusTotal</string>
     <string name="report_footer">Dibuat dengan PackPeek langsung di perangkat; aplikasinya tidak dijalankan.</string>
+    <string name="report_share_quick">Bagikan laporan bukti (PDF)</string>
 </resources>

@@ -80,4 +80,5 @@
     <string name="report_deep">Deep analysis</string>
     <string name="report_lookup">VirusTotal</string>
     <string name="report_footer">Made with PackPeek on the device itself; the app was not run.</string>
+    <string name="report_share_quick">Share evidence report (PDF)</string>
 </resources>
