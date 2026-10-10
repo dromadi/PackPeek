@@ -138,6 +138,9 @@ object DexScanner {
         setOf("schemas.android.com", "www.w3.org", "www.apache.org", "xmlpull.org", "localhost", "127.0.0.1",
             "example.com", "www.example.com", "ns.adobe.com", "purl.org", "xml.org", "www.xml.org")
 
+    /** Labels of letters, digits and hyphens, ending in an alphabetic top-level domain. */
+    private val domain = Regex("""^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$""")
+
     private val base64 = Regex("""^[A-Za-z0-9+/]+={0,2}$""")
 
     /** Calls that hand an app class to Android to run later (Intent, work request, job). */
@@ -296,6 +299,17 @@ object DexScanner {
                 Library("Lcom/fyber/", "Fyber", true),
                 Library("Lcom/smaato/", "Smaato", true),
                 Library("Lnet/pubnative/", "PubNative", true),
+                Library("Lcom/apm/insight/", "ByteDance APM", true),
+                Library("Lcom/pgl/", "Pangle", true),
+                Library("Lcom/tradplus/", "TradPlus", true),
+                Library("Lcom/taurusx/", "TaurusX", true),
+                Library("Lcom/anythink/", "TopOn", true),
+                Library("Lcom/my/target/", "myTarget", true),
+                Library("Lcom/iab/omid/", "Open Measurement SDK", true),
+                Library("Lio/appmetrica/", "AppMetrica", true),
+                Library("Lcom/yandex/", "Yandex SDK"),
+                Library("Lio/jsonwebtoken/", "JJWT"),
+                Library("Lnet/aihelp/", "AIHelp"),
             )
             .sortedByDescending { it.prefix.length }
 
@@ -1047,7 +1061,7 @@ object DexScanner {
             if (strings.size >= 2) {
                 val joined = strings.joinToString("")
                 // Only when no single piece already shows what the whole does.
-                if (strings.none { interesting(it) != null }) recordDecoded(Decoding.JOINED, joined, readable, key)
+                if (strings.none { interesting(it) != null }) recordDecoded(Decoding.JOINED, joined, readable, key, quiet = true)
             }
         }
 
@@ -1086,7 +1100,8 @@ object DexScanner {
                 } else state.hit(Rule(rule.capability, hit.api, true), readable, null)
                 info.apis.putIfAbsent(rule.capability, hit.api)
             }
-            url(text, key.substringBefore("->"))
+            // A join of unrelated constants would invent hosts such as "instagram.compriority".
+            if (technique != Decoding.JOINED) url(text, key.substringBefore("->"))
             return true
         }
 
@@ -1095,7 +1110,7 @@ object DexScanner {
             if (s.length > 2048) return
             url.findAll(s).take(3).forEach { m ->
                 val host = m.groupValues[2].lowercase().trim('[', ']')
-                if (host.isBlank() || host in ignoredHosts || '.' !in host && ':' !in host) return@forEach
+                if (host.isBlank() || host in ignoredHosts || !(NetAddress.isIp(host) || domain.matches(host))) return@forEach
                 val cleartext = m.groupValues[1] == "http"
                 val existing = state.destinations[host]
                 val public = NetAddress.isPublic(host)

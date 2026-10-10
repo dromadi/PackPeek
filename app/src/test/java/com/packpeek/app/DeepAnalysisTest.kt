@@ -78,4 +78,19 @@ class DeepAnalysisTest {
             assertArrayEquals(java.util.Base64.getDecoder().decode(it), DexScanner.decodeBase64(it))
         }
     }
+
+    /** Constants of one method are not one text: joins are kept only when they form a known destination. */
+    @Test
+    fun joinedPiecesAreNotNoise() {
+        assertTrue(deep.decoded.filter { it.technique == Decoding.JOINED }.all { it.capability != null })
+        val domain = Regex("""^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$""")
+        assertTrue(code.destinations.all { NetAddress.isIp(it.host) || domain.matches(it.host) })
+    }
+
+    @Test
+    fun reportNamesTheClassOfEachStep() {
+        assertEquals("OtpReceiver.onReceive", com.packpeek.app.ui.EvidenceReport.shortMethod("sim.packpeek.undangan.OtpReceiver.onReceive"))
+        assertEquals("b.invoke", com.packpeek.app.ui.EvidenceReport.shortMethod("a.b.invoke [OkHttp]"))
+        assertEquals("run", com.packpeek.app.ui.EvidenceReport.shortMethod("run"))
+    }
 }

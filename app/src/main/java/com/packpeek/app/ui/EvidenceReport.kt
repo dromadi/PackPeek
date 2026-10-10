@@ -56,7 +56,14 @@ object EvidenceReport {
                 line()
                 line("• ${texts[0]} [$severity]")
                 f.evidence.forEach { e ->
-                    val where = listOfNotNull(e.location.takeIf { it.isNotBlank() }, e.library).joinToString(" · ")
+                    val code = e.level == EvidenceLevel.CODE || e.level == EvidenceLevel.FLOW
+                    val origin =
+                        when {
+                            !code || e.location.isBlank() -> null
+                            e.library != null -> res.getString(R.string.ev_origin_library, e.library)
+                            else -> res.getString(R.string.ev_origin_app)
+                        }
+                    val where = listOfNotNull(e.location.takeIf { it.isNotBlank() }, origin ?: e.library.takeIf { !code }).joinToString(" · ")
                     line("  ${e.level.tag} ${evidenceText(res, e).replace("\n", " ")}${if (where.isBlank()) "" else " — $where"}")
                 }
             }
@@ -67,7 +74,7 @@ object EvidenceReport {
                     line(res.getString(R.string.section_chains) + ":")
                     deep.chains.forEach { c ->
                         line("  ${capabilityName(res, c.source)} → ${capabilityName(res, c.sink)}")
-                        line("    ${(c.toSource + c.toSink.drop(1)).distinct().joinToString(" → ") { it.method.substringAfterLast('.', it.method) }}")
+                        line("    ${(c.toSource + c.toSink.drop(1)).distinct().joinToString(" → ") { shortMethod(it.method) }}")
                         line("    ${c.sourceApi} → ${c.sinkApi}")
                     }
                 }
@@ -88,6 +95,13 @@ object EvidenceReport {
             line()
             line(res.getString(R.string.report_footer))
         }
+
+    /** "Class.method" from "package.Class.method", so a chain step names where it is. */
+    fun shortMethod(method: String): String {
+        val name = method.substringBefore(" [")
+        val cls = name.substringBeforeLast('.', "")
+        return if (cls.isEmpty()) name else "${cls.substringAfterLast('.')}.${name.substringAfterLast('.')}"
+    }
 
     fun sourceText(res: Resources, source: String) =
         res.getString(
