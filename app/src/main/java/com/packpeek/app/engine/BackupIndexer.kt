@@ -5,7 +5,9 @@ import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import com.packpeek.app.model.*
 import java.io.ByteArrayOutputStream
+import java.io.FilterInputStream
 import java.io.InputStream
+import java.io.InterruptedIOException
 import java.util.zip.ZipInputStream
 import kotlinx.coroutines.*
 
@@ -46,7 +48,50 @@ object StreamManifest {
     }
 }
 
+/**
+ * Caps what one archive may cost while looking for its manifest: raw bytes read and time, and stops
+ * as soon as [active] turns false. ZipInputStream inflates every skipped entry, so a huge set or a
+ * zip bomb would otherwise stall the scan; the clock is checked on every read, which also bounds
+ * inflating (each raw read can only expand so far).
+ */
+class LimitedInput(
+    input: InputStream,
+    private val maxBytes: Long,
+    private val deadline: Long,
+    private val active: () -> Boolean,
+) : FilterInputStream(input) {
+    var consumed = 0L
+        private set
+
+    private fun check() {
+        if (!active()) throw InterruptedIOException("cancelled")
+        if (consumed > maxBytes) throw InterruptedIOException("read limit")
+        if (System.currentTimeMillis() > deadline) throw InterruptedIOException("time limit")
+    }
+
+    override fun read(): Int {
+        check()
+        return super.read().also { if (it >= 0) consumed++ }
+    }
+
+    override fun read(b: ByteArray, off: Int, len: Int): Int {
+        check()
+        return super.read(b, off, len).also { if (it > 0) consumed += it }
+    }
+
+    override fun skip(n: Long): Long {
+        check()
+        return super.skip(n).also { consumed += it }
+    }
+}
+
 class BackupIndexer(private val context: Context) {
+    companion object {
+        /** Per archive: base manifests normally sit in the first entries. */
+        const val MAX_READ_BYTES = 1024L * 1024 * 1024
+        const val MAX_MILLIS_PER_FILE = 20_000L
+    }
+
     private data class Key(val uri: String, val modified: Long, val bytes: Long)
 
     /** Parsed manifests by file version; unreadable files map to an empty manifest. */
@@ -64,6 +109,7 @@ class BackupIndexer(private val context: Context) {
                     ?: throw AppFailure(ErrorCode.FOLDER)
             val files = tree.listFiles().filter { it.isFile && isPackageArchive(it.name.orEmpty()) }
             val seen = mutableSetOf<Key>()
+            val job = coroutineContext.job
             val result =
                 files.mapIndexedNotNull { index, doc ->
                     ensureActive()
@@ -74,9 +120,17 @@ class BackupIndexer(private val context: Context) {
                         synchronized(cache) { cache[key] }
                             ?: runCatching {
                                     context.contentResolver.openInputStream(doc.uri)?.use {
-                                        StreamManifest.read(it.buffered())
+                                        val limited =
+                                            LimitedInput(
+                                                it,
+                                                MAX_READ_BYTES,
+                                                System.currentTimeMillis() + MAX_MILLIS_PER_FILE,
+                                                job::isActive,
+                                            )
+                                        StreamManifest.read(limited.buffered())
                                     }
                                 }
+                                .also { ensureActive() }
                                 .getOrNull()
                                 .orEmpty()
                                 .also { synchronized(cache) { cache[key] = it } }
