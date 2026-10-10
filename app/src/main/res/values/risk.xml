@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Each array: title, impact, context, not yet proven, suggested action. -->
+    <string-array name="risk_otp_theft">
+        <item>OTP theft / account takeover pattern</item>
+        <item>The app can receive SMS, including bank and WhatsApp one-time codes, and can reach the internet. Fake invitation, traffic-ticket and parcel APKs use this combination to take over accounts.</item>
+        <item>This pattern appears because SMS access comes together with concealment or untrusted-source signs: a hidden icon, a file from outside an app store, a debug or brand-new certificate, or a luring name.</item>
+        <item>The app\'s code has not been analysed yet, so it is not proven that SMS are read or sent anywhere. This assessment comes from the manifest and context only.</item>
+        <item>Do not install this file. If it is installed: revoke SMS permission, uninstall it, then change passwords and re-enable two-step verification for important accounts (WhatsApp, bank, email).</item>
+    </string-array>
+    <string-array name="risk_screen_spying">
+        <item>Screen spying pattern</item>
+        <item>An accessibility service can read other apps\' screens, including messages, balances and typed text, and the app could send it over the internet.</item>
+        <item>This pattern appears because screen-reading accessibility comes together with other signs, such as a hidden icon, overlays, device admin, a notification listener or an untrusted source.</item>
+        <item>It is not proven that screen content is sent anywhere. The app\'s code has not been analysed yet.</item>
+        <item>Turn this app\'s accessibility service off in Settings → Accessibility unless you use it on purpose. Uninstall it if you do not recognise it.</item>
+    </string-array>
+    <string-array name="risk_accessibility">
+        <item>Accessibility service</item>
+        <item>When enabled, it can read screen content and tap on the user\'s behalf.</item>
+        <item>Normal for screen readers, password managers, automation tools and alternative launchers.</item>
+        <item>Not proven that screen data leaves the device. Code not analysed yet.</item>
+        <item>Enable it only if you know what it is for. Check Settings → Accessibility.</item>
+    </string-array>
+    <string-array name="risk_notifications">
+        <item>Notification listener</item>
+        <item>When enabled, the app can read every notification, including message text and one-time codes.</item>
+        <item>Normal for smartwatches, reminder apps and notification managers.</item>
+        <item>Not proven that notifications are stored or sent.</item>
+        <item>Allow it only for apps you trust. Check Settings → Notifications → Notification access.</item>
+    </string-array>
+    <string-array name="risk_device_admin">
+        <item>Device admin</item>
+        <item>A device admin can lock the screen, change the screen lock or even erase data, and is hard to uninstall while active.</item>
+        <item>Normal for work (MDM), find-my-device and parental control apps.</item>
+        <item>Not proven that these policies are used.</item>
+        <item>Deactivate it in Settings → Security → Device admin apps if not needed.</item>
+    </string-array>
+    <string-array name="risk_sms">
+        <item>SMS access</item>
+        <item>The app can receive or read SMS, including one-time codes.</item>
+        <item>Normal for SMS apps, some banking apps that auto-fill verification codes, and spam blockers.</item>
+        <item>Not proven that SMS are read or sent anywhere. Code not analysed yet.</item>
+        <item>If the app does not need SMS for its features, revoke the SMS permission in Settings → Apps.</item>
+    </string-array>
+    <string-array name="risk_sms_send">
+        <item>Sending SMS</item>
+        <item>The app can send SMS from your number, which can cost money or spread links to your contacts.</item>
+        <item>Normal for SMS apps and some verification apps.</item>
+        <item>Not proven that any SMS was sent.</item>
+        <item>Revoke the SMS permission if not needed and check your sent messages.</item>
+    </string-array>
+    <string-array name="risk_contacts_calls">
+        <item>Contacts and call history</item>
+        <item>The app can read your contact list or call history.</item>
+        <item>Normal for messaging, phone and contact backup apps.</item>
+        <item>Not proven that contact data leaves the device.</item>
+        <item>Revoke contacts or call log permission if unrelated to the app\'s purpose.</item>
+    </string-array>
+    <string-array name="risk_phone_identity">
+        <item>Phone identity and accounts</item>
+        <item>The app can read phone state, your number or the accounts on the device.</item>
+        <item>Common in calling apps, games and analytics SDKs that tell devices apart.</item>
+        <item>Not proven that this data is sent.</item>
+        <item>Revoke the \"Phone\" permission if the app does not make calls.</item>
+    </string-array>
+    <string-array name="risk_camera_mic">
+        <item>Camera and microphone</item>
+        <item>The app can use the camera or record audio once permitted.</item>
+        <item>Normal for photo, video, calling and QR apps. Android 12+ shows a green indicator while the camera or microphone is in use.</item>
+        <item>Not proven that recording happens in the background.</item>
+        <item>Choose \"Only while using the app\" or \"Ask every time\" for camera and microphone.</item>
+    </string-array>
+    <string-array name="risk_location">
+        <item>Location</item>
+        <item>The app can know where you are; with background location, also while it is closed.</item>
+        <item>Normal for maps, ride-hailing, weather and find-my-device apps.</item>
+        <item>Not proven that location is sent or stored.</item>
+        <item>Use approximate location or \"Only while using the app\" where possible.</item>
+    </string-array>
+    <string-array name="risk_screen_capture">
+        <item>Screen recording</item>
+        <item>The app can record or cast the whole screen after you accept Android\'s prompt.</item>
+        <item>Normal for screen recorders, meeting screen sharing and game streaming.</item>
+        <item>Android asks every time recording starts; not proven that anything was recorded.</item>
+        <item>Decline unexpected screen recording prompts, especially while opening banking apps.</item>
+    </string-array>
+    <string-array name="risk_overlay">
+        <item>Display over other apps</item>
+        <item>The app can draw windows over other apps, which can be abused for fake login screens.</item>
+        <item>Normal for chat bubbles, screen recorders and blue-light filters.</item>
+        <item>Not proven that it covers other apps.</item>
+        <item>Revoke it in Settings → Apps → Special access → Display over other apps if not needed.</item>
+    </string-array>
+    <string-array name="risk_persistence">
+        <item>Runs in the background</item>
+        <item>The app can start again after the phone boots, or is exempt from battery optimisation.</item>
+        <item>Normal for messaging, alarm and sync apps.</item>
+        <item>Not proven that it keeps running.</item>
+        <item>Remove the battery exemption if the app does not need to run in the background.</item>
+    </string-array>
+    <string-array name="risk_hidden_icon">
+        <item>No home screen icon</item>
+        <item>The app does not show in the app drawer, so it is easy to forget and harder to find for uninstalling.</item>
+        <item>Normal for keyboards, widgets, wallpapers and plug-ins opened from other apps.</item>
+        <item>Not known whether the icon is hidden on purpose.</item>
+        <item>Make sure you know what this app is. Uninstall it from Settings → Apps if you do not recognise it.</item>
+    </string-array>
+    <string-array name="risk_install_apps">
+        <item>Installs other apps</item>
+        <item>The app can ask to install other APKs, which can be used to download additional apps.</item>
+        <item>Normal for app stores, file managers, browsers and backup tools such as PackPeek.</item>
+        <item>Android still asks before every install; not proven that it was used.</item>
+        <item>Do not allow \"Install unknown apps\" for apps you do not trust.</item>
+    </string-array>
+    <string-array name="risk_all_files">
+        <item>All files access</item>
+        <item>The app can read and change every file in storage, including photos and documents.</item>
+        <item>Normal for file managers, antivirus and backup tools.</item>
+        <item>Not proven that files leave the device.</item>
+        <item>Revoke \"All files access\" if the app does not manage files.</item>
+    </string-array>
+    <string-array name="risk_cleartext">
+        <item>Unencrypted traffic allowed</item>
+        <item>The app may communicate without encryption (HTTP), so others on the same Wi-Fi could read the data.</item>
+        <item>Sometimes needed for local devices such as printers or CCTV cameras.</item>
+        <item>Not proven that sensitive data is sent unencrypted.</item>
+        <item>Avoid logging in or paying through this app on public Wi-Fi.</item>
+    </string-array>
+    <string-array name="risk_network_usage">
+        <item>Network data usage</item>
+        <item>Shows how much data the app used in the last 30 days, including while it was not open.</item>
+        <item>Background data is normal for sync, messaging and updates. Large amounts for an app you rarely use deserve a look.</item>
+        <item>These numbers do not show what the data was or where it went.</item>
+        <item>Restrict background data in Settings → Apps → Mobile data if the amount looks wrong.</item>
+    </string-array>
+    <string-array name="risk_untrusted_signer">
+        <item>Unusual signing certificate</item>
+        <item>The app is signed with a debug certificate or a very recently created one, which is common for quickly built APKs outside official stores.</item>
+        <item>Normal for self-built apps, test builds or PackPeek merged .apk files.</item>
+        <item>Does not prove the app is harmful.</item>
+        <item>Make sure you trust where the file came from before installing it.</item>
+    </string-array>
+
+    <string name="context_default_sms">This is your chosen default SMS app, so SMS access matches its purpose.</string>
+    <string name="context_system_app">This is a built-in system app; this capability is usually part of system functions.</string>
+
+    <string name="concerns">Concerns</string>
+    <string name="concerns_none">No concerns from this check.</string>
+    <string name="concerns_disclaimer">These results do not say an app is safe or harmful. Check the evidence level and \"Not yet proven\".</string>
+    <string name="severity_strong">Strong indicator</string>
+    <string name="severity_attention">Needs attention</string>
+    <string name="severity_info">Information</string>
+    <plurals name="severity_strong_count">
+        <item quantity="one">%1$d strong indicator</item>
+        <item quantity="other">%1$d strong indicators</item>
+    </plurals>
+    <plurals name="severity_attention_count">
+        <item quantity="one">%1$d needs attention</item>
+        <item quantity="other">%1$d need attention</item>
+    </plurals>
+    <plurals name="severity_info_count">
+        <item quantity="one">%1$d note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+    <string name="risk_found">What was found</string>
+    <string name="risk_impact">Impact for you</string>
+    <string name="risk_context">Context</string>
+    <string name="risk_unproven">Not yet proven</string>
+    <string name="risk_action">Suggested action</string>
+    <string name="level_declared">T1 Declared</string>
+    <string name="level_code">T2 In code</string>
+    <string name="level_flow">T3 Data flow</string>
+    <string name="level_observed">T4 Observed</string>
+    <string name="levels_explained">T1: written in the manifest. T2: function found in code. T3: data flow indicated. T4: observed on this device.</string>
+
+    <string name="ev_permission">Requests %1$s</string>
+    <string name="ev_component">Component %1$s</string>
+    <string name="ev_config_retrieve">Configuration: can read other apps\' screen content</string>
+    <string name="ev_config_gestures">Configuration: can perform taps and gestures</string>
+    <string name="ev_config_all_events">Configuration: receives every kind of screen event</string>
+    <string name="ev_accessibility_enabled">Accessibility service is ENABLED</string>
+    <string name="ev_notification_enabled">Notification listener is ENABLED</string>
+    <string name="ev_admin_active">Device admin is ACTIVE</string>
+    <string name="ev_default_sms">Chosen as the default SMS app</string>
+    <string name="ev_granted">%1$s is granted</string>
+    <string name="ev_overlay_allowed">Display over other apps is allowed</string>
+    <string name="ev_battery_exempt">Exempt from battery optimisation</string>
+    <string name="ev_sideloaded">Installed from outside an app store</string>
+    <string name="ev_file">APK file, not installed</string>
+    <string name="ev_no_launcher">No activity shown on the home screen</string>
+    <string name="ev_debug_cert">Signed with a debug certificate</string>
+    <string name="ev_new_cert">Certificate created recently (%1$s days ago)</string>
+    <string name="ev_lure_label">Luring app name: \"%1$s\"</string>
+    <string name="ev_cleartext">usesCleartextTraffic is enabled</string>
+    <string name="ev_network">30 days: %1$s while open, %2$s in the background</string>
+
+    <string name="coverage">Check coverage</string>
+    <plurals name="coverage_apks">
+        <item quantity="one">Manifest of %1$d APK checked</item>
+        <item quantity="other">Manifests of %1$d APKs checked</item>
+    </plurals>
+    <string name="coverage_unreadable">Could not read: %1$s</string>
+    <plurals name="coverage_configs">
+        <item quantity="one">%1$d configuration file could not be read</item>
+        <item quantity="other">%1$d configuration files could not be read</item>
+    </plurals>
+    <string name="coverage_no_code">App code (DEX) is not analysed yet. The next phase adds T2–T3 evidence.</string>
+    <string name="coverage_device">Device state read (enabled services, granted permissions)</string>
+    <string name="coverage_file">The file is not installed, so device state is unavailable</string>
+    <string name="coverage_usage_on">Data usage read through Usage access</string>
+    <string name="coverage_usage_off">Data usage not read because Usage access is not allowed</string>
+    <string name="grant_usage_access">Allow</string>
+
+    <string name="install_risk_title">Strong indicator found</string>
+    <string name="install_risk_body">The check found patterns often used by data-stealing apps:\n\n%1$s\n\nInstall anyway?</string>
+    <string name="install_anyway">Install anyway</string>
+    <string name="risk_badge_ok">None</string>
+    <string name="risk_badge_label">concerns</string>
+    <string name="old_score_title">Previous configuration score</string>
+
+    <string name="active_on_device">Active on this device</string>
+    <string name="active_on_device_note">These services can read the screen or notifications, or control the device. Make sure you recognise every app.</string>
+    <string name="active_accessibility">Accessibility services</string>
+    <string name="active_notifications">Notification listeners</string>
+    <string name="active_admins">Device admins</string>
+    <string name="active_default_sms">Default SMS app</string>
+    <string name="active_none">None</string>
+    <string name="usage_access">Usage access</string>
+    <string name="usage_access_on">Allowed: per-app data usage is shown as observed evidence</string>
+    <string name="usage_access_off">Not allowed. Optional: shows per-app data usage (not its content or destination).</string>
+    <string name="risk_analysis">Risk analysis</string>
+</resources>

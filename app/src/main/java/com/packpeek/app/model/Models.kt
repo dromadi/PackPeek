@@ -191,6 +191,8 @@ data class CertificateRow(
     val md5: String,
     val serial: String,
     val expired: Boolean,
+    /** Start of validity in epoch milliseconds; a very recent date is a weak warning sign. */
+    val notBefore: Long = 0,
 )
 
 data class AuditReport(

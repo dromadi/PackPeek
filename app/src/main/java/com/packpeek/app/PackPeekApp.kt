@@ -5,6 +5,8 @@ import android.os.Build
 import androidx.room.Room
 import com.packpeek.app.data.*
 import com.packpeek.app.engine.AuditEngine
+import com.packpeek.app.engine.risk.DeviceStateReader
+import com.packpeek.app.engine.risk.RiskEngine
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -18,6 +20,8 @@ class PackPeekApp : Application() {
     }
     val apps by lazy { AppRepository(this) }
     val audit by lazy { AuditEngine(apps) }
+    val deviceState by lazy { DeviceStateReader(this, apps) }
+    val risk by lazy { RiskEngine(deviceState) }
 
     val crashFile
         get() = File(filesDir, "last_crash.txt")

@@ -4,7 +4,9 @@
 
 **Bukan tujuan:** memberi vonis "aman" atau "malware". PackPeek menunjukkan apa yang ditemukan, seberapa kuat buktinya, dan apa yang belum terbukti.
 
-Dokumen ini adalah rencana untuk direview pemilik sebelum implementasi.
+Dokumen ini adalah rencana yang sudah disetujui pemilik: model T1–T4, skor diganti daftar kekhawatiran, pilihan B (Akses penggunaan), dan sampel `undangan-sim`.
+
+**Status:** tahap 1 selesai di 2.0.0-alpha.5. Tahap 2 (DEX) adalah langkah berikutnya.
 
 ## 1. Kondisi saat ini (2.0.0-alpha.4)
 

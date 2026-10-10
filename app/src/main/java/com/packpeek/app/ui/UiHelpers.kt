@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.provider.DocumentsContract
 import android.util.LruCache
 import android.widget.Toast
@@ -46,6 +47,18 @@ fun errorText(code: ErrorCode) =
         ErrorCode.MERGE -> R.string.error_merge
         else -> R.string.error_unknown
     }
+
+/** Opens the Usage access settings, on this app's own page where Android supports it. */
+fun openUsageAccess(context: Context) {
+    val generic = Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS)
+    val own =
+        Intent(generic).setData(Uri.parse("package:${context.packageName}"))
+    try {
+        context.startActivity(if (Build.VERSION.SDK_INT >= 29) own else generic)
+    } catch (e: Exception) {
+        context.launchSafe(generic)
+    }
+}
 
 fun Context.launchSafe(intent: Intent) {
     try {

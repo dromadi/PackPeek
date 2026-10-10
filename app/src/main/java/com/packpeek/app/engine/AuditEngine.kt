@@ -196,6 +196,7 @@ class AuditEngine(private val apps: AppRepository) {
                                 digest(c.encoded, "MD5"),
                                 c.serialNumber.toString(16),
                                 runCatching { c.checkValidity() }.isFailure,
+                                c.notBefore.time,
                             )
                         }
                             .getOrNull()

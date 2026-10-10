@@ -18,6 +18,8 @@ import androidx.work.*
 import com.packpeek.app.PackPeekApp
 import com.packpeek.app.data.*
 import com.packpeek.app.engine.*
+import com.packpeek.app.engine.risk.ActiveServices
+import com.packpeek.app.engine.risk.RiskReport
 import com.packpeek.app.model.*
 import java.util.UUID
 import kotlinx.coroutines.*
@@ -30,6 +32,8 @@ data class DetailState(
     val error: ErrorCode? = null,
     /** The latest backup when its signer differs from the installed app's signer now. */
     val signerChangedSince: BackupRecord? = null,
+    /** Evidence-based concerns; null while loading or when the analysis failed. */
+    val risk: RiskReport? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -258,6 +262,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { owner.settings.text(key, value) }
     }
 
+    val usageAccess = MutableStateFlow(false)
+    val activeServices = MutableStateFlow<ActiveServices?>(null)
+
+    /** Re-reads device-wide state; cheap, called when the overview or settings appear. */
+    fun refreshDeviceState() {
+        viewModelScope.launch(Dispatchers.IO) {
+            usageAccess.value = owner.deviceState.usageAccessGranted()
+            activeServices.value = owner.deviceState.activeServices()
+        }
+    }
+
     fun number(key: String, value: Int) {
         viewModelScope.launch { owner.settings.number(key, value) }
     }
@@ -379,7 +394,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             val now = owner.apps.signerDigest(app.packageName)
                             previous?.takeIf { now.isNotBlank() && it.signer != now }
                         }
-                detail.value = DetailState(app, report, signerChangedSince = changed)
+                detail.value = DetailState(app, report, loading = true, signerChangedSince = changed)
+                val risk =
+                    try {
+                        owner.risk.analyze(app, report)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        null
+                    }
+                detail.value = DetailState(app, report, signerChangedSince = changed, risk = risk)
                 if (!app.fromFile) {
                     riskScores.value = riskScores.value + (app.packageName to report.score)
                     tech.value = tech.value + (app.packageName to report.frameworks)

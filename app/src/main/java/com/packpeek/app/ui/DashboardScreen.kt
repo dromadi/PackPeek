@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.packpeek.app.R
 import com.packpeek.app.model.AppRecord
@@ -24,6 +25,12 @@ fun DashboardScreen(vm: MainViewModel, inspect: (AppRecord) -> Unit) {
     val tech by vm.technologies.collectAsStateWithLifecycle()
     val scores by vm.riskScores.collectAsStateWithLifecycle()
     val checking by vm.checkingOverview.collectAsStateWithLifecycle()
+    val active by vm.activeServices.collectAsStateWithLifecycle()
+    LifecycleResumeEffect(Unit) {
+        vm.refreshDeviceState()
+        onPauseOrDispose {}
+    }
+    val byPackage = remember(apps) { apps.associateBy { it.packageName } }
     val source = remember(apps) { apps.groupingBy { it.source }.eachCount().toList().sortedByDescending { it.second } }
     val sdk =
         remember(apps) {
@@ -63,6 +70,49 @@ fun DashboardScreen(vm: MainViewModel, inspect: (AppRecord) -> Unit) {
                     apps.count { it.split }.toString(),
                     Modifier.weight(1f),
                 )
+            }
+        }
+        active?.let { services ->
+            item {
+                RowGroup(title = stringResource(R.string.active_on_device)) {
+                    Text(
+                        stringResource(R.string.active_on_device_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(16.dp),
+                    )
+                    listOf(
+                            R.string.active_accessibility to services.accessibility,
+                            R.string.active_notifications to services.notificationListeners,
+                            R.string.active_admins to services.deviceAdmins,
+                            R.string.active_default_sms to setOfNotNull(services.defaultSms),
+                        )
+                        .forEach { (title, packages) ->
+                            GroupDivider()
+                            Text(
+                                stringResource(title),
+                                style = MaterialTheme.typography.labelLarge,
+                                modifier = Modifier.padding(start = 16.dp, top = 12.dp),
+                            )
+                            if (packages.isEmpty())
+                                Text(
+                                    stringResource(R.string.active_none),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(start = 16.dp, top = 4.dp, bottom = 12.dp),
+                                )
+                            packages.sorted().forEach { pkg ->
+                                val app = byPackage[pkg]
+                                if (app != null) AppLine(app, null, { inspect(app) })
+                                else
+                                    Text(
+                                        pkg,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                    )
+                            }
+                        }
+                }
             }
         }
         item {

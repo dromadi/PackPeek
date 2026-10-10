@@ -5,10 +5,10 @@ import android.net.Uri
 import android.os.Build
 import com.android.apksig.ApkVerifier
 import com.packpeek.app.data.AppRepository
+import com.packpeek.app.engine.risk.BinaryXml
+import com.packpeek.app.engine.risk.XmlNode
 import com.packpeek.app.model.*
 import java.io.*
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.util.UUID
 import java.util.zip.ZipFile
 import kotlinx.coroutines.*
@@ -135,9 +135,8 @@ class ArchiveImporter(private val context: Context, private val apps: AppReposit
         }
 }
 
-/** Bounded binary XML parser for manifest metadata. It never executes APK code. */
+/** Manifest root attributes and launcher entries, read with [BinaryXml]. Never executes code. */
 object ManifestRoot {
-    private const val LIMIT = 2 * 1024 * 1024
     private val launcherCategories =
         setOf("android.intent.category.LAUNCHER", "android.intent.category.LEANBACK_LAUNCHER")
 
@@ -150,28 +149,19 @@ object ManifestRoot {
 
     fun decode(bytes: ByteArray): Map<String, String> = parse(bytes).root
 
-    private fun parseFile(apk: File): Manifest =
+    fun readTree(apk: File): XmlNode =
         failClosed {
             ZipFile(apk).use { zip ->
-                val entry =
-                    zip.getEntry("AndroidManifest.xml") ?: throw AppFailure(ErrorCode.ARCHIVE)
-                val bytes =
-                    zip.getInputStream(entry).use { input ->
-                        val out = ByteArrayOutputStream()
-                        val buffer = ByteArray(8192)
-                        while (true) {
-                            val n = input.read(buffer)
-                            if (n < 0) break
-                            require(out.size() + n <= LIMIT)
-                            out.write(buffer, 0, n)
-                        }
-                        out.toByteArray()
-                    }
-                parse(bytes)
+                BinaryXml.parse(
+                    BinaryXml.readEntry(zip, "AndroidManifest.xml")
+                        ?: throw AppFailure(ErrorCode.ARCHIVE)
+                )
             }
         }
 
-    fun parse(bytes: ByteArray): Manifest = failClosed { walk(bytes) }
+    private fun parseFile(apk: File): Manifest = summarize(readTree(apk))
+
+    fun parse(bytes: ByteArray): Manifest = summarize(BinaryXml.parse(bytes))
 
     private inline fun <T> failClosed(block: () -> T): T =
         try {
@@ -182,107 +172,29 @@ object ManifestRoot {
             throw AppFailure(ErrorCode.ARCHIVE, e)
         }
 
-    private fun walk(bytes: ByteArray): Manifest {
-        val b = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
-        fun u16(p: Int) = b.getShort(p).toInt() and 65535
-        fun i32(p: Int) = b.getInt(p)
-        require(bytes.size >= 8 && bytes.size <= LIMIT && u16(0) == 3)
-        var pos = u16(2)
-        var strings = emptyList<String>()
-        fun str(index: Int): String {
-            require(index in strings.indices)
-            return strings[index]
-        }
-        var root: Map<String, String>? = null
-        val launchers = mutableSetOf<String>()
-        val stack = ArrayList<String>()
-        var activity: String? = null
-        while (pos + 8 <= bytes.size) {
-            val type = u16(pos)
-            val header = u16(pos + 2)
-            val size = i32(pos + 4)
-            require(size >= 8 && size <= bytes.size - pos && header in 8..size)
-            val end = pos + size
-            if (type == 1) {
-                val count = i32(pos + 8)
-                val utf8 = i32(pos + 16) and 256 != 0
-                val start = pos + i32(pos + 20)
-                require(count in 0..100000 && pos + header + 4L * count <= end)
-                require(start in pos..end)
-                strings =
-                    (0 until count).map { index ->
-                        var p = start + i32(pos + header + 4 * index)
-                        require(p in start until end)
-                        fun len8(): Int {
-                            val n = bytes[p++].toInt() and 255
-                            return if (n and 128 != 0)
-                                ((n and 127) shl 8) or (bytes[p++].toInt() and 255)
-                            else n
-                        }
-                        fun len16(): Int {
-                            val n = u16(p)
-                            p += 2
-                            return if (n and 32768 != 0)
-                                ((n and 32767) shl 16) or u16(p).also { p += 2 }
-                            else n
-                        }
-                        if (utf8) {
-                            len8()
-                            val n = len8()
-                            require(n <= 32768 && p + n <= end)
-                            String(bytes, p, n, Charsets.UTF_8)
-                        } else {
-                            val n = len16()
-                            require(n <= 32768 && p + 2 * n <= end)
-                            String(bytes, p, n * 2, Charsets.UTF_16LE)
+    private fun summarize(tree: XmlNode): Manifest {
+        if (tree.name != "manifest") throw AppFailure(ErrorCode.ARCHIVE)
+        // Legacy rendering: unsigned decimal for non-string values, as split checks compare it.
+        val root = tree.attrs.mapValues { (_, v) -> v.text ?: v.data.toUInt().toString() }
+        val pkg = root["package"].orEmpty()
+        val launchers =
+            tree.child("application")
+                .flatMap { it.children }
+                .filter { it.name == "activity" || it.name == "activity-alias" }
+                .filter { activity ->
+                    activity.child("intent-filter").any { filter ->
+                        filter.child("category").any {
+                            it["name"]?.asString() in launcherCategories
                         }
                     }
-            } else if (type == 0x102) {
-                val ext = pos + header
-                require(ext + 20 <= end)
-                val element = str(i32(ext + 4))
-                val first = ext + u16(ext + 8)
-                val stride = u16(ext + 10)
-                val count = u16(ext + 12)
-                require(stride >= 20 && count <= 1000 && first + stride.toLong() * count <= end)
-                val attributes =
-                    (0 until count).associate { index ->
-                        val p = first + stride * index
-                        val raw = i32(p + 8)
-                        val t = bytes[p + 15].toInt() and 255
-                        val value = i32(p + 16)
-                        str(i32(p + 4)) to
-                            if (raw >= 0) str(raw)
-                            else if (t == 3) str(value) else value.toUInt().toString()
-                    }
-                if (root == null) {
-                    require(element == "manifest")
-                    root = attributes
                 }
-                val parent = stack.lastOrNull()
-                if (
-                    parent == "application" &&
-                        (element == "activity" || element == "activity-alias")
-                )
-                    activity = qualify(root["package"].orEmpty(), attributes["name"].orEmpty())
-                if (
-                    element == "category" &&
-                        parent == "intent-filter" &&
-                        attributes["name"] in launcherCategories
-                )
-                    activity?.let { launchers += it }
-                stack += element
-                require(stack.size <= 64)
-            } else if (type == 0x103) {
-                val closed = stack.removeLastOrNull()
-                if (closed == "activity" || closed == "activity-alias") activity = null
-            }
-            pos = end
-        }
-        return Manifest(root ?: throw AppFailure(ErrorCode.ARCHIVE), launchers)
+                .mapNotNull { it["name"]?.asString() }
+                .map { qualify(pkg, it) }
+                .toSet()
+        return Manifest(root, launchers)
     }
 
-    private fun qualify(pkg: String, name: String): String =
+    fun qualify(pkg: String, name: String): String =
         when {
             name.startsWith('.') -> pkg + name
             '.' !in name -> "$pkg.$name"

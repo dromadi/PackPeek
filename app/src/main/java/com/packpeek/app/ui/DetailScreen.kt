@@ -18,6 +18,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -25,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.packpeek.app.R
+import com.packpeek.app.engine.risk.Severity
 import com.packpeek.app.model.*
 import java.text.DateFormat
 import java.util.Date
@@ -41,7 +49,33 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
     val installing by vm.installing.collectAsStateWithLifecycle()
     var tab by remember(app.basePath) { mutableIntStateOf(0) }
     var menu by remember { mutableStateOf(false) }
-    Column(Modifier.fillMaxSize()) {
+    var confirmInstall by remember { mutableStateOf(false) }
+    if (confirmInstall) {
+        val strong = state.risk?.findings.orEmpty().filter { it.severity == Severity.STRONG }
+        val titles = strong.map { "• " + resources.getStringArray(riskTexts(it.id))[0] }
+        AlertDialog(
+            onDismissRequest = { confirmInstall = false },
+            icon = { Icon(PackIcons.GppMaybe, null, tint = MaterialTheme.colorScheme.error) },
+            title = { Text(stringResource(R.string.install_risk_title)) },
+            text = { Text(stringResource(R.string.install_risk_body, titles.joinToString("\n"))) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmInstall = false
+                        vm.install()
+                    }
+                ) {
+                    Text(stringResource(R.string.install_anyway), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                Button(onClick = { confirmInstall = false }) { Text(stringResource(R.string.cancel)) }
+            },
+        )
+    }
+    val collapse = remember { CollapseState() }
+    Column(Modifier.fillMaxSize().nestedScroll(collapse.connection)) {
+        CollapsingHeader(collapse) {
         Row(
             Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -67,7 +101,8 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            if (report != null) ScoreBadge(report.score)
+            val risk = state.risk
+            if (risk != null) RiskBadge(risk) else if (report != null) ScoreBadge(report.score)
         }
         Row(
             Modifier.fillMaxWidth().padding(horizontal = 16.dp),
@@ -99,6 +134,7 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                                     Uri.parse("package:${c.packageName}"),
                                 )
                             )
+                        else if ((state.risk?.count(Severity.STRONG) ?: 0) > 0) confirmInstall = true
                         else vm.install()
                     },
                 ) {
@@ -178,6 +214,7 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                 }
             }
         }
+        }
         val tabs =
             listOf(
                 R.string.overview,
@@ -226,6 +263,14 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                 }
                 when (tab) {
                     0 -> {
+                        state.risk?.let { risk ->
+                            item {
+                                SectionTitle(stringResource(R.string.concerns))
+                                RiskSummary(risk)
+                            }
+                            items(risk.findings, key = { "risk:${it.id}" }) { FindingCard(it) }
+                            item { CoverageCard(risk.coverage) { openUsageAccess(c) } }
+                        }
                         state.signerChangedSince?.let { previous ->
                             item {
                                 Surface(
@@ -316,7 +361,10 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                         }
                         if (report != null)
                             item {
-                                RowGroup(title = stringResource(R.string.review_title)) {
+                                RowGroup(
+                                    title =
+                                        "${stringResource(R.string.old_score_title)} · ${report.score}/100"
+                                ) {
                                     Text(
                                         stringResource(R.string.audit_disclaimer),
                                         style = MaterialTheme.typography.bodySmall,
@@ -624,3 +672,51 @@ fun findingBody(code: FindingCode): Int =
         FindingCode.SIDELOAD -> R.string.find_source_body
         FindingCode.DEBUG_CERT -> R.string.find_debug_cert_body
     }
+
+/** Header that folds away while the list scrolls up and returns once the list is back on top. */
+private class CollapseState {
+    var height by mutableFloatStateOf(0f)
+    var offset by mutableFloatStateOf(0f)
+
+    val connection =
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y >= 0) return Offset.Zero
+                val next = (offset + available.y).coerceIn(-height, 0f)
+                val used = next - offset
+                offset = next
+                return Offset(0f, used)
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (available.y <= 0) return Offset.Zero
+                val next = (offset + available.y).coerceIn(-height, 0f)
+                val used = next - offset
+                offset = next
+                return Offset(0f, used)
+            }
+
+            // A fling that reaches the top of the list opens the header fully.
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                if (available.y > 0) offset = 0f
+                return Velocity.Zero
+            }
+        }
+}
+
+@Composable
+private fun CollapsingHeader(state: CollapseState, content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        Modifier.clipToBounds().layout { measurable, constraints ->
+            val placeable = measurable.measure(constraints.copy(minHeight = 0))
+            state.height = placeable.height.toFloat()
+            val visible = (placeable.height + state.offset).toInt().coerceAtLeast(0)
+            layout(placeable.width, visible) { placeable.place(0, state.offset.toInt()) }
+        },
+        content = content,
+    )
+}

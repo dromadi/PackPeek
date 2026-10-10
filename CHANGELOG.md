@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.0-alpha.5 — 2026-10-10
+
+Analisis risiko berbasis bukti, tahap 1 (lihat `docs/ANALISIS_RISIKO.md`).
+
+- **Kekhawatiran** menggantikan skor angka di bagian atas layar detail. Setiap temuan menampilkan apa yang ditemukan beserta lokasinya, dampak, konteks, yang belum terbukti, dan tindakan yang disarankan, dengan tingkat bukti T1 (dideklarasikan) dan T4 (teramati). Skor lama masih ditampilkan di bawah sebagai pembanding.
+- **Manifest semua APK** (base dan split) dibaca lewat parser XML biner baru, termasuk konfigurasi `res/xml` layanan aksesibilitas dan admin perangkat yang di-resolve lewat `resources.arsc`.
+- **Katalog kemampuan:** aksesibilitas (membaca layar, gestur), pembaca notifikasi, admin perangkat, SMS (penerima beserta prioritas), kirim SMS, kontak dan panggilan, identitas telepon, kamera/mikrofon, lokasi, perekaman layar, overlay, berjalan di latar belakang, ikon tersembunyi, memasang aplikasi lain, akses semua berkas, cleartext, dan sertifikat tidak biasa.
+- **Pola gabungan:** pencurian OTP / pengambilalihan akun (modus `undangan.apk`) dan pengintaian layar menjadi "indikator kuat" hanya bila beberapa bukti muncul bersama. Aplikasi SMS bawaan dan aplikasi sistem diberi konteks, bukan dituduh.
+- **Bukti teramati (T4):** layanan aksesibilitas, pembaca notifikasi, dan admin perangkat yang aktif, aplikasi SMS bawaan, izin yang diberikan, izin overlay, pengecualian baterai, serta pemakaian data 30 hari (latar depan/latar belakang) lewat izin opsional **Akses penggunaan**.
+- **Sebelum pasang:** berkas dengan indikator kuat meminta konfirmasi tambahan; tombol Batal menjadi pilihan utama.
+- **Ringkasan:** bagian "Aktif di perangkat ini" berisi aplikasi dengan aksesibilitas, pembaca notifikasi, atau admin perangkat yang aktif, serta aplikasi SMS bawaan.
+- **Pengaturan:** baris Akses penggunaan (opsional).
+- Header layar detail melipat saat digulir, agar isi mendapat lebih banyak ruang pada ukuran huruf besar.
+- Sampel uji `tools/undangan-sim/` tanpa kode sama sekali, dibangun dengan `aapt2`, dipakai di unit test.
+
 ## 2.0.0-alpha.4 — 2026-10-10
 
 Perombakan UI/UX. Perbandingan sebelum/sesudah: `docs/ui-redesign-before-after.png`.

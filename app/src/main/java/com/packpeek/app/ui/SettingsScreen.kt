@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.packpeek.app.BuildConfig
 import com.packpeek.app.R
@@ -29,6 +30,11 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val s = settings ?: return
     val c = LocalContext.current
+    val usageAccess by vm.usageAccess.collectAsStateWithLifecycle()
+    LifecycleResumeEffect(Unit) {
+        vm.refreshDeviceState()
+        onPauseOrDispose {}
+    }
     val sample =
         AppRecord(
             "com.example.app",
@@ -103,6 +109,20 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
                     icon = Icons.Rounded.CheckCircle,
                 ) {
                     vm.flag("confirm", it)
+                }
+            }
+        }
+        item {
+            RowGroup(title = stringResource(R.string.risk_analysis)) {
+                ActionRow(
+                    stringResource(R.string.usage_access),
+                    stringResource(
+                        if (usageAccess) R.string.usage_access_on else R.string.usage_access_off
+                    ),
+                    PackIcons.Insights,
+                    onClick = { openUsageAccess(c) },
+                ) {
+                    Switch(checked = usageAccess, onCheckedChange = null)
                 }
             }
         }
