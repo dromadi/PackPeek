@@ -237,46 +237,50 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
             }
         }
         val error by vm.error.collectAsStateWithLifecycle()
-        if (error != null)
+        // Dialog content composes separately from this scope and can run once more after the
+        // state is cleared, so every dialog works on a captured non-null value, never `!!`.
+        error?.let { code ->
             AlertDialog(
                 onDismissRequest = { vm.error.value = null },
                 title = { Text(stringResource(R.string.attention)) },
-                text = { Text(stringResource(errorText(error!!))) },
+                text = { Text(stringResource(errorText(code))) },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            val folder = error == ErrorCode.FOLDER
                             vm.error.value = null
-                            if (folder) folderPicker.launch(null)
+                            if (code == ErrorCode.FOLDER) folderPicker.launch(null)
                         }
                     ) {
                         Text(
                             stringResource(
-                                if (error == ErrorCode.FOLDER) R.string.choose_folder
+                                if (code == ErrorCode.FOLDER) R.string.choose_folder
                                 else R.string.close
                             )
                         )
                     }
                 },
             )
+        }
         val confirmation by vm.confirmation.collectAsStateWithLifecycle()
-        if (confirmation != null)
+        val current = settings
+        val pending = confirmation
+        if (pending != null && current != null)
             AlertDialog(
                 onDismissRequest = { vm.confirmation.value = null },
                 title = { Text(stringResource(R.string.confirm_backup)) },
                 text = {
                     Column {
-                        Text(stringResource(R.string.backup_count, confirmation!!.size))
+                        Text(stringResource(R.string.backup_count, pending.size))
                         Text(
-                            folderName(c, settings!!.folder),
+                            folderName(c, current.folder),
                             style = MaterialTheme.typography.bodySmall,
                         )
                         LazyColumn(Modifier.heightIn(max = 300.dp)) {
-                            items(confirmation!!) { app ->
+                            items(pending) { app ->
                                 Column(Modifier.padding(vertical = 8.dp)) {
                                     Text(app.label)
                                     Text(
-                                        FileNames.format(app, settings!!.naming),
+                                        FileNames.format(app, current.naming),
                                         style = MaterialTheme.typography.bodySmall,
                                     )
                                     Text(
@@ -287,13 +291,13 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                             }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(settings!!.confirm, { vm.flag("confirm", it) })
+                            Checkbox(current.confirm, { vm.flag("confirm", it) })
                             Text(stringResource(R.string.confirm_each_time))
                         }
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { vm.startBackup(confirmation!!.toList()) }) {
+                    TextButton(onClick = { vm.startBackup(pending) }) {
                         Text(stringResource(R.string.extract))
                     }
                 },
@@ -303,17 +307,18 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                     }
                 },
             )
+        val job = latest
         if (
-            latest != null &&
-                latest!!.state in listOf("COMPLETED", "FAILED", "CANCELLED") &&
-                !latest!!.dismissed
+            job != null &&
+                job.state in listOf("COMPLETED", "FAILED", "CANCELLED") &&
+                !job.dismissed
         )
             AlertDialog(
                 onDismissRequest = vm::dismissResult,
                 title = {
                     Text(
                         stringResource(
-                            if (latest!!.state == "CANCELLED") R.string.backup_cancelled
+                            if (job.state == "CANCELLED") R.string.backup_cancelled
                             else R.string.backup_result
                         )
                     )
@@ -335,7 +340,7 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                                 )
                             )
                             Text(
-                                folderName(c, latest!!.folder),
+                                folderName(c, job.folder),
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
@@ -364,7 +369,7 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                 },
                 dismissButton = {
                     Row {
-                        TextButton(onClick = { openFolder(c, latest!!.folder) }) {
+                        TextButton(onClick = { openFolder(c, job.folder) }) {
                             Text(stringResource(R.string.open_folder))
                         }
                         TextButton(
@@ -383,15 +388,48 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                     }
                 },
             )
+        val crash by vm.lastCrash.collectAsStateWithLifecycle()
+        crash?.let { log ->
+            AlertDialog(
+                onDismissRequest = vm::clearCrash,
+                title = { Text(stringResource(R.string.crash_title)) },
+                text = {
+                    Column {
+                        Text(stringResource(R.string.crash_body))
+                        Text(
+                            log.lineSequence().take(12).joinToString("\n"),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier =
+                                Modifier.heightIn(max = 240.dp)
+                                    .verticalScroll(rememberScrollState()),
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            c.copyText(log)
+                            vm.clearCrash()
+                        }
+                    ) {
+                        Text(stringResource(R.string.crash_copy))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = vm::clearCrash) { Text(stringResource(R.string.close)) }
+                },
+            )
+        }
         val icon by vm.iconSaved.collectAsStateWithLifecycle()
-        if (icon != null)
+        val saved = icon
+        if (saved != null)
             AlertDialog(
                 onDismissRequest = { vm.iconSaved.value = null },
                 title = { Text(stringResource(R.string.icon_saved)) },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            shareFiles(c, listOf(icon!!), "image/png")
+                            shareFiles(c, listOf(saved), "image/png")
                             vm.iconSaved.value = null
                         }
                     ) {

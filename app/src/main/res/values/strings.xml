@@ -219,4 +219,7 @@
     <string name="licenses">Open-source notices</string>
     <string name="install_success">Installation completed</string>
     <string name="install_failed">Installation failed or was cancelled</string>
+    <string name="crash_title">PackPeek stopped last time</string>
+    <string name="crash_body">The error details are saved on this device only. Copy them and send them to the developer.</string>
+    <string name="crash_copy">Copy error log</string>
 </resources>

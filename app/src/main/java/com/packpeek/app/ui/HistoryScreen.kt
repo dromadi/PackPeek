@@ -83,7 +83,8 @@ fun HistoryScreen(vm: MainViewModel, onInspect: () -> Unit) {
             }
         }
     }
-    if (hide != null)
+    val target = hide
+    if (target != null)
         AlertDialog(
             onDismissRequest = { hide = null },
             title = { Text(stringResource(R.string.hide_history)) },
@@ -91,7 +92,7 @@ fun HistoryScreen(vm: MainViewModel, onInspect: () -> Unit) {
             confirmButton = {
                 TextButton(
                     onClick = {
-                        vm.hideRecord(hide!!)
+                        vm.hideRecord(target)
                         hide = null
                     }
                 ) {

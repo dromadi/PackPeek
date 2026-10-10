@@ -56,6 +56,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val importing = MutableStateFlow(false)
     val installing = MutableStateFlow(false)
     val iconSaved = MutableStateFlow<Uri?>(null)
+    val lastCrash = MutableStateFlow(runCatching { owner.crashFile.readText() }.getOrNull())
     val latestJob = dao.latest().stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val jobRecords =
         latestJob
@@ -333,6 +334,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun dismissResult() {
         latestJob.value?.let { job -> viewModelScope.launch { dao.dismiss(job.id) } }
+    }
+
+    fun clearCrash() {
+        lastCrash.value = null
+        runCatching { owner.crashFile.delete() }
     }
 
     fun hideRecord(id: Long) {

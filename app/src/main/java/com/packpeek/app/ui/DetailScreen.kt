@@ -169,16 +169,17 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                if (state.error != null)
+                state.error?.let { failure ->
                     item {
                         Text(
-                            stringResource(errorText(state.error!!)),
+                            stringResource(errorText(failure)),
                             color = MaterialTheme.colorScheme.error,
                         )
                         TextButton(onClick = { vm.inspect(app) }) {
                             Text(stringResource(R.string.retry))
                         }
                     }
+                }
                 when (tab) {
                     0 -> {
                         item {

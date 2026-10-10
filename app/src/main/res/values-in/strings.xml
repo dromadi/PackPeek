@@ -219,4 +219,7 @@
     <string name="licenses">Lisensi sumber terbuka</string>
     <string name="install_success">Instalasi selesai</string>
     <string name="install_failed">Instalasi gagal atau dibatalkan</string>
+    <string name="crash_title">PackPeek berhenti sebelumnya</string>
+    <string name="crash_body">Detail error hanya disimpan di perangkat ini. Salin lalu kirimkan ke pengembang.</string>
+    <string name="crash_copy">Salin log error</string>
 </resources>
