@@ -236,10 +236,17 @@
     </string-array>
     <string-array name="risk_dynamic_code">
         <item>Memuat kode tambahan</item>
-        <item>Aplikasi dapat memuat atau menjalankan kode yang tidak ikut diperiksa: DEX/APK tersembunyi di dalam paket, packer yang mengenkripsi kode, class loader, atau perintah shell.</item>
+        <item>Aplikasi dapat memuat atau menjalankan kode yang tidak ikut diperiksa: DEX/APK tersembunyi di dalam paket, packer yang mengenkripsi kode, atau class loader.</item>
         <item>Aplikasi besar memakai pemuatan dinamis untuk plug-in dan pembaruan, dan sebagian perusahaan melindungi kodenya dengan packer.</item>
         <item></item>
         <item>Anggap hasil pemeriksaan untuk aplikasi ini belum lengkap. Lebih berhati-hati bila aplikasinya juga berasal dari luar toko aplikasi.</item>
+    </string-array>
+    <string-array name="risk_shell_command">
+        <item>Menjalankan perintah shell</item>
+        <item>Kode memulai perintah sistem (Runtime.exec atau ProcessBuilder). Perintah bisa membaca informasi perangkat atau log, dan pada perangkat yang di-root bisa jauh lebih banyak.</item>
+        <item>Pelapor crash dan SDK info perangkat sering menjalankan perintah tidak berbahaya seperti getprop atau logcat. Paling penting bila kode aplikasi sendiri yang melakukannya.</item>
+        <item></item>
+        <item>Periksa apakah aplikasi memang membutuhkannya. Waspada bila aplikasi juga meminta akses root atau berasal dari luar toko aplikasi.</item>
     </string-array>
     <string-array name="risk_clipboard">
         <item>Membaca clipboard</item>

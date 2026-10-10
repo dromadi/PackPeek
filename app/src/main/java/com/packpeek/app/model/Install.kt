@@ -97,6 +97,17 @@ object InstallErrors {
             else -> InstallWait.NO_RESULT
         }
 
+    /**
+     * Lowest target SDK a new install may have on [deviceSdk]: Android 14 refuses below 23,
+     * Android 15 and later below 24. Null when the device has no such limit.
+     */
+    fun minTargetSdk(deviceSdk: Int): Int? =
+        when {
+            deviceSdk >= 35 -> 24
+            deviceSdk >= 34 -> 23
+            else -> null
+        }
+
     fun classify(status: Int, message: String?): InstallFailure {
         val text = message.orEmpty().uppercase(Locale.ROOT)
         return byMessage.firstOrNull { text.contains(it.first) }?.second
@@ -133,7 +144,7 @@ fun readiness(input: ReadinessInput): List<ReadinessIssue> = buildList {
     if (input.signatureValid == false) add(ReadinessIssue.SIGNATURE_INVALID)
     if (input.minSdk > input.deviceSdk) add(ReadinessIssue.SDK)
     // Android 14 refuses new installs that target API 22 or lower.
-    if (input.deviceSdk >= 34 && input.targetSdk < 23) add(ReadinessIssue.TARGET)
+    InstallErrors.minTargetSdk(input.deviceSdk)?.let { if (input.targetSdk < it) add(ReadinessIssue.TARGET) }
     val device = input.deviceAbis.map { it.replace('_', '-') }
     if (input.abis.isNotEmpty() && input.abis.none { it.replace('_', '-') in device })
         add(ReadinessIssue.ABI)

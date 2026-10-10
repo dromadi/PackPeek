@@ -314,7 +314,6 @@
     <string name="ready_warning">Mungkin gagal dipasang</string>
     <string name="ready_signature_invalid">• Tanda tangan APK tidak valid; Android akan menolaknya.</string>
     <string name="ready_sdk">• Butuh Android API %1$d; perangkat ini API %2$d.</string>
-    <string name="ready_target">• Menargetkan API %1$d; Android 14 ke atas menolak aplikasi di bawah API 23.</string>
     <string name="ready_abi">• Kode native hanya untuk %1$s; perangkat ini mendukung %2$s.</string>
     <string name="ready_features">• Fitur perangkat wajib yang tidak ada: %1$s</string>
     <string name="ready_signer">• Ditandatangani sertifikat yang berbeda dengan aplikasi terpasang. Pembaruan harus mencopot aplikasi lama dulu.</string>
@@ -359,4 +358,5 @@
     <string name="delete">Hapus</string>
     <string name="delete_backup_title">Hapus backup?</string>
     <string name="delete_backup_body">%1$s akan dihapus dari folder backup. Tindakan ini tidak bisa dibatalkan.</string>
+    <string name="ready_target_min">• Menargetkan API %1$d; versi Android ini menolak aplikasi baru di bawah API %2$d.</string>
 </resources>

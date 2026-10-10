@@ -53,6 +53,7 @@ fun riskTexts(id: RiskId): Int =
         RiskId.HIDDEN_DESTINATION -> R.array.risk_hidden_destination
         RiskId.CALL_FORWARDING -> R.array.risk_call_forwarding
         RiskId.DYNAMIC_CODE -> R.array.risk_dynamic_code
+        RiskId.SHELL_COMMAND -> R.array.risk_shell_command
         RiskId.CLIPBOARD -> R.array.risk_clipboard
         RiskId.WEB_LOGIN -> R.array.risk_web_login
         RiskId.AD_SDKS -> R.array.risk_ad_sdks

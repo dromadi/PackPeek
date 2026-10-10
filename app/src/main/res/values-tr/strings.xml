@@ -216,7 +216,6 @@
     <string name="ready_warning">Kurulmayabilir</string>
     <string name="ready_signature_invalid">• APK imzası geçerli değil; Android reddedecek.</string>
     <string name="ready_sdk">• Android API %1$d gerekiyor; bu cihazda API %2$d var.</string>
-    <string name="ready_target">• API %1$d hedefliyor; Android 14 ve sonrası API 23 altındaki uygulamaları reddeder.</string>
     <string name="ready_abi">• Yerel kod yalnızca %1$s için; bu cihaz %2$s destekliyor.</string>
     <string name="ready_features">• Eksik zorunlu cihaz özellikleri: %1$s</string>
     <string name="ready_signer">• Kurulu uygulamadan farklı bir sertifikayla imzalanmış. Güncellemek için önce onu kaldırmak gerekir.</string>

@@ -146,4 +146,16 @@ class InstallRulesTest {
         assertTrue(InstallResult("a.b").answers(7, "a.b"))
         assertFalse(InstallResult("c.d").answers(7, "a.b"))
     }
+
+    /** Android 14 refuses targets below 23; Android 15 and later below 24. */
+    @Test
+    fun targetLimitFollowsTheAndroidVersion() {
+        assertNull(InstallErrors.minTargetSdk(33))
+        assertEquals(23, InstallErrors.minTargetSdk(34))
+        assertEquals(24, InstallErrors.minTargetSdk(35))
+        assertEquals(24, InstallErrors.minTargetSdk(36))
+        // A target-23 APK is fine on Android 14 but refused on Android 15.
+        assertFalse(ReadinessIssue.TARGET in readiness(input(targetSdk = 23, deviceSdk = 34)))
+        assertTrue(ReadinessIssue.TARGET in readiness(input(targetSdk = 23, deviceSdk = 35)))
+    }
 }

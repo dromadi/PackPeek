@@ -216,7 +216,6 @@
     <string name="ready_warning">शायद इंस्टॉल न हो</string>
     <string name="ready_signature_invalid">• APK सिग्नेचर मान्य नहीं है; Android इसे अस्वीकार करेगा।</string>
     <string name="ready_sdk">• Android API %1$d चाहिए; इस डिवाइस पर API %2$d है।</string>
-    <string name="ready_target">• API %1$d को टारगेट करता है; Android 14 और बाद के वर्शन API 23 से नीचे के ऐप्स अस्वीकार करते हैं।</string>
     <string name="ready_abi">• नेटिव कोड सिर्फ़ %1$s के लिए है; यह डिवाइस %2$s सपोर्ट करता है।</string>
     <string name="ready_features">• डिवाइस में ज़रूरी सुविधाएँ नहीं हैं: %1$s</string>
     <string name="ready_signer">• इंस्टॉल किए गए ऐप से अलग सर्टिफ़िकेट से साइन किया गया है। अपडेट के लिए पहले उसे अनइंस्टॉल करना होगा।</string>

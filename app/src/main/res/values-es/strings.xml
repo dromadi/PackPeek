@@ -216,7 +216,6 @@
     <string name="ready_warning">Puede que no se instale</string>
     <string name="ready_signature_invalid">• La firma del APK no es válida; Android la rechazará.</string>
     <string name="ready_sdk">• Necesita Android API %1$d; este dispositivo tiene API %2$d.</string>
-    <string name="ready_target">• Apunta a API %1$d; Android 14 y posteriores rechazan apps por debajo de API 23.</string>
     <string name="ready_abi">• Código nativo solo para %1$s; este dispositivo admite %2$s.</string>
     <string name="ready_features">• Faltan funciones obligatorias del dispositivo: %1$s</string>
     <string name="ready_signer">• Firmada con un certificado distinto al de la app instalada. Para actualizar hay que desinstalarla primero.</string>

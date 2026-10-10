@@ -323,7 +323,6 @@
     <string name="ready_warning">May not install</string>
     <string name="ready_signature_invalid">• The APK signature is not valid; Android will refuse it.</string>
     <string name="ready_sdk">• Needs Android API %1$d; this device has API %2$d.</string>
-    <string name="ready_target">• Targets API %1$d; Android 14 and later refuse apps below API 23.</string>
     <string name="ready_abi">• Native code only for %1$s; this device supports %2$s.</string>
     <string name="ready_features">• Missing required device features: %1$s</string>
     <string name="ready_signer">• Signed with a different certificate than the installed app. Updating requires uninstalling it first.</string>
@@ -368,4 +367,5 @@
     <string name="delete">Delete</string>
     <string name="delete_backup_title">Delete backup?</string>
     <string name="delete_backup_body">%1$s will be deleted from the backup folder. This cannot be undone.</string>
+    <string name="ready_target_min">• Targets API %1$d; this Android version refuses new apps below API %2$d.</string>
 </resources>

@@ -216,7 +216,6 @@
     <string name="ready_warning">Может не установиться</string>
     <string name="ready_signature_invalid">• Подпись APK недействительна; Android её отклонит.</string>
     <string name="ready_sdk">• Нужен Android API %1$d; на этом устройстве API %2$d.</string>
-    <string name="ready_target">• Целевой API %1$d; Android 14 и новее отклоняют приложения ниже API 23.</string>
     <string name="ready_abi">• Нативный код только для %1$s; это устройство поддерживает %2$s.</string>
     <string name="ready_features">• Нет обязательных функций устройства: %1$s</string>
     <string name="ready_signer">• Подписано другим сертификатом, чем установленное приложение. Для обновления его нужно сначала удалить.</string>

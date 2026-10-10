@@ -842,7 +842,12 @@ private fun ReadinessCard(app: AppRecord, report: AuditReport) {
                             stringResource(R.string.ready_signature_invalid)
                         ReadinessIssue.SDK ->
                             stringResource(R.string.ready_sdk, app.minSdk, Build.VERSION.SDK_INT)
-                        ReadinessIssue.TARGET -> stringResource(R.string.ready_target, app.targetSdk)
+                        ReadinessIssue.TARGET ->
+                            stringResource(
+                                R.string.ready_target_min,
+                                app.targetSdk,
+                                InstallErrors.minTargetSdk(Build.VERSION.SDK_INT) ?: 0,
+                            )
                         ReadinessIssue.ABI ->
                             stringResource(
                                 R.string.ready_abi,

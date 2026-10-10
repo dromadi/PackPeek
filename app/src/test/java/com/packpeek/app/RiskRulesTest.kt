@@ -358,4 +358,16 @@ class RiskRulesTest {
             )
         assertEquals(EvidenceLevel.FLOW, sends.findings.single { it.id == RiskId.SCREEN_SPYING }.strongestLevel)
     }
+
+    /** Shell commands are their own finding, and only the app's own code needs attention. */
+    @Test
+    fun shellCommandsAreNotLoadingCode() {
+        val sdk = RiskRules.evaluate(facts(), context(), null, code(listOf(hit(Capability.SHELL, "Runtime.exec", "com.apm.insight.A.b", "ByteDance APM"))))
+        assertTrue(sdk.findings.none { it.id == RiskId.DYNAMIC_CODE || it.id == RiskId.SHELL_COMMAND })
+        val own = RiskRules.evaluate(facts(), context(), null, code(listOf(hit(Capability.SHELL, "Runtime.exec"))))
+        assertEquals(Severity.ATTENTION, own.findings.single { it.id == RiskId.SHELL_COMMAND }.severity)
+        val loader = RiskRules.evaluate(facts(), context(), null, code(listOf(hit(Capability.DYNAMIC_CODE, "DexClassLoader.<init>"))))
+        assertTrue(loader.findings.any { it.id == RiskId.DYNAMIC_CODE })
+        assertTrue(loader.findings.none { it.id == RiskId.SHELL_COMMAND })
+    }
 }

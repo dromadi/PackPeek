@@ -425,13 +425,19 @@ object RiskRules {
                 findings += finding(RiskId.HIDDEN_DESTINATION, severity(Severity.ATTENTION), hiddenDestinations + ipDestinations)
             if (forwarding.isNotEmpty())
                 findings += finding(RiskId.CALL_FORWARDING, severity(Severity.ATTENTION), forwarding)
+            // Loading code that was not checked: class loaders, hidden code files, packers.
             val dynamic =
-                calls(Capability.DYNAMIC_CODE, Capability.SHELL) +
+                calls(Capability.DYNAMIC_CODE) +
                     code.gaps
                         .filter { it.kind == GapKind.HIDDEN_CODE || it.kind == GapKind.PACKER }
                         .map { Evidence(EvidenceLevel.CODE, EvidenceKind.STRING, it.detail, it.kind.name) }
             if (dynamic.isNotEmpty())
                 findings += finding(RiskId.DYNAMIC_CODE, severity(Severity.ATTENTION), dynamic, systemNote)
+            // Shell commands are a different capability from loading code. Like other calls, only
+            // the app's own code counts: crash and device-info SDKs run getprop or logcat.
+            val shell = calls(Capability.SHELL)
+            if (shell.isNotEmpty())
+                findings += finding(RiskId.SHELL_COMMAND, severity(Severity.ATTENTION), shell, systemNote)
             val clipboard = calls(Capability.CLIPBOARD) + flowsFrom(Capability.CLIPBOARD)
             if (clipboard.isNotEmpty())
                 findings +=

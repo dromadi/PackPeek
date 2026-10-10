@@ -251,10 +251,17 @@
     </string-array>
     <string-array name="risk_dynamic_code">
         <item>Loads extra code</item>
-        <item>The app can load or run code that is not part of what was checked: a hidden DEX/APK inside the package, an encrypting packer, a class loader or shell commands.</item>
+        <item>The app can load or run code that is not part of what was checked: a hidden DEX/APK inside the package, an encrypting packer or a class loader.</item>
         <item>Large apps use dynamic loading for plug-ins and updates, and some companies protect their code with packers.</item>
         <item></item>
         <item>Treat the result of this check as incomplete for this app. Be cautious if the app also comes from outside an app store.</item>
+    </string-array>
+    <string-array name="risk_shell_command">
+        <item>Runs shell commands</item>
+        <item>The code starts system commands (Runtime.exec or ProcessBuilder). Commands can read device information or logs, and on a rooted device do much more.</item>
+        <item>Crash reporters and device-info SDKs often run harmless commands such as getprop or logcat. It matters most when the app\'s own code does it.</item>
+        <item></item>
+        <item>Check whether the app needs this for its purpose. Be cautious if it also asks for root access or comes from outside an app store.</item>
     </string-array>
     <string-array name="risk_clipboard">
         <item>Reads the clipboard</item>
