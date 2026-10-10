@@ -58,7 +58,11 @@ android {
     }
     packaging {
         resources.excludes +=
-            setOf("META-INF/DEPENDENCIES", "META-INF/LICENSE*", "META-INF/NOTICE*")
+            setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE*",
+                "META-INF/NOTICE*",
+            )
     }
     lint {
         abortOnError = true
@@ -69,6 +73,19 @@ android {
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
 
 kapt { arguments { arg("room.schemaLocation", "$projectDir/schemas") } }
+
+// ARSCLib ships desktop copies of android.* and org.xmlpull.* classes. Android provides the real
+// ones, and R8 would otherwise optimise app code against the copies (AbstractMethodError at
+// startup). Its framework tables are only needed for decoding, which merging does not do.
+val arscLib by configurations.creating
+val filteredArscLib =
+    tasks.register<Jar>("filteredArscLib") {
+        archiveFileName.set("arsclib-filtered.jar")
+        destinationDirectory.set(layout.buildDirectory.dir("libs"))
+        from({ arscLib.map { zipTree(it) } }) {
+            exclude("android/**", "org/xmlpull/**", "frameworks/**")
+        }
+    }
 
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.12.00"))
@@ -91,5 +108,7 @@ dependencies {
     implementation("androidx.documentfile:documentfile:1.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("com.android.tools.build:apksig:8.13.2")
+    arscLib("io.github.reandroid:ARSCLib:1.4.0")
+    implementation(files(filteredArscLib))
     testImplementation("junit:junit:4.13.2")
 }

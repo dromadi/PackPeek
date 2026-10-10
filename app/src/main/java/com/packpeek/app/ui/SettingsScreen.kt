@@ -81,10 +81,17 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
                     SplitFormat.APKS.name to R.string.split_format_apks,
                     SplitFormat.XAPK.name to R.string.split_format_xapk,
                     SplitFormat.ZIP.name to R.string.split_format_zip,
+                    SplitFormat.APK.name to R.string.split_format_apk,
                 ),
             ) {
                 vm.text("split_format", it)
             }
+            if (s.naming.split == SplitFormat.APK)
+                Text(
+                    stringResource(R.string.merged_apk_warning),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
         }
         item {
             InfoRow(stringResource(R.string.preview), FileNames.format(sample, s.naming))

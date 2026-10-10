@@ -53,6 +53,13 @@ class CoreRulesTest {
         assertEquals(SplitFormat.APKS, SplitFormat.of(null))
         assertEquals(SplitFormat.APKS, SplitFormat.of("UNKNOWN"))
         assertEquals(SplitFormat.ZIP, SplitFormat.of("ZIP"))
+        assertEquals(
+            "Split_v1.0.apk",
+            FileNames.format(
+                app("Split", splits = listOf("config.apk")),
+                NamingConfig(split = SplitFormat.APK),
+            ),
+        )
     }
 
     @Test

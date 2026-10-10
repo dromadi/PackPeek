@@ -227,4 +227,7 @@
     <string name="split_format_xapk">.xapk (APKPure, installer XAPK)</string>
     <string name="split_format_zip">.zip (arsip biasa)</string>
     <string name="preview_split">Pratinjau untuk aplikasi split</string>
+    <string name="split_format_apk">.apk gabungan (eksperimental)</string>
+    <string name="merged_apk_warning">⚠ .apk gabungan ditandatangani ulang dengan kunci PackPeek: tidak bisa meng-update aplikasi asli (harus uninstall dulu, datanya hilang), tidak di-update Play Store, sebagian aplikasi (bank, game, Meta) menolak jalan, dan isinya hanya untuk perangkat ini.</string>
+    <string name="error_merge">Penggabungan APK split gagal. Aplikasi mungkin terlalu besar atau tidak didukung; pilih .apks, .xapk atau .zip.</string>
 </resources>

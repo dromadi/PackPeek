@@ -32,7 +32,7 @@ Salin `keystore.properties.example` ke `keystore.properties`, isi secara lokal u
 
 Pilih folder melalui onboarding/pengaturan. Ketuk Ekstrak pada satu kartu atau centang beberapa lalu Ekstrak pilihan. Hasil dapat dibagikan melalui dialog hasil/Riwayat. Periksa berkas membuka APK/APKS tanpa memasang. Setelah mengizinkan sumber tidak dikenal untuk installer, kembali dan ketuk Pasang lagi.
 
-Backup berisi paket instalasi, bukan data aplikasi, akun, progres permainan, atau OBB. APKS di sini berupa ZIP base + split, bukan jaminan kompatibilitas semua arsip Bundletool/XAPK/APKM.
+Backup berisi paket instalasi, bukan data aplikasi, akun, progres permainan, atau OBB. Aplikasi split dapat disimpan sebagai `.apks`, `.xapk`, `.zip`, atau `.apk` gabungan eksperimental. `.apk` gabungan ditandatangani ulang dengan kunci PackPeek, sehingga bukan lagi build asli pengembang: tidak dapat meng-update aplikasi asli dan sebagian aplikasi menolak berjalan. APKS di sini berupa ZIP base + split, bukan jaminan kompatibilitas semua arsip Bundletool/XAPK/APKM.
 
 ## Batas dan keputusan
 

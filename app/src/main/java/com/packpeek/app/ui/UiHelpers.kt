@@ -41,6 +41,7 @@ fun errorText(code: ErrorCode) =
         ErrorCode.ARCHIVE -> R.string.error_archive
         ErrorCode.SIGNATURE -> R.string.error_signature
         ErrorCode.ABI -> R.string.error_abi
+        ErrorCode.MERGE -> R.string.error_merge
         else -> R.string.error_unknown
     }
 

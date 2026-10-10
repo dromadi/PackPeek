@@ -46,7 +46,9 @@ enum class SplitFormat(val extension: String) {
     /** ZIP with manifest.json, read by APKPure and other XAPK installers. */
     XAPK("xapk"),
     /** Same layout as APKS under a generic extension. */
-    ZIP("zip");
+    ZIP("zip"),
+    /** Experimental: splits merged into one APK, re-signed with PackPeek's key. */
+    APK("apk");
 
     companion object {
         fun of(value: String?) = entries.firstOrNull { it.name == value } ?: APKS
@@ -212,6 +214,7 @@ enum class ErrorCode {
     ARCHIVE,
     SIGNATURE,
     ABI,
+    MERGE,
     UNKNOWN,
 }
 

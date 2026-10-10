@@ -69,40 +69,56 @@ class Extractor(private val context: Context) {
                 name = FileNames.numbered(base, ++n)
                 if (n > 9999) throw AppFailure(ErrorCode.FOLDER)
             }
+            val merging = app.split && naming.split == SplitFormat.APK
             val document =
                 folder.createFile(
-                    if (app.split) "application/zip" else "application/vnd.android.package-archive",
+                    if (app.split && !merging) "application/zip"
+                    else "application/vnd.android.package-archive",
                     name,
                 ) ?: throw AppFailure(ErrorCode.FOLDER)
+            // When merging, the merge takes the first 60% of the bar and copying the rest.
+            var copyLength = total
             var processed = 0L
             var last = 0L
             suspend fun report(delta: Long) {
                 processed += delta
                 val now = android.os.SystemClock.elapsedRealtime()
-                if (now - last >= 100 || processed >= total) {
-                    progress(processed, total)
+                if (now - last >= 100 || processed >= copyLength) {
+                    progress(
+                        if (merging) (total * (0.6 + 0.4 * processed / copyLength)).toLong()
+                        else processed,
+                        total,
+                    )
                     last = now
                 }
             }
+            var merged: File? = null
             try {
                 created(document.uri.toString(), name)
                 if (document.name != name) {
                     document.renameTo(name)
                     created(document.uri.toString(), document.name ?: name)
                 }
-                if (!app.split) {
+                if (!app.split || merging) {
+                    val input =
+                        if (merging)
+                            ApkMerger(context)
+                                .merge(app) { progress((total * 0.6f * it).toLong(), total) }
+                                .also { merged = it }
+                        else File(app.basePath)
+                    copyLength = input.length().coerceAtLeast(1)
                     val descriptor =
                         context.contentResolver.openFileDescriptor(document.uri, "w")
                             ?: throw AppFailure(ErrorCode.FOLDER)
                     ParcelFileDescriptor.AutoCloseOutputStream(descriptor).use { target ->
-                        FileInputStream(app.basePath).use { source ->
+                        FileInputStream(input).use { source ->
                             var position = 0L
-                            while (position < total) {
+                            while (position < copyLength) {
                                 ensureActive()
                                 val size =
                                     source.channel.transferTo(
                                         position,
-                                        minOf(1024 * 1024L, total - position),
+                                        minOf(1024 * 1024L, copyLength - position),
                                         target.channel,
                                     )
                                 if (size > 0) {
@@ -118,7 +134,7 @@ class Extractor(private val context: Context) {
                                     report(read.toLong())
                                 }
                             }
-                            if (position != total) throw AppFailure(ErrorCode.SOURCE)
+                            if (position != copyLength) throw AppFailure(ErrorCode.SOURCE)
                             target.flush()
                         }
                     }
@@ -191,6 +207,8 @@ class Extractor(private val context: Context) {
                             e,
                         )
                 }
+            } finally {
+                merged?.parentFile?.deleteRecursively()
             }
         }
 }

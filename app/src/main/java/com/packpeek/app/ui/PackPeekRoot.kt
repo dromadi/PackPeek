@@ -271,6 +271,12 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                 text = {
                     Column {
                         Text(stringResource(R.string.backup_count, pending.size))
+                        if (current.naming.split == SplitFormat.APK && pending.any { it.split })
+                            Text(
+                                stringResource(R.string.merged_apk_warning),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
                         Text(
                             folderName(c, current.folder),
                             style = MaterialTheme.typography.bodySmall,

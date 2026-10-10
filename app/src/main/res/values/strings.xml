@@ -227,4 +227,7 @@
     <string name="split_format_xapk">.xapk (APKPure, XAPK installers)</string>
     <string name="split_format_zip">.zip (plain archive)</string>
     <string name="preview_split">Preview for split apps</string>
+    <string name="split_format_apk">.apk merged (experimental)</string>
+    <string name="merged_apk_warning">⚠ Merged .apk is re-signed with PackPeek\'s key: it cannot update the original app (uninstall first, its data will be lost), Play Store will not update it, some apps (banking, games, Meta) refuse to run, and it only contains the parts for this device.</string>
+    <string name="error_merge">Merging the split APKs failed. The app may be too large or unsupported; choose .apks, .xapk or .zip instead.</string>
 </resources>
