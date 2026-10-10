@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.0-alpha.12 — 2026-10-11
+
+- **Perbaikan pemasangan di Android 15/16**: tombol Pasang tidak memunculkan prompt sistem karena Android memblokir layar status pemasangan (pembatasan "background activity launch" untuk target SDK 35+). PendingIntent pemasangan kini memberi izin yang diperlukan. Ditemukan lewat uji emulator Android 16.
+- **Laporan bukti lebih mudah dijangkau**: tombol "Bagikan laporan bukti (PDF)" langsung di bawah ringkasan analisis mendalam.
+- **Analisis mendalam lebih bersih** (dari laporan aplikasi Play sungguhan):
+  - "Digabung dari potongan" hanya muncul bila gabungannya membentuk tujuan yang mencurigakan (bot, webhook, alamat data, kode pengalihan). Sebelumnya semua teks satu metode digabung sehingga muncul ratusan baris tak bermakna.
+  - Alamat di kode harus berupa nama domain atau IP yang valid.
+  - SDK ByteDance APM, Pangle (pgl), TradPlus, TaurusX, TopOn, myTarget, OM SDK, AppMetrica, Yandex, JJWT, dan AIHelp dikenali sebagai library, bukan kode aplikasi sendiri.
+  - Laporan menulis langkah jejak data sebagai `Kelas.metode` dan menandai setiap bukti kode sebagai kode aplikasi sendiri atau library.
+
 ## 2.0.0-alpha.11 — 2026-10-10
 
 Branch installer disatukan dengan alpha.10, parser manifest diperketat, dan aturan IP dikalibrasi.
