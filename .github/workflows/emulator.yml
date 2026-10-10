@@ -20,13 +20,13 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: emulator-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   emulator:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[emulator]')
+    # On the job, not the workflow: a push without [emulator] must not cancel a running test.
+    concurrency:
+      group: emulator-${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -89,7 +89,10 @@ jobs:
           cp "$GITHUB_WORKSPACE"/emulator-results/*.png "$GITHUB_WORKSPACE"/emulator-results/SUMMARY.md "$run"/ 2>/dev/null || true
           cp "$GITHUB_WORKSPACE"/emulator-results/crash.txt "$run"/ 2>/dev/null || true
           tail -n 3000 "$GITHUB_WORKSPACE"/emulator-results/logcat.txt > "$run/logcat-tail.txt" 2>/dev/null || true
-          status=$([ "${SCENARIO_FAILED:-0}" = 1 ] && echo "❌" || echo "✅")
+          # ⚠️ when the scenario did not reach its last step (cancelled or timed out).
+          if [ "${SCENARIO_FAILED:-0}" = 1 ]; then status="❌"
+          elif grep -q "No crash" "$run/SUMMARY.md"; then status="✅"
+          else status="⚠️"; fi
           line="- $status [Run ${GITHUB_RUN_NUMBER} · API ${API} · ${GITHUB_REF_NAME} · ${GITHUB_SHA::7}]($run/SUMMARY.md) · $(date -u '+%Y-%m-%d %H:%M UTC')"
           { echo "# PackPeek emulator results"; echo; echo "Newest first. Open a run to see its steps and screenshots."; echo;
             echo "$line"; [ -f README.md ] && grep '^- ' README.md | head -n 49 || true; } > README.new
