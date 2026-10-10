@@ -34,6 +34,14 @@ Dokumen ini untuk direview pemilik. Belum ada fitur di sini yang dijanjikan; uru
 | 21 | Format output split (.apks/.xapk/.zip/.apk gabungan) | Ekspor | S | ✅ alpha.2 |
 | 22 | Persiapan rilis publik | Rilis | S | ⚪ |
 | 23 | Tes otomatis UI dan alur backup | Kualitas | S | ⚪ |
+| 24 | Koleksi backup per versi | Pulihkan | S | ⚪ |
+| 25 | Pembersih backup duplikat | Penyimpanan | K | ⚪ |
+| 26 | Pemeriksaan kompatibilitas sebelum pasang | Pulihkan | K | ⚪ |
+| 27 | Ekspor CSV/JSON | Ekspor | K | ⚪ |
+| 28 | Kirim APK lewat Wi-Fi dan QR | Kenyamanan | B | ⚪ perlu keputusan |
+| 29 | Build APK otomatis di GitHub (CI) | Kualitas | K | ⚪ |
+
+Ide 24–29 berasal dari masukan tambahan (ChatGPT) dan sudah dinilai di bawah.
 
 ## 1. Backup lebih pintar
 
@@ -81,6 +89,21 @@ Satu ketukan di Riwayat. Bila izin pemasangan sudah diberikan, dialog pemasangan
 - Panduan langkah demi langkah: backup versi sekarang dulu, uninstall, lalu pasang backup.
 - Jelaskan bahwa data aplikasi hilang saat uninstall.
 
+### 24. Koleksi backup per versi ⚪ · S
+**Apa:** Riwayat dikelompokkan per aplikasi. Setiap aplikasi menampilkan daftar versinya: nomor versi, tanggal, ukuran, format, tanda tangan, dan tombol Pasang/Bagikan/Bandingkan per versi.
+
+**Catatan teknis:** data sudah tersedia di tabel `backups` (versi, tanggal, ukuran, tanda tangan); ini terutama pekerjaan tampilan. Cocok dengan ide 3 (simpan N versi), 6 (pasang ulang), 9 (tanda tangan), dan 10 (bandingkan dua versi). Tombol "Bandingkan" di sini menjadi pintu masuk ide 10.
+
+### 26. Pemeriksaan kompatibilitas sebelum pasang ⚪ · K
+**Apa:** sebelum tombol Pasang ditekan, tampilkan daftar periksa yang mudah dipahami:
+- versi Android cukup atau tidak (`minSdk`),
+- arsitektur CPU cocok,
+- split lengkap,
+- lebih lama dari versi terpasang (downgrade),
+- tanda tangan sama dengan aplikasi terpasang.
+
+**Catatan teknis:** sebagian besar pemeriksaan sudah ada di `ArchiveImporter.validateForInstall` dan `AuditEngine` (`signerMatch`), tetapi saat ini hasilnya baru terlihat ketika pemasangan gagal. Melengkapi ide 7.
+
 ### 8. Pasang banyak sekaligus ⚪ · S
 **Apa:** pilih beberapa backup di Riwayat, lalu pasang berurutan. Berguna saat pindah ke HP baru.
 
@@ -119,6 +142,9 @@ Tanda tangan dicatat saat backup. Layar detail memperingatkan bila aplikasi terp
 
 **Catatan teknis:** ARSCLib bisa mendekode XML biner ke teks. Perlu dibatasi ukurannya dan ditampilkan secara lazy untuk manifest besar.
 
+### 27. Ekspor CSV/JSON ⚪ · K
+**Apa:** ekspor daftar backup dan ringkasan pemeriksaan sebagai CSV (untuk spreadsheet) atau JSON (untuk alat lain). Bisa dibuat sekaligus dengan ide 5 (ekspor daftar aplikasi) dan ide 14 (laporan PDF).
+
 ### 14. Laporan audit (PDF/teks) ⚪ · S
 **Apa:** ekspor hasil pemeriksaan satu aplikasi (ringkasan, izin, komponen, sertifikat, teknologi, temuan) sebagai PDF atau teks untuk dibagikan.
 
@@ -144,7 +170,19 @@ Tanda tangan dicatat saat backup. Layar detail memperingatkan bila aplikasi terp
 ### 18. Satuan ukuran dan label folder ✅ alpha.3
 Ukuran memakai satuan desimal seperti file manager; folder akar menampilkan nama yang benar.
 
+### 28. Kirim APK lewat Wi-Fi dan QR ⚪ · B · perlu keputusan
+**Apa:** memindahkan hasil ekstraksi ke HP lain lewat jaringan lokal, dengan kode QR untuk menghubungkan.
+
+**Keputusan yang dibutuhkan:** di Android, koneksi jaringan, termasuk Wi-Fi lokal, membutuhkan izin Internet. Fitur ini mengubah janji "tanpa izin Internet".
+
+**Alternatif tanpa izin baru:** tombol Bagikan yang sudah ada bisa mengirim lewat Quick Share / Nearby Share, Bluetooth, atau aplikasi lain. Mungkin cukup diberi petunjuk di layar hasil backup.
+
 ## 5. Penyimpanan
+
+### 25. Pembersih backup duplikat ⚪ · K
+**Apa:** mengenali berkas backup yang isinya identik (aplikasi dan versi sama, dibackup berkali-kali), menghitung ruang yang bisa dibebaskan, lalu menghapus duplikat setelah dikonfirmasi pengguna.
+
+**Catatan teknis:** bandingkan paket, `versionCode`, dan hash SHA-256 berkas. Penghapusan selalu lewat konfirmasi, karena berkas yang dihapus dari folder tidak bisa dikembalikan.
 
 ### 19. Backup ke kartu SD / USB OTG 🟡 · K
 **Sudah bisa:** pemilih folder SAF bisa memilih kartu SD atau flashdisk OTG.
@@ -185,21 +223,31 @@ Belum fitur, tetapi syarat sebelum PackPeek dibagikan luas:
 
 **Alasan:** crash tombol Ekstrak di alpha.1 akan tertangkap oleh tes UI sederhana. Tes ini mencegah masalah serupa muncul lagi.
 
+### 29. Build APK otomatis di GitHub (CI) ⚪ · K
+**Apa:** GitHub Actions membangun APK dan menjalankan unit test serta lint setiap kali ada push atau PR. APK-nya bisa diunduh langsung dari halaman GitHub, tanpa menunggu dikirim.
+
+**Catatan teknis:**
+- Butuh kunci tanda tangan **tetap** yang disimpan sebagai *secret* di GitHub. Tanpa itu, APK dari CI memakai kunci acak dan tidak bisa dipasang menimpa versi di HP.
+- Kunci ini sebaiknya bukan kunci rilis publik (ide 22), tetapi kunci khusus untuk build uji.
+
 ## Usulan urutan berikutnya
 
 Usulan ini untuk direview; bisa diubah sesuai prioritas pemilik.
 
 | Tahap | Isi | Alasan |
 |---|---|---|
-| **alpha.4** | 11 Deteksi tracker, 10 Bandingkan dua versi, 16 Bagikan ke PackPeek | Memperkuat sisi pemeriksaan yang membedakan PackPeek |
-| **alpha.5** | 2 Backup terjadwal (sekaligus menjawab ide 1), 4 Grup, 15 Tile Quick Settings | Membuat backup berjalan sendiri |
+| **sebelum fitur baru** | Uji alpha.3 di HP: Bagikan, Pasang ulang, peringatan tanda tangan; 29 CI | Fitur yang ada harus terbukti di perangkat nyata dulu; CI mempercepat pengujian berikutnya |
+| **alpha.4** | 24 Koleksi backup per versi, 10 Bandingkan dua versi, 26 Pemeriksaan kompatibilitas | Saling melengkapi dan memakai data yang sudah ada; memberi alasan membuka PackPeek lagi setelah ekstraksi |
+| **alpha.5** | 11 Deteksi tracker, 16 Bagikan ke PackPeek, 25 Pembersih duplikat | Memperkuat sisi pemeriksaan dan merapikan penyimpanan |
+| **alpha.6** | 2 Backup terjadwal (sekaligus menjawab ide 1), 4 Grup, 15 Tile Quick Settings | Membuat backup berjalan sendiri; jadwal mengikuti batasan kerja latar belakang Android |
 | **beta** | 22 Persiapan rilis, 23 Tes otomatis, 7 Panduan downgrade | Syarat sebelum dibagikan luas |
-| **nanti** | 12, 13, 14, 17, 5, 8, 19 | Bermanfaat tetapi tidak mendesak |
-| **perlu keputusan** | 20 Backup ke cloud | Menyangkut janji "tanpa internet" |
+| **nanti** | 12, 13, 14, 27, 17, 5, 8, 19 | Bermanfaat tetapi tidak mendesak |
+| **perlu keputusan** | 20 Backup ke cloud, 28 Kirim lewat Wi-Fi/QR | Menyangkut janji "tanpa izin Internet" |
 
 ## Pertanyaan untuk pemilik
 
 1. Apakah urutan di atas sesuai, atau ada ide yang ingin didahulukan?
-2. Untuk ide 20: tetap tanpa internet (pakai folder aplikasi cloud lewat SAF), atau boleh menambah izin Internet?
+2. Untuk ide 20 dan 28: tetap tanpa izin Internet (cloud lewat folder SAF, kirim lewat Quick Share), atau boleh menambah izin Internet?
 3. Untuk ide 11: boleh memakai daftar tracker dari Exodus Privacy setelah lisensinya dicek?
 4. Apakah PackPeek direncanakan masuk Play Store? Jawabannya menentukan seberapa cepat ide 22 perlu dikerjakan.
+5. Untuk ide 29: boleh dibuatkan kunci tanda tangan khusus build uji yang disimpan sebagai *secret* di GitHub? Pemasangannya perlu dilakukan pemilik di Settings → Secrets repositori.
