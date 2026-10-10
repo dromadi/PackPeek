@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.0-alpha.3 — 2026-10-10
+
+- **Pasang ulang dari Riwayat** dengan satu ketukan. Bila izin pemasangan sudah diberikan, dialog pemasangan Android langsung muncul.
+- **Peringatan tanda tangan berubah:** tanda tangan aplikasi dicatat saat backup. Layar detail memperingatkan bila aplikasi terpasang kini ditandatangani sertifikat berbeda dari backup terakhir, dan Riwayat menandai backup yang tanda tangannya berbeda dari backup sebelumnya. Database naik ke versi 2 dengan migrasi; riwayat lama tetap ada.
+- **Favorit:** tanda bintang pada kartu aplikasi dan filter Jenis → Favorit untuk backup sekelompok aplikasi.
+- **Simpan N versi terakhir:** Pengaturan → Backup per aplikasi (semua / 1 / 3 / 5). Berkas backup lama di luar jumlah itu dihapus setelah backup berhasil.
+- Pesan gagal pasang yang jelas: versi lebih lama (downgrade), tanda tangan berbeda, tidak kompatibel, ruang penuh, diblokir, atau dibatalkan.
+- Ukuran memakai satuan desimal (1 MB = 1.000.000 byte), sama dengan file manager.
+- Nama folder backup tampil benar untuk folder akar seperti Download dan penyimpanan internal.
+
 ## 2.0.0-alpha.2 — 2026-10-10
 
 - Perbaikan: backup tidak lagi macet permanen setelah worker dihentikan sistem. Penghentian oleh sistem mengembalikan job ke antrean, bukan menandainya batal; baris job yang basi direkonsiliasi dengan status WorkManager; request baru tidak lagi dibuang diam-diam oleh `KEEP`.

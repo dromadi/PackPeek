@@ -1,7 +1,11 @@
 package com.packpeek.app
 
+import com.packpeek.app.data.BackupRecord
+import com.packpeek.app.data.pruneTargets
+import com.packpeek.app.data.signerChanges
 import com.packpeek.app.engine.ManifestRoot
 import com.packpeek.app.model.*
+import com.packpeek.app.ui.sizeText
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -143,6 +147,60 @@ class CoreRulesTest {
         assertTrue(isOldTarget(30))
         assertFalse(isOldTarget(31))
         assertFalse(isOldTarget(36))
+    }
+
+    @Test
+    fun favoriteFilterUsesSavedPackages() {
+        val star = app(pkg = "star.app")
+        assertEquals(
+            listOf(star),
+            filterApps(
+                listOf(star, app(pkg = "plain.app")),
+                AppQuery(kind = "FAVORITE"),
+                favorites = setOf("star.app"),
+            ),
+        )
+    }
+
+    private fun record(id: Long, pkg: String, created: Long, signer: String) =
+        BackupRecord(
+            id = id,
+            jobId = "job",
+            packageName = pkg,
+            label = pkg,
+            version = "1",
+            format = "apk",
+            created = created,
+            state = "SUCCESS",
+            signer = signer,
+        )
+
+    @Test
+    fun pruneKeepsNewestOnly() {
+        val rows = (5L downTo 1L).map { record(it, "a", it, "s") }
+        assertEquals(listOf(2L, 1L), pruneTargets(rows, 3).map { it.id })
+        assertTrue(pruneTargets(rows, 0).isEmpty())
+        assertTrue(pruneTargets(rows, 9).isEmpty())
+    }
+
+    @Test
+    fun signerChangeFlagsOnlyTheChangedBackup() {
+        val rows =
+            listOf(
+                record(1, "a", 10, "k1"),
+                record(2, "a", 20, "k1"),
+                record(3, "a", 30, "k2"),
+                record(4, "b", 15, "k9"),
+                record(5, "a", 25, ""),
+            )
+        assertEquals(setOf(3L), signerChanges(rows))
+    }
+
+    @Test
+    fun sizesUseDecimalUnits() {
+        assertEquals("78.9 MB", sizeText(78_940_000).replace(',', '.'))
+        assertEquals("1.50 GB", sizeText(1_500_000_000).replace(',', '.'))
+        assertEquals("999 B", sizeText(999))
     }
 
     @Test

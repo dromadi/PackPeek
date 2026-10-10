@@ -1,4 +1,4 @@
-# PackPeek 2.0.0-alpha.2
+# PackPeek 2.0.0-alpha.3
 
 Penulisan ulang OmniExtract berdasarkan `Grand_Design_PackPeek.xlsx` milik pengguna. Source ini ditulis baru, bukan pemulihan source asli APK. Kode pesaing tidak disalin. Fokus pada tahap 1; tanpa iklan, billing, akun, atau analitik.
 

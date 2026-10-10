@@ -218,7 +218,7 @@
     <string name="rate_app">Beri nilai di Google Play</string>
     <string name="licenses">Lisensi sumber terbuka</string>
     <string name="install_success">Instalasi selesai</string>
-    <string name="install_failed">Instalasi gagal atau dibatalkan</string>
+    <string name="install_failed">Instalasi gagal</string>
     <string name="crash_title">PackPeek berhenti sebelumnya</string>
     <string name="crash_body">Detail error hanya disimpan di perangkat ini. Salin lalu kirimkan ke pengembang.</string>
     <string name="crash_copy">Salin log error</string>
@@ -230,4 +230,27 @@
     <string name="split_format_apk">.apk gabungan (eksperimental)</string>
     <string name="merged_apk_warning">⚠ .apk gabungan ditandatangani ulang dengan kunci PackPeek: tidak bisa meng-update aplikasi asli (harus uninstall dulu, datanya hilang), tidak di-update Play Store, sebagian aplikasi (bank, game, Meta) menolak jalan, dan isinya hanya untuk perangkat ini.</string>
     <string name="error_merge">Penggabungan APK split gagal. Aplikasi mungkin terlalu besar atau tidak didukung; pilih .apks, .xapk atau .zip.</string>
+    <string name="folder_root">Penyimpanan %1$s</string>
+    <string name="folder_selected">Folder terpilih</string>
+    <string name="favorite_apps">Favorit</string>
+    <string name="favorite">Tambah ke favorit</string>
+    <string name="unfavorite">Hapus dari favorit</string>
+    <string name="signer_changed_title">Tanda tangan berubah</string>
+    <string name="signer_changed_body">Aplikasi ini sekarang ditandatangani sertifikat yang berbeda dari backup versi %1$s (%2$s). Ini bisa terjadi bila pengembang mengganti kunci, tetapi juga bisa berarti build termodifikasi atau palsu. Periksa dari mana aplikasi ini dipasang.</string>
+    <string name="signer_changed_badge">⚠ Tanda tangan berbeda dari backup sebelumnya</string>
+    <string name="reinstall">Pasang ulang</string>
+    <string name="keep_versions">Backup per aplikasi</string>
+    <string name="keep_all">Simpan semua</string>
+    <string name="keep_1">1 terbaru</string>
+    <string name="keep_3">3 terbaru</string>
+    <string name="keep_5">5 terbaru</string>
+    <string name="keep_versions_explanation">Setelah backup berhasil, berkas backup lama dari aplikasi yang sama yang melebihi jumlah ini dihapus dari folder.</string>
+    <string name="install_cancelled">Pemasangan dibatalkan</string>
+    <string name="install_failed_downgrade">Backup lebih lama dari versi yang terpasang. Android tidak memasang versi lama di atas versi baru; uninstall aplikasinya dulu (datanya hilang), lalu pasang backup.</string>
+    <string name="install_failed_signature">Backup ditandatangani kunci yang berbeda dari aplikasi terpasang (misalnya .apk gabungan). Uninstall aplikasinya dulu (datanya hilang), lalu pasang backup.</string>
+    <string name="install_failed_incompatible">Perangkat ini tidak kompatibel dengan backup (versi Android atau arsitektur CPU).</string>
+    <string name="install_failed_storage">Ruang penyimpanan tidak cukup untuk memasang. Kosongkan ruang lalu coba lagi.</string>
+    <string name="install_failed_blocked">Pemasangan diblokir oleh perangkat atau kebijakannya.</string>
+    <string name="install_failed_generic">Android tidak menyelesaikan pemasangan. Periksa berkas backup lalu coba lagi.</string>
+    <string name="internal_storage">Penyimpanan internal</string>
 </resources>

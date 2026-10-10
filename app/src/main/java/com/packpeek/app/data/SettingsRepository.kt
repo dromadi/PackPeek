@@ -23,6 +23,9 @@ data class Settings(
     val onboarding: Boolean = false,
     val sort: String = "NAME_ASC",
     val naming: NamingConfig = NamingConfig(),
+    val favorites: Set<String> = emptySet(),
+    /** Successful backups kept per app; 0 keeps every backup. */
+    val keep: Int = 0,
 )
 
 class SettingsRepository(context: Context) {
@@ -45,11 +48,25 @@ class SettingsRepository(context: Context) {
                         p[booleanPreferencesKey("code")] ?: false,
                         SplitFormat.of(p[stringPreferencesKey("split_format")]),
                     ),
+                    p[stringSetPreferencesKey("favorites")] ?: emptySet(),
+                    p[intPreferencesKey("keep")] ?: 0,
                 )
             }
 
     suspend fun text(key: String, value: String) {
         store.edit { it[stringPreferencesKey(key)] = value }
+    }
+
+    suspend fun number(key: String, value: Int) {
+        store.edit { it[intPreferencesKey(key)] = value }
+    }
+
+    suspend fun toggleFavorite(pkg: String) {
+        store.edit {
+            val key = stringSetPreferencesKey("favorites")
+            val now = it[key] ?: emptySet()
+            it[key] = if (pkg in now) now - pkg else now + pkg
+        }
     }
 
     suspend fun flag(key: String, value: Boolean) {

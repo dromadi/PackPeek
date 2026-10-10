@@ -183,6 +183,32 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                 }
                 when (tab) {
                     0 -> {
+                        state.signerChangedSince?.let { previous ->
+                            item {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.errorContainer,
+                                    shape = MaterialTheme.shapes.medium,
+                                ) {
+                                    Column(Modifier.padding(14.dp)) {
+                                        Text(
+                                            stringResource(R.string.signer_changed_title),
+                                            style = MaterialTheme.typography.titleSmall,
+                                            color = MaterialTheme.colorScheme.onErrorContainer,
+                                        )
+                                        Text(
+                                            stringResource(
+                                                R.string.signer_changed_body,
+                                                previous.version,
+                                                DateFormat.getDateInstance(DateFormat.MEDIUM)
+                                                    .format(Date(previous.created)),
+                                            ),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onErrorContainer,
+                                        )
+                                    }
+                                }
+                            }
+                        }
                         item {
                             InfoRow(stringResource(R.string.package_name), app.packageName) {
                                 c.copyText(app.packageName)

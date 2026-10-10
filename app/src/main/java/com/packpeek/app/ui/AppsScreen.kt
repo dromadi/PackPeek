@@ -69,6 +69,7 @@ fun AppsScreen(
                         "USER" to R.string.user_apps,
                         "SYSTEM" to R.string.system_apps,
                         "SPLIT" to R.string.split_apps,
+                        "FAVORITE" to R.string.favorite_apps,
                     ),
                 ) {
                     vm.setQuery(query.copy(kind = it))
@@ -227,6 +228,21 @@ fun AppsScreen(
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                val favorite = app.packageName in settings?.favorites.orEmpty()
+                                IconButton(onClick = { vm.toggleFavorite(app.packageName) }) {
+                                    Icon(
+                                        Icons.Filled.Star,
+                                        stringResource(
+                                            if (favorite) R.string.unfavorite else R.string.favorite
+                                        ),
+                                        tint =
+                                            if (favorite) MaterialTheme.colorScheme.primary
+                                            else
+                                                MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                    alpha = 0.35f
+                                                ),
                                     )
                                 }
                                 val selectLabel = stringResource(R.string.select_app, app.label)

@@ -1,6 +1,8 @@
 package com.packpeek.app.data
 
 import androidx.room.*
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
 @Entity(tableName = "jobs")
@@ -27,6 +29,8 @@ data class BackupRecord(
     val bytes: Long = 0,
     val error: String = "",
     val hidden: Boolean = false,
+    /** SHA-256 of the installed app's signer(s) when backed up; empty for older rows. */
+    @ColumnInfo(defaultValue = "") val signer: String = "",
 )
 
 data class BackupStats(val count: Int, val bytes: Long)
@@ -85,6 +89,17 @@ interface BackupDao {
 
     @Query("UPDATE backups SET hidden=1 WHERE id=:id") suspend fun hide(id: Long)
 
+    @Query("UPDATE backups SET signer=:signer WHERE id=:id")
+    suspend fun setSigner(id: Long, signer: String)
+
+    @Query(
+        "SELECT * FROM backups WHERE packageName=:pkg AND state='SUCCESS' ORDER BY created DESC, id DESC"
+    )
+    suspend fun successes(pkg: String): List<BackupRecord>
+
+    /** Backups removed by the keep-N setting leave history and totals. */
+    @Query("UPDATE backups SET state='PRUNED' WHERE id=:id") suspend fun prune(id: Long)
+
     @Transaction
     suspend fun create(job: BackupJob, records: List<BackupRecord>) {
         addJob(job)
@@ -92,7 +107,37 @@ interface BackupDao {
     }
 }
 
-@Database(entities = [BackupJob::class, BackupRecord::class], version = 1, exportSchema = true)
+@Database(entities = [BackupJob::class, BackupRecord::class], version = 2, exportSchema = true)
 abstract class BackupDatabase : RoomDatabase() {
     abstract fun backups(): BackupDao
+
+    companion object {
+        val MIGRATION_1_2 =
+            object : Migration(1, 2) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("ALTER TABLE backups ADD COLUMN signer TEXT NOT NULL DEFAULT ''")
+                }
+            }
+    }
 }
+
+/** Successful backups beyond the newest [keep] (0 keeps all); input is newest first. */
+fun pruneTargets(newestFirst: List<BackupRecord>, keep: Int): List<BackupRecord> =
+    if (keep <= 0) emptyList() else newestFirst.drop(keep)
+
+/**
+ * Ids of backups whose signer differs from the previous backup of the same package. A change
+ * means the app was re-signed: a different developer key, or a modified or fake build.
+ */
+fun signerChanges(records: List<BackupRecord>): Set<Long> =
+    records
+        .filter { it.signer.isNotBlank() }
+        .groupBy { it.packageName }
+        .values
+        .flatMap { rows ->
+            rows.sortedWith(compareBy({ it.created }, { it.id })).zipWithNext().mapNotNull {
+                (old, new) ->
+                new.id.takeIf { old.signer != new.signer }
+            }
+        }
+        .toSet()

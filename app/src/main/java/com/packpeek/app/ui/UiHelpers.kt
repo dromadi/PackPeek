@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.util.LruCache
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -25,11 +26,12 @@ import com.packpeek.app.model.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/** Decimal units (1 MB = 1,000,000 bytes), as Android settings and file managers show them. */
 fun sizeText(bytes: Long): String =
     when {
-        bytes >= 1024L * 1024 * 1024 -> "%.2f GB".format(bytes.toDouble() / (1024 * 1024 * 1024))
-        bytes >= 1024 * 1024 -> "%.1f MB".format(bytes.toDouble() / (1024 * 1024))
-        bytes >= 1024 -> "%.0f KB".format(bytes / 1024.0)
+        bytes >= 1_000_000_000L -> "%.2f GB".format(bytes / 1e9)
+        bytes >= 1_000_000L -> "%.1f MB".format(bytes / 1e6)
+        bytes >= 1_000L -> "%.0f kB".format(bytes / 1e3)
         else -> "$bytes B"
     }
 
@@ -73,11 +75,27 @@ fun shareFiles(context: Context, uris: List<Uri>, mime: String = "*/*") {
     context.launchSafe(Intent.createChooser(intent, context.getString(R.string.share)))
 }
 
-fun folderName(context: Context, value: String): String =
-    if (value.isBlank()) context.getString(R.string.choose_folder)
-    else
-        runCatching { DocumentFile.fromTreeUri(context, Uri.parse(value))?.name }.getOrNull()
-            ?: context.getString(R.string.choose_folder)
+fun folderName(context: Context, value: String): String {
+    if (value.isBlank()) return context.getString(R.string.choose_folder)
+    val uri = Uri.parse(value)
+    runCatching { DocumentFile.fromTreeUri(context, uri)?.name }
+        .getOrNull()
+        ?.takeIf { it.isNotBlank() }
+        ?.let {
+            return it
+        }
+    // Some providers (e.g. the Downloads root) report no display name for the tree itself.
+    val id = runCatching { DocumentsContract.getTreeDocumentId(uri) }.getOrNull().orEmpty()
+    val root = id.substringBefore(':')
+    val path = id.substringAfter(':', "").trimEnd('/')
+    return when {
+        path.isNotBlank() -> path.substringAfterLast('/')
+        root == "downloads" -> "Download"
+        root == "primary" -> context.getString(R.string.internal_storage)
+        root.isNotBlank() -> context.getString(R.string.folder_root, root)
+        else -> context.getString(R.string.folder_selected)
+    }
+}
 
 fun openFolder(context: Context, folder: String) {
     if (folder.isNotBlank())

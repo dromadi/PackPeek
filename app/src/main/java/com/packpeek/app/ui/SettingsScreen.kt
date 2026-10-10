@@ -94,6 +94,24 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
                 )
         }
         item {
+            ChoiceMenu(
+                stringResource(R.string.keep_versions),
+                s.keep.toString(),
+                listOf(
+                    "0" to R.string.keep_all,
+                    "1" to R.string.keep_1,
+                    "3" to R.string.keep_3,
+                    "5" to R.string.keep_5,
+                ),
+            ) {
+                vm.number("keep", it.toInt())
+            }
+            Text(
+                stringResource(R.string.keep_versions_explanation),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        item {
             InfoRow(stringResource(R.string.preview), FileNames.format(sample, s.naming))
             InfoRow(
                 stringResource(R.string.preview_split),

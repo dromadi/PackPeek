@@ -12,6 +12,7 @@ import androidx.work.*
 import com.packpeek.app.MainActivity
 import com.packpeek.app.PackPeekApp
 import com.packpeek.app.R
+import com.packpeek.app.data.pruneTargets
 import com.packpeek.app.model.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
@@ -59,6 +60,8 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                             }
                         }
                     dao.finish(record.id, "SUCCESS", result.uri, result.name, result.bytes)
+                    dao.setSigner(record.id, app.apps.signerDigest(record.packageName))
+                    prune(record.packageName, settings.keep)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -91,6 +94,16 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                 dao.jobState(jobId, "FAILED")
             }
             return Result.failure()
+        }
+    }
+
+    /** Applies the keep-N setting. A file already deleted by the user still leaves history. */
+    private suspend fun prune(pkg: String, keep: Int) {
+        for (old in pruneTargets(dao.successes(pkg), keep)) {
+            runCatching {
+                DocumentFile.fromSingleUri(applicationContext, Uri.parse(old.uri))?.delete()
+            }
+            dao.prune(old.id)
         }
     }
 

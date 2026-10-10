@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package com.packpeek.app.ui
 
 import android.net.Uri
+import android.os.Build
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.material3.*
@@ -12,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.packpeek.app.R
+import com.packpeek.app.data.signerChanges
 import java.text.DateFormat
 import java.util.Date
 
@@ -23,6 +27,7 @@ fun HistoryScreen(vm: MainViewModel, onInspect: () -> Unit) {
     val c = LocalContext.current
     var search by remember { mutableStateOf("") }
     var hide by remember { mutableStateOf<Long?>(null) }
+    val signerChanged = remember(history) { signerChanges(history) }
     val records =
         remember(history, search) {
             history.filter {
@@ -59,12 +64,31 @@ fun HistoryScreen(vm: MainViewModel, onInspect: () -> Unit) {
                     Column(Modifier.padding(14.dp)) {
                         Text(r.label, style = MaterialTheme.typography.titleMedium)
                         Text(r.fileName, style = MaterialTheme.typography.bodySmall)
+                        if (r.id in signerChanged)
+                            Text(
+                                stringResource(R.string.signer_changed_badge),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.error,
+                            )
                         Text(
                             "${sizeText(r.bytes)} · ${DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.SHORT).format(Date(r.created))}",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary,
                         )
-                        Row {
+                        FlowRow {
+                            TextButton(
+                                enabled = !importing,
+                                onClick = {
+                                    vm.reinstall(
+                                        Uri.parse(r.uri),
+                                        Build.VERSION.SDK_INT < 26 ||
+                                            c.packageManager.canRequestPackageInstalls(),
+                                        onInspect,
+                                    )
+                                },
+                            ) {
+                                Text(stringResource(R.string.reinstall))
+                            }
                             TextButton(onClick = { shareFiles(c, listOf(Uri.parse(r.uri))) }) {
                                 Text(stringResource(R.string.share))
                             }

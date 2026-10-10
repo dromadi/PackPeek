@@ -28,6 +28,8 @@ data class DetailState(
     val report: AuditReport? = null,
     val loading: Boolean = false,
     val error: ErrorCode? = null,
+    /** The latest backup when its signer differs from the installed app's signer now. */
+    val signerChangedSince: BackupRecord? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -45,7 +47,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val riskScores = MutableStateFlow<Map<String, Int>>(emptyMap())
     val checkingOverview = MutableStateFlow(false)
     val filtered =
-        combine(apps, query, tech) { a, q, t -> filterApps(a, q, t) }
+        combine(apps, query, tech, settings) { a, q, t, s ->
+                filterApps(a, q, t, s?.favorites.orEmpty())
+            }
             .flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val scanning = MutableStateFlow(false)
@@ -249,6 +253,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { owner.settings.text(key, value) }
     }
 
+    fun number(key: String, value: Int) {
+        viewModelScope.launch { owner.settings.number(key, value) }
+    }
+
+    fun toggleFavorite(pkg: String) {
+        viewModelScope.launch { owner.settings.toggleFavorite(pkg) }
+    }
+
     fun flag(key: String, value: Boolean) {
         viewModelScope.launch { owner.settings.flag(key, value) }
     }
@@ -351,7 +363,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         auditJob = viewModelScope.launch {
             try {
                 val report = owner.audit.audit(app)
-                detail.value = DetailState(app, report)
+                val changed =
+                    if (app.fromFile) null
+                    else
+                        withContext(Dispatchers.IO) {
+                            val previous =
+                                dao.successes(app.packageName).firstOrNull {
+                                    it.signer.isNotBlank()
+                                }
+                            val now = owner.apps.signerDigest(app.packageName)
+                            previous?.takeIf { now.isNotBlank() && it.signer != now }
+                        }
+                detail.value = DetailState(app, report, signerChangedSince = changed)
                 if (!app.fromFile) {
                     riskScores.value = riskScores.value + (app.packageName to report.score)
                     tech.value = tech.value + (app.packageName to report.frameworks)
@@ -383,6 +406,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             } finally {
                 importing.value = false
             }
+        }
+    }
+
+    /** Opens a backup from history and, when installs are allowed, starts installing it. */
+    fun reinstall(uri: Uri, canInstall: Boolean, onReady: () -> Unit) {
+        import(uri) {
+            onReady()
+            if (canInstall) install()
         }
     }
 

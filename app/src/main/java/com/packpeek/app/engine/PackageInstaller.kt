@@ -1,6 +1,7 @@
 package com.packpeek.app.engine
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -84,8 +85,37 @@ class InstallStatusActivity : Activity() {
             }
             PackageInstaller.STATUS_SUCCESS ->
                 Toast.makeText(this, R.string.install_success, Toast.LENGTH_LONG).show()
-            else -> Toast.makeText(this, R.string.install_failed, Toast.LENGTH_LONG).show()
+            PackageInstaller.STATUS_FAILURE_ABORTED ->
+                Toast.makeText(this, R.string.install_cancelled, Toast.LENGTH_LONG).show()
+            else -> {
+                // A Toast truncates these explanations, so they get a dialog.
+                val reason =
+                    failureReason(
+                        intent.getIntExtra(PackageInstaller.EXTRA_STATUS, 0),
+                        intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE).orEmpty(),
+                    )
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.install_failed)
+                    .setMessage(reason)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .setOnDismissListener { finish() }
+                    .show()
+                return
+            }
         }
         finish()
     }
+
+    private fun failureReason(status: Int, message: String): Int =
+        when {
+            message.contains("DOWNGRADE", true) -> R.string.install_failed_downgrade
+            message.contains("UPDATE_INCOMPATIBLE", true) ||
+                status == PackageInstaller.STATUS_FAILURE_CONFLICT ->
+                R.string.install_failed_signature
+            status == PackageInstaller.STATUS_FAILURE_INCOMPATIBLE ->
+                R.string.install_failed_incompatible
+            status == PackageInstaller.STATUS_FAILURE_STORAGE -> R.string.install_failed_storage
+            status == PackageInstaller.STATUS_FAILURE_BLOCKED -> R.string.install_failed_blocked
+            else -> R.string.install_failed_generic
+        }
 }

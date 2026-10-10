@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import com.packpeek.app.model.AppRecord
 import java.io.File
+import java.security.MessageDigest
 import kotlinx.coroutines.*
 
 class AppRepository(context: Context) {
@@ -39,6 +40,32 @@ class AppRepository(context: Context) {
             }
             .map { it.activityInfo.name }
             .toSet()
+
+    /** Sorted SHA-256 digests of the installed app's current signer(s), or "" if unknown. */
+    @Suppress("DEPRECATION")
+    fun signerDigest(pkg: String): String =
+        runCatching {
+                val p =
+                    packageInfo(
+                        pkg,
+                        if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES
+                        else PackageManager.GET_SIGNATURES,
+                    )
+                val signatures =
+                    if (Build.VERSION.SDK_INT >= 28) p.signingInfo?.apkContentsSigners.orEmpty()
+                    else p.signatures.orEmpty()
+                signatures
+                    .map {
+                        MessageDigest.getInstance("SHA-256").digest(it.toByteArray()).joinToString(
+                            ""
+                        ) { b ->
+                            "%02x".format(b)
+                        }
+                    }
+                    .sorted()
+                    .joinToString(",")
+            }
+            .getOrDefault("")
 
     fun installed(pkg: String): AppRecord = fromInfo(packageInfo(pkg))
 

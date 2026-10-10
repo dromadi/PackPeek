@@ -12,7 +12,9 @@ import java.io.StringWriter
 class PackPeekApp : Application() {
     val settings by lazy { SettingsRepository(this) }
     val database by lazy {
-        Room.databaseBuilder(this, BackupDatabase::class.java, "packpeek.db").build()
+        Room.databaseBuilder(this, BackupDatabase::class.java, "packpeek.db")
+            .addMigrations(BackupDatabase.MIGRATION_1_2)
+            .build()
     }
     val apps by lazy { AppRepository(this) }
     val audit by lazy { AuditEngine(apps) }

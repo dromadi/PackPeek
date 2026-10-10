@@ -42,7 +42,7 @@ Implementasi source dan penerimaan perangkat dibedakan. Workbook asli tidak diub
 | T803 | Aksesibilitas & layar besar (tablet/foldable) | Sebagian / menunggu QA | Grid adaptive dan kontrol Material; TalkBack, font 200%, kontras dan foldable menunggu QA perangkat. |
 | T706 | Halaman Tentang & Lisensi Open Source | Sebagian / menunggu QA | About/versi/notice OSS/privasi lokal ada; kontak dan URL kebijakan privasi publik belum diisi. |
 | T317 | Menu Masukan/Dukungan, Bagikan Aplikasi & Beri Rating | Sebagian / menunggu QA | Share info/diagnostik ada; email belum diberikan, rating Play disembunyikan. |
-| T208 | Unit test untuk logika inti | Implementasi alpha | 16 unit test aturan inti dan manifest (termasuk deteksi launcher dan filter multi-framework) |
+| T208 | Unit test untuk logika inti | Implementasi alpha | 20 unit test aturan inti dan manifest (termasuk deteksi launcher dan filter multi-framework) |
 | T341 | Optimasi performa: Baseline Profile & startup | Belum selesai | Baseline Profile khusus aplikasi dan benchmark startup/scroll belum dibuat/dijalankan. |
 | T802 | Uji build release dengan R8 & aturan ProGuard | Sebagian / menunggu QA | Build release R8 diperiksa dalam BUILD_REPORT; pengujian runtime release belum dilakukan. |
 | T801 | Uji di berbagai versi Android & perangkat | Belum selesai | Uji emulator API 24/29/33/34/36 dan satu HP fisik belum dilakukan. |

@@ -112,6 +112,7 @@ fun filterApps(
     apps: List<AppRecord>,
     query: AppQuery,
     technologies: Map<String, List<String>> = emptyMap(),
+    favorites: Set<String> = emptySet(),
 ): List<AppRecord> {
     val result = apps.filter { a ->
         (query.text.isBlank() ||
@@ -121,6 +122,7 @@ fun filterApps(
                 "USER" -> !a.system
                 "SYSTEM" -> a.system
                 "SPLIT" -> a.split
+                "FAVORITE" -> a.packageName in favorites
                 else -> true
             }) &&
             (query.source == "ALL" || a.source == query.source) &&
