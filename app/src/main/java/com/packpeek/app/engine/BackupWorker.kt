@@ -54,7 +54,15 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                             setProgress(workDataOf("percent" to percent, "label" to record.label))
                             val now = android.os.SystemClock.elapsedRealtime()
                             if (now - lastNotification >= 1000) {
-                                setForeground(notification(percent, record.label))
+                                // Re-posting under the same id updates the foreground notification
+                                // without restarting the service, which Android 12+ may refuse in
+                                // the background and which would fail the record being copied.
+                                runCatching {
+                                    val info = notification(percent, record.label)
+                                    applicationContext
+                                        .getSystemService(NotificationManager::class.java)
+                                        .notify(info.notificationId, info.notification)
+                                }
                                 lastNotification = now
                             }
                         }

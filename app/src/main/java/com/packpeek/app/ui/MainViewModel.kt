@@ -81,6 +81,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 .distinctUntilChanged()
                 .collect { if (it) refresh() }
         }
+        viewModelScope.launch { releaseStaleJob() }
         viewModelScope.launch {
             workInfo.filterNotNull().collect { info ->
                 if (info.state == WorkInfo.State.CANCELLED)
@@ -89,6 +90,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         dao.jobState(it.id, "CANCELLED")
                     }
             }
+        }
+    }
+
+    /** A job left QUEUED/RUNNING without live work would otherwise block every later backup. */
+    private suspend fun releaseStaleJob() {
+        val job = dao.latest().first() ?: return
+        if (job.state !in listOf("QUEUED", "RUNNING")) return
+        val info = work.getWorkInfoByIdFlow(UUID.fromString(job.id)).first()
+        if (info != null && !info.state.isFinished) return
+        if (info?.state == WorkInfo.State.CANCELLED) {
+            dao.cancelPending(job.id)
+            dao.jobState(job.id, "CANCELLED")
+        } else {
+            dao.records(job.id)
+                .filter { it.state in listOf("RUNNING", "QUEUED") }
+                .forEach { dao.finish(it.id, "FAILED", error = "UNKNOWN") }
+            dao.jobState(job.id, "FAILED")
         }
     }
 
@@ -119,7 +137,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: Exception) {
                 error.value = ErrorCode.SOURCE
             } finally {
-                scanning.value = false
+                // A cancelled scan must not hide the indicator of the scan that replaced it.
+                if (scanJob === coroutineContext.job) scanning.value = false
             }
         }
     }
@@ -156,7 +175,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     }
                 } finally {
-                    filtering.value = false
+                    if (filterJob === coroutineContext.job) filtering.value = false
                 }
             }
         else filtering.value = false
@@ -356,10 +375,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888)
                 val canvas = Canvas(bitmap)
                 if (Build.VERSION.SDK_INT >= 26 && drawable is AdaptiveIconDrawable) {
-                    drawable.background.setBounds(0, 0, 512, 512)
-                    drawable.background.draw(canvas)
-                    drawable.foreground.setBounds(0, 0, 512, 512)
-                    drawable.foreground.draw(canvas)
+                    listOfNotNull(drawable.background, drawable.foreground).forEach {
+                        it.setBounds(0, 0, 512, 512)
+                        it.draw(canvas)
+                    }
                 } else {
                     drawable.setBounds(0, 0, 512, 512)
                     drawable.draw(canvas)
