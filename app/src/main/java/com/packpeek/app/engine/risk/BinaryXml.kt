@@ -130,8 +130,11 @@ object BinaryXml {
         val b = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
         fun u16(p: Int) = b.getShort(p).toInt() and 65535
         fun i32(p: Int) = b.getInt(p)
-        require(bytes.size >= 8 && bytes.size <= LIMIT && u16(0) == 3)
-        var pos = u16(2)
+        // The document header (type 3, 8 bytes) declares the whole size; a compiled manifest has
+        // nothing before or after it, so a mismatch is a crafted or damaged file.
+        require(bytes.size >= 8 && bytes.size <= LIMIT && u16(0) == 3 && u16(2) == 8)
+        require(i32(4) == bytes.size)
+        var pos = 8
         var strings = emptyList<String>()
         var resourceIds = IntArray(0)
         fun str(index: Int): String {
@@ -200,6 +203,8 @@ object BinaryXml {
             }
             pos = end
         }
+        // Chunks must tile the document exactly: no stray bytes after the last one.
+        require(pos == bytes.size)
         // A truncated or unbalanced document would yield a partial tree; fail closed instead.
         require(stack.isEmpty())
         return root?.build() ?: throw AppFailure(ErrorCode.ARCHIVE)

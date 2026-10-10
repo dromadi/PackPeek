@@ -289,6 +289,24 @@ class ManifestParserTest {
         failsAsArchive(compile(nested, extra = listOf(Element("application", emptyList(), listOf(launcherActivity())))))
     }
 
+    /** The declared document size must match the file, and chunks must end exactly at its end. */
+    @Test
+    fun documentSizeMustMatch() {
+        val good = compile(nested)
+        assertEquals("manifest", BinaryXml.parse(good).name)
+        for (extra in 1..7) failsAsArchive(good + ByteArray(extra))
+        // Trailing bytes that the header also claims: they are not a chunk.
+        for (extra in 1..7) {
+            val padded = good + ByteArray(extra)
+            java.nio.ByteBuffer.wrap(padded).order(java.nio.ByteOrder.LITTLE_ENDIAN).putInt(4, padded.size)
+            failsAsArchive(padded)
+        }
+        val shortHeader = good.copyOf().also { java.nio.ByteBuffer.wrap(it).order(java.nio.ByteOrder.LITTLE_ENDIAN).putInt(4, good.size - 4) }
+        failsAsArchive(shortHeader)
+        val wrongHeaderSize = good.copyOf().also { it[2] = 16 }
+        failsAsArchive(wrongHeaderSize)
+    }
+
     /** Random corruption must end in a clean AppFailure, never a crash or a hang. */
     @Test
     fun corruptedManifestsFailCleanly() {
