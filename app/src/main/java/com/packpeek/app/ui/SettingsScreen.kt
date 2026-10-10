@@ -93,6 +93,7 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
                         "SYSTEM" to R.string.follow_system,
                         "LIGHT" to R.string.light_theme,
                         "DARK" to R.string.dark_theme,
+                        "AMOLED" to R.string.amoled_theme,
                     ),
                 ) {
                     vm.text("theme", it)

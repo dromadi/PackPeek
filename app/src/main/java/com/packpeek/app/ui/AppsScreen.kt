@@ -160,6 +160,9 @@ fun AppsScreen(
                     Modifier.weight(1f),
                     style = MaterialTheme.typography.labelLarge,
                 )
+                TextButton(onClick = { vm.exportAppList(apps) }, enabled = apps.isNotEmpty()) {
+                    Text(stringResource(R.string.export_list))
+                }
                 TextButton(onClick = vm::selectAll, enabled = apps.isNotEmpty()) {
                     Text(stringResource(R.string.select_all))
                 }

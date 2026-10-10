@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.net.Uri
 import android.os.Build
+import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +16,10 @@ import com.packpeek.app.PackPeekApp
 import com.packpeek.app.data.*
 import com.packpeek.app.engine.*
 import com.packpeek.app.model.*
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -52,6 +57,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val importing = MutableStateFlow(false)
     val installing = MutableStateFlow(false)
     val iconSaved = MutableStateFlow<Uri?>(null)
+    val appListShared = MutableStateFlow<Uri?>(null)
+    val installResult = owner.installResult.asStateFlow()
+    /** Layout of the archive behind the current local-file detail screen. */
+    val importSummary = MutableStateFlow<Pair<ArchiveKind, Int>?>(null)
     val latestJob = dao.latest().stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val jobRecords =
         latestJob
@@ -331,7 +340,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 auditJob?.cancelAndJoin()
                 imported?.close()
                 imported = null
+                importSummary.value = null
                 imported = ArchiveImporter(owner, owner.apps).open(uri)
+                importSummary.value = imported!!.kind to imported!!.obbCount
                 inspect(imported!!.app)
                 onReady()
             } catch (e: CancellationException) {
@@ -358,6 +369,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 error.value = (e as? AppFailure)?.code ?: ErrorCode.UNKNOWN
             } finally {
                 installing.value = false
+            }
+        }
+    }
+
+    fun dismissInstallResult() {
+        owner.installResult.value = null
+    }
+
+    fun exportAppList(items: List<AppRecord>) {
+        if (items.isEmpty()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val dir = File(owner.cacheDir, "shared").apply { mkdirs() }
+                dir.listFiles()?.filter { it.name.endsWith(".csv") }?.forEach { it.delete() }
+                val stamp = SimpleDateFormat("yyyyMMdd-HHmm", Locale.ROOT).format(Date())
+                val file = File(dir, "packpeek-apps-$stamp.csv")
+                // A BOM lets spreadsheet apps detect UTF-8 labels.
+                file.writeText("\uFEFF" + appListCsv(items))
+                appListShared.value =
+                    FileProvider.getUriForFile(owner, "${owner.packageName}.fileprovider", file)
+            } catch (e: Exception) {
+                error.value = ErrorCode.STORAGE
             }
         }
     }

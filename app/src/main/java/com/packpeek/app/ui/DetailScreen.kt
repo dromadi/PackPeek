@@ -35,6 +35,7 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
     val report = state.report
     val latest by vm.latestJob.collectAsStateWithLifecycle()
     val installing by vm.installing.collectAsStateWithLifecycle()
+    val summary by vm.importSummary.collectAsStateWithLifecycle()
     var tab by remember(app.basePath) { mutableIntStateOf(0) }
     var menu by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
@@ -208,9 +209,18 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                         item {
                             InfoRow(
                                 stringResource(R.string.archive_format),
-                                ".${app.format} · ${app.paths.size} APK · ${sizeText(app.size)}",
+                                "${summary?.first?.takeIf { app.fromFile }?.name ?: ".${app.format}"} · ${app.paths.size} APK · ${sizeText(app.size)}",
                             )
                         }
+                        val obb = summary?.second?.takeIf { app.fromFile } ?: 0
+                        if (obb > 0)
+                            item {
+                                Text(
+                                    stringResource(R.string.obb_notice, obb),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
                         item {
                             InfoRow(
                                 stringResource(R.string.source),
@@ -233,6 +243,8 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                             }
                             item { InfoRow("UID", app.uid.toString()) }
                         }
+                        if (report != null && app.fromFile)
+                            item { ReadinessCard(app, report) }
                         if (report != null) {
                             item {
                                 Card(
@@ -417,6 +429,84 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                         }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ReadinessCard(app: AppRecord, report: AuditReport) {
+    val device = Build.SUPPORTED_ABIS.toList()
+    val issues =
+        remember(app, report) {
+            readiness(
+                ReadinessInput(
+                    app.minSdk,
+                    app.targetSdk,
+                    Build.VERSION.SDK_INT,
+                    report.abis,
+                    device,
+                    report.signatureValid,
+                    report.signerMatch,
+                    app.versionCode,
+                    report.installedVersionCode,
+                    report.missingFeatures,
+                )
+            )
+        }
+    val ok = issues.isEmpty()
+    Card(
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (ok) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.errorContainer
+            )
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                when {
+                    !ok -> stringResource(R.string.ready_warning)
+                    report.installedVersionCode == null -> stringResource(R.string.ready_new)
+                    else ->
+                        stringResource(
+                            R.string.ready_update,
+                            report.installedVersion.orEmpty(),
+                            app.version,
+                        )
+                },
+                style = MaterialTheme.typography.titleLarge,
+            )
+            issues.forEach { issue ->
+                Text(
+                    when (issue) {
+                        ReadinessIssue.SIGNATURE_INVALID ->
+                            stringResource(R.string.ready_signature_invalid)
+                        ReadinessIssue.SDK ->
+                            stringResource(R.string.ready_sdk, app.minSdk, Build.VERSION.SDK_INT)
+                        ReadinessIssue.TARGET -> stringResource(R.string.ready_target, app.targetSdk)
+                        ReadinessIssue.ABI ->
+                            stringResource(
+                                R.string.ready_abi,
+                                report.abis.joinToString(),
+                                device.joinToString(),
+                            )
+                        ReadinessIssue.FEATURES ->
+                            stringResource(
+                                R.string.ready_features,
+                                report.missingFeatures.joinToString(),
+                            )
+                        ReadinessIssue.SIGNER -> stringResource(R.string.ready_signer)
+                        ReadinessIssue.DOWNGRADE ->
+                            stringResource(
+                                R.string.ready_downgrade,
+                                app.versionCode,
+                                report.installedVersionCode ?: 0L,
+                            )
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Text(stringResource(R.string.ready_note), style = MaterialTheme.typography.bodySmall)
         }
     }
 }

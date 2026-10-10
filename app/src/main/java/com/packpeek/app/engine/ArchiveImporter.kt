@@ -13,7 +13,13 @@ import java.util.UUID
 import java.util.zip.ZipFile
 import kotlinx.coroutines.*
 
-data class ImportedArchive(val directory: File, val app: AppRecord, val files: List<File>) {
+data class ImportedArchive(
+    val directory: File,
+    val app: AppRecord,
+    val files: List<File>,
+    val kind: ArchiveKind = ArchiveKind.APK,
+    val obbCount: Int = 0,
+) {
     fun close() {
         directory.deleteRecursively()
     }
@@ -29,8 +35,10 @@ class ArchiveImporter(private val context: Context, private val apps: AppReposit
                 context.contentResolver.openInputStream(uri)?.use {
                     copyBounded(it, outer, 4L * 1024 * 1024 * 1024)
                 } ?: throw AppFailure(ErrorCode.SOURCE)
+                val names = mutableSetOf<String>()
+                val single = apps.archiveInfo(outer.path) != null
                 val files =
-                    if (apps.archiveInfo(outer.path) != null) listOf(outer)
+                    if (single) listOf(outer)
                     else {
                         var total = 0L
                         val result = mutableListOf<File>()
@@ -43,6 +51,7 @@ class ArchiveImporter(private val context: Context, private val apps: AppReposit
                                 val entry = entries.nextElement()
                                 if (!FileNames.safeZipEntry(entry.name))
                                     throw AppFailure(ErrorCode.ARCHIVE)
+                                names += entry.name
                                 if (!entry.isDirectory && entry.name.endsWith(".apk", true)) {
                                     if (result.size >= 512) throw AppFailure(ErrorCode.ARCHIVE)
                                     val file = File(directory, "part_${result.size}.apk")
@@ -72,8 +81,8 @@ class ArchiveImporter(private val context: Context, private val apps: AppReposit
                     }
                 )
                     throw AppFailure(ErrorCode.ARCHIVE)
-                val names = metadata.values.map { it["split"].orEmpty() }
-                if (names.toSet().size != names.size) throw AppFailure(ErrorCode.ARCHIVE)
+                val splits = metadata.values.map { it["split"].orEmpty() }
+                if (splits.toSet().size != splits.size) throw AppFailure(ErrorCode.ARCHIVE)
                 val p = apps.archiveInfo(base.path) ?: throw AppFailure(ErrorCode.ARCHIVE)
                 p.applicationInfo?.apply {
                     sourceDir = base.path
@@ -84,6 +93,9 @@ class ArchiveImporter(private val context: Context, private val apps: AppReposit
                     directory,
                     apps.fromInfo(p, true, ordered.drop(1).map { it.path }),
                     ordered,
+                    archiveKind(single, names),
+                    // OBB data cannot be placed under Android/obb without all-files access.
+                    names.count { it.endsWith(".obb", true) },
                 )
             } catch (e: CancellationException) {
                 directory.deleteRecursively()

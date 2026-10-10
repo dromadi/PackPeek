@@ -94,6 +94,7 @@ class AuditEngine(private val apps: AppRepository) {
                     PackageManager.GET_SERVICES or
                     PackageManager.GET_RECEIVERS or
                     PackageManager.GET_PROVIDERS or
+                    PackageManager.GET_CONFIGURATIONS or
                     signFlags
             val p =
                 if (app.fromFile)
@@ -239,14 +240,23 @@ class AuditEngine(private val apps: AppRepository) {
                     add(Finding(FindingCode.DEBUG_CERT))
             }
             val tech = technology(app)
-            val match =
+            val installed =
                 if (app.fromFile)
-                    runCatching {
-                            currentSigners(apps.packageInfo(app.packageName, signFlags)) ==
-                                currentSigners(p)
-                        }
-                        .getOrNull()
+                    runCatching { apps.packageInfo(app.packageName, signFlags) }.getOrNull()
                 else null
+            val match = installed?.let { currentSigners(it) == currentSigners(p) }
+            val missingFeatures =
+                if (app.fromFile)
+                    p.reqFeatures
+                        .orEmpty()
+                        .filter {
+                            it.name != null &&
+                                it.flags and FeatureInfo.FLAG_REQUIRED != 0 &&
+                                !apps.pm.hasSystemFeature(it.name)
+                        }
+                        .map { it.name }
+                        .distinct()
+                else emptyList()
             AuditReport(
                 permissions,
                 components,
@@ -258,6 +268,11 @@ class AuditEngine(private val apps: AppRepository) {
                 tech.abis,
                 tech.libraries,
                 match,
+                installed?.versionName,
+                installed?.let {
+                    if (Build.VERSION.SDK_INT >= 28) it.longVersionCode else it.versionCode.toLong()
+                },
+                missingFeatures,
             )
         }
 

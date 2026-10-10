@@ -11,6 +11,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -34,7 +35,8 @@ fun PackPeekTheme(settings: Settings?, content: @Composable () -> Unit) {
     val dark =
         when (settings?.theme) {
             "LIGHT" -> false
-            "DARK" -> true
+            "DARK",
+            "AMOLED" -> true
             else -> isSystemInDarkTheme()
         }
     val c = LocalContext.current
@@ -64,7 +66,20 @@ fun PackPeekTheme(settings: Settings?, content: @Composable () -> Unit) {
                 background = Color(0xFFF7F9F8),
                 surface = Color(0xFFF7F9F8),
             )
-    MaterialTheme(colorScheme = scheme, content = content)
+    val black = Color(0xFF000000)
+    val finalScheme =
+        if (settings?.theme == "AMOLED")
+            scheme.copy(
+                background = black,
+                surface = black,
+                surfaceContainerLowest = black,
+                surfaceContainerLow = Color(0xFF0B0B0B),
+                surfaceContainer = Color(0xFF121212),
+                surfaceContainerHigh = Color(0xFF1A1A1A),
+                surfaceContainerHighest = Color(0xFF222222),
+            )
+        else scheme
+    MaterialTheme(colorScheme = finalScheme, content = content)
 }
 
 @Composable
@@ -383,6 +398,15 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                     }
                 },
             )
+        val installResult by vm.installResult.collectAsStateWithLifecycle()
+        installResult?.let { InstallResultDialog(it, vm) }
+        val appList by vm.appListShared.collectAsStateWithLifecycle()
+        LaunchedEffect(appList) {
+            appList?.let {
+                shareFiles(c, listOf(it), "text/csv")
+                vm.appListShared.value = null
+            }
+        }
         val icon by vm.iconSaved.collectAsStateWithLifecycle()
         if (icon != null)
             AlertDialog(
@@ -406,6 +430,104 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
             )
     }
 }
+
+@Composable
+private fun InstallResultDialog(result: InstallResult, vm: MainViewModel) {
+    val c = LocalContext.current
+    val installed =
+        remember(result) {
+            result.packageName.isNotBlank() &&
+                runCatching { vm.owner.apps.packageInfo(result.packageName) }.isSuccess
+        }
+    val launch =
+        remember(result) {
+            if (result.success && result.packageName.isNotBlank())
+                c.packageManager.getLaunchIntentForPackage(result.packageName)
+            else null
+        }
+    val canUninstall =
+        installed &&
+            result.failure in
+                listOf(InstallFailure.SIGNATURE, InstallFailure.DOWNGRADE, InstallFailure.CONFLICT)
+    AlertDialog(
+        onDismissRequest = vm::dismissInstallResult,
+        title = {
+            Text(
+                stringResource(
+                    if (result.success) R.string.install_success else R.string.install_failed_title
+                )
+            )
+        },
+        text = {
+            SelectionContainer {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (result.success) Text(stringResource(R.string.install_success_body))
+                    else {
+                        Text(stringResource(installFailureText(result.failure!!)))
+                        if (result.detail.isNotBlank())
+                            Text(
+                                stringResource(R.string.install_system_message, result.detail),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (launch != null)
+                TextButton(
+                    onClick = {
+                        vm.dismissInstallResult()
+                        c.launchSafe(launch)
+                    }
+                ) {
+                    Text(stringResource(R.string.open_app))
+                }
+            else if (canUninstall)
+                TextButton(
+                    onClick = {
+                        vm.dismissInstallResult()
+                        c.launchSafe(
+                            android.content.Intent(
+                                android.content.Intent.ACTION_DELETE,
+                                Uri.parse("package:${result.packageName}"),
+                            )
+                        )
+                    }
+                ) {
+                    Text(stringResource(R.string.uninstall_current))
+                }
+            else
+                TextButton(onClick = vm::dismissInstallResult) {
+                    Text(stringResource(R.string.close))
+                }
+        },
+        dismissButton = {
+            if (launch != null || canUninstall)
+                TextButton(onClick = vm::dismissInstallResult) {
+                    Text(stringResource(R.string.close))
+                }
+        },
+    )
+}
+
+fun installFailureText(failure: InstallFailure): Int =
+    when (failure) {
+        InstallFailure.ABORTED -> R.string.install_fail_aborted
+        InstallFailure.BLOCKED -> R.string.install_fail_blocked
+        InstallFailure.CONFLICT -> R.string.install_fail_conflict
+        InstallFailure.INCOMPATIBLE -> R.string.install_fail_incompatible
+        InstallFailure.INVALID -> R.string.install_fail_invalid
+        InstallFailure.STORAGE -> R.string.install_fail_storage
+        InstallFailure.SIGNATURE -> R.string.install_fail_signature
+        InstallFailure.DOWNGRADE -> R.string.install_fail_downgrade
+        InstallFailure.ABI -> R.string.install_fail_abi
+        InstallFailure.SDK -> R.string.install_fail_sdk
+        InstallFailure.TARGET -> R.string.install_fail_target
+        InstallFailure.MISSING_SPLIT -> R.string.install_fail_missing_split
+        InstallFailure.FEATURE -> R.string.install_fail_feature
+        InstallFailure.UNKNOWN -> R.string.install_fail_unknown
+    }
 
 @Composable
 private fun Onboarding(folder: () -> Unit, finish: () -> Unit, location: String) {
