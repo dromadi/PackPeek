@@ -359,6 +359,45 @@ public class Main {
 )
 
 
+# ---- Control C: overloads. a(String) reads the clipboard, a(int) sends a counter. -----------
+# They are different methods; no clipboard-to-internet path may be reported.
+sample(
+    "control-overload", "Penghitung", "sim.app.counter",
+    ["INTERNET"],
+    {
+        "Main.java": HEADER + """package sim.app.counter;
+import android.content.*; import java.net.*;
+public class Main {
+    Context c;
+    String a(String label) {
+        ClipboardManager cm = (ClipboardManager) c.getSystemService(Context.CLIPBOARD_SERVICE);
+        return label + cm.getPrimaryClip();
+    }
+    void a(int count) throws Exception {
+        ((java.net.HttpURLConnection) new URL("https://counter.example.com/hit").openConnection()).getOutputStream().write(count);
+    }
+}""",
+    },
+)
+
+# ---- Control D: reads a cookie and sends a request in one method, but the request does not
+# carry the cookie. Same code path, no traced value: must not be reported as a traced flow.
+sample(
+    "control-unlinked", "Info Cuaca", "sim.app.weather",
+    ["INTERNET"],
+    {
+        "Main.java": HEADER + """package sim.app.weather;
+import android.webkit.CookieManager; import java.net.*;
+public class Main {
+    boolean loggedIn;
+    void refresh() throws Exception {
+        loggedIn = CookieManager.getInstance().getCookie("https://weather.example.com") != null;
+        ((java.net.HttpURLConnection) new URL("https://weather.example.com/today").openConnection()).getResponseCode();
+    }
+}""",
+    },
+)
+
 def write():
     for name, s in SAMPLES.items():
         root = os.path.join(HERE, "samples", name)

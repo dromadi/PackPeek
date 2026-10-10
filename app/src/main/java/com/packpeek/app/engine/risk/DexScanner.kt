@@ -616,6 +616,10 @@ object DexScanner {
         return out.copyOf(n)
     }
 
+    private fun methodName(key: String) = key.substringAfter("->").substringBefore('(')
+
+    private fun isConstructor(key: String) = methodName(key) == "<init>"
+
     private class Classes(val sending: Set<String>, val querying: Set<String>)
 
     /** Read-then-send paths, and the classes that can actually send or query (for text evidence). */
@@ -625,7 +629,7 @@ object DexScanner {
         val querying = HashSet<String>()
         fun calleeKeys(info: MethodInfo): List<String> =
             info.callees.flatMap { key ->
-                if (key.endsWith("-><init>")) {
+                if (isConstructor(key)) {
                     val members = state.classMethods[key.substringBefore("->")].orEmpty()
                     if (members.size <= CONSTRUCTOR_EXPANSION_LIMIT) members else listOf(key)
                 } else listOf(key)
@@ -676,7 +680,7 @@ object DexScanner {
         fun edges(key: String, info: MethodInfo): List<Pair<String, StepVia>> {
             val out = ArrayList<Pair<String, StepVia>>()
             info.callees.forEach { callee ->
-                if (callee.endsWith("-><init>")) {
+                if (isConstructor(callee)) {
                     val members = state.classMethods[callee.substringBefore("->")].orEmpty()
                     if (members.size <= CONSTRUCTOR_EXPANSION_LIMIT) members.forEach { out += it to StepVia.OBJECT }
                 }
@@ -685,7 +689,7 @@ object DexScanner {
             if (info.launches)
                 info.constClasses.forEach { cls ->
                     state.classMethods[cls].orEmpty()
-                        .filter { it.substringAfter("->") in entryPoints }
+                        .filter { methodName(it) in entryPoints }
                         .forEach { out += it to StepVia.INTENT }
                 }
             return out
@@ -768,6 +772,8 @@ object DexScanner {
         val fieldCount: Int
         val methodIdsOff: Int
         val methodCount: Int
+        val protoIdsOff: Int
+        val protoCount: Int
         val classDefsOff: Int
         val classCount: Int
         /** Per method id: rule, or null; computed only for classes that have rules. */
@@ -783,6 +789,8 @@ object DexScanner {
             typeIdsOff = offset(68, typeCount, 4)
             fieldCount = count(80)
             fieldIdsOff = offset(84, fieldCount, 8)
+            protoCount = count(72)
+            protoIdsOff = offset(76, protoCount, 12)
             methodCount = count(88)
             methodIdsOff = offset(92, methodCount, 8)
             classCount = count(96)
@@ -857,10 +865,32 @@ object DexScanner {
             return string(b.getInt(typeIdsOff + 4 * index))
         }
 
+        private val signatures = HashMap<Int, String>()
+
+        /**
+         * Full identity of a method: class, name and signature, e.g. `La/B;->a(Ljava/lang/String;)V`.
+         * Overloads such as a(String) and a(int) are different methods and must not be merged.
+         */
         fun methodKey(m: Int): String {
             val p = methodIdsOff + 8 * m
-            return type(u16(p)) + "->" + string(b.getInt(p + 4))
+            return type(u16(p)) + "->" + string(b.getInt(p + 4)) + signature(u16(p + 2))
         }
+
+        fun signature(proto: Int): String =
+            signatures.getOrPut(proto) {
+                require(proto in 0 until protoCount)
+                val p = protoIdsOff + 12 * proto
+                val returns = type(b.getInt(p + 4))
+                val params = b.getInt(p + 8)
+                val out = StringBuilder("(")
+                if (params != 0) {
+                    require(params in 0x70 until bytes.size - 4)
+                    val n = b.getInt(params)
+                    require(n in 0..255 && params + 4L + 2L * n <= bytes.size)
+                    for (k in 0 until n) out.append(type(u16(params + 4 + 2 * k)))
+                }
+                out.append(')').append(returns).toString()
+            }
 
         fun stringRule(index: Int): Rule? = stringRules.getOrPut(index) { DexScanner.stringRule(string(index)) }
 
@@ -907,6 +937,7 @@ object DexScanner {
             val start = codeOff + 16
             require(size >= 0 && start.toLong() + 2L * size <= bytes.size)
             val name = string(b.getInt(methodIdsOff + 8 * index + 4))
+            val key = methodKey(index)
             val readable = if (origin.isEmpty()) "$className.$name" else "$className.$name [$origin]"
             val info = if (lib == null) MethodInfo() else null
             val deep = state.deep && info != null
@@ -926,10 +957,9 @@ object DexScanner {
                     val data =
                         if (width == 2) ByteArray(values.size * 2) { if (it % 2 == 0) values.getValue(it / 2).toByte() else (values.getValue(it / 2) shr 8).toByte() }
                         else ByteArray(values.size) { values.getValue(it).toByte() }
-                    decodeArray(data, width, readable, "$descriptor->$name")
+                    decodeArray(data, width, readable, key)
                 }
             }
-            val key = "$descriptor->$name"
             fun record(rule: Rule) {
                 val cap = rule.capability
                 val needsConfirmation = rule.string && (cap in Capability.hiddenDestinations || cap.source)
@@ -1015,8 +1045,8 @@ object DexScanner {
                             if (library(owner) == null && owner.startsWith("L")) info.callees += methodKey(next)
                             if (deep) {
                                 val called = methodKey(next)
-                                if (called in launchKeys) info.launches = true
-                                line((if (rule != null) "⚠ " else "") + "call ${simple(owner)}.${called.substringAfter("->")}")
+                                if (called.substringBefore('(') in launchKeys) info.launches = true
+                                line((if (rule != null) "⚠ " else "") + "call ${simple(owner)}.${methodName(called)}")
                             }
                         }
                     }

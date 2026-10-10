@@ -59,4 +59,14 @@ class ScamSamplesTest {
         assertEquals(0, r.count(Severity.STRONG))
         assertTrue(r.findings.none { it.id == RiskId.HIDDEN_DESTINATION })
     }
+
+    /** a(String) reads the clipboard and a(int) sends: two methods, so no clipboard path. */
+    @Test
+    fun overloadsAreNotMerged() {
+        val apk = File(requireNotNull(javaClass.getResource("/samples/control-overload.apk")).toURI())
+        val code = DexScanner.scan(listOf(apk), DexScanner.DEEP_TIME_LIMIT_MS, deep = true)
+        assertTrue(code.inApp(Capability.CLIPBOARD))
+        assertTrue(code.flows.none { it.source == Capability.CLIPBOARD })
+        assertTrue(analyse("control-overload", "Penghitung").findings.none { it.severity == Severity.STRONG })
+    }
 }
