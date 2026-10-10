@@ -104,6 +104,20 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
             rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
                 it?.let { uri -> vm.import(uri) { nav.navigate("detail") } }
             }
+        val multiPicker =
+            rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) {
+                vm.installMany(it)
+            }
+        fun pickInstallFiles() {
+            if (Build.VERSION.SDK_INT >= 26 && !c.packageManager.canRequestPackageInstalls())
+                c.launchSafe(
+                    android.content.Intent(
+                        android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        Uri.parse("package:${c.packageName}"),
+                    )
+                )
+            else multiPicker.launch(arrayOf("*/*"))
+        }
         val notifyPermission =
             rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
         fun backup(items: List<AppRecord>) {
@@ -130,6 +144,8 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
         val work by vm.workInfo.collectAsStateWithLifecycle()
         val importing by vm.importing.collectAsStateWithLifecycle()
         val installing by vm.installing.collectAsStateWithLifecycle()
+        val queue by vm.queue.collectAsStateWithLifecycle()
+        val queueRunning by vm.queueRunning.collectAsStateWithLifecycle()
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -163,6 +179,12 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                                 enabled = !importing && !installing,
                             ) {
                                 Text(stringResource(R.string.analyze_file))
+                            }
+                            IconButton(
+                                onClick = ::pickInstallFiles,
+                                enabled = !importing && !installing,
+                            ) {
+                                Icon(Icons.Default.Add, stringResource(R.string.install_files))
                             }
                             IconButton(onClick = vm::refresh) {
                                 Icon(Icons.Default.Refresh, stringResource(R.string.refresh))
@@ -222,6 +244,29 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                             )
                         }
                     }
+                if (queueRunning) {
+                    val done = queue.count { it.result != null || it.error != null }
+                    val current = queue.getOrNull(done)
+                    Surface(color = MaterialTheme.colorScheme.tertiaryContainer) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                stringResource(
+                                    R.string.queue_progress,
+                                    (done + 1).coerceAtMost(queue.size),
+                                    queue.size,
+                                    current?.label?.ifBlank { current.name } ?: "",
+                                ),
+                                Modifier.weight(1f),
+                            )
+                            TextButton(onClick = vm::cancelQueue) {
+                                Text(stringResource(R.string.cancel))
+                            }
+                        }
+                    }
+                }
                 if (importing || installing) LinearProgressIndicator(Modifier.fillMaxWidth())
                 NavHost(
                     navController = nav,
@@ -399,7 +444,8 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                 },
             )
         val installResult by vm.installResult.collectAsStateWithLifecycle()
-        installResult?.let { InstallResultDialog(it, vm) }
+        if (!queueRunning) installResult?.let { InstallResultDialog(it, vm) }
+        if (!queueRunning && queue.isNotEmpty()) QueueSummaryDialog(queue, vm::dismissQueue)
         val appList by vm.appListShared.collectAsStateWithLifecycle()
         LaunchedEffect(appList) {
             appList?.let {
@@ -508,6 +554,46 @@ private fun InstallResultDialog(result: InstallResult, vm: MainViewModel) {
                     Text(stringResource(R.string.close))
                 }
         },
+    )
+}
+
+@Composable
+private fun QueueSummaryDialog(queue: List<QueueEntry>, dismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = dismiss,
+        title = { Text(stringResource(R.string.queue_summary_title)) },
+        text = {
+            LazyColumn(Modifier.heightIn(max = 360.dp)) {
+                item {
+                    Text(
+                        stringResource(
+                            R.string.queue_counts,
+                            queue.count { it.result?.success == true },
+                            queue.count { it.result?.success == false || it.error != null },
+                        )
+                    )
+                }
+                items(queue) { e ->
+                    Column(Modifier.padding(vertical = 6.dp)) {
+                        Text(e.label.ifBlank { e.name })
+                        Text(
+                            when {
+                                e.result?.success == true -> stringResource(R.string.install_success)
+                                e.result != null ->
+                                    stringResource(installFailureText(e.result.failure!!))
+                                e.error != null -> stringResource(errorText(e.error))
+                                else -> stringResource(R.string.cancelled)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color =
+                                if (e.result?.success == true) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.done)) } },
     )
 }
 

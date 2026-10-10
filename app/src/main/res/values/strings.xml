@@ -250,4 +250,20 @@
     <string name="ready_downgrade">• Older than the installed app (version code %1$d vs %2$d). Android blocks downgrades.</string>
     <string name="ready_note">These checks cover common problems; Android makes the final decision.</string>
     <string name="obb_notice">This archive includes %1$d OBB file(s). They are not installed; copy them to Android/obb manually if the app needs them.</string>
+    <string name="install_files">Install files</string>
+    <string name="queue_progress">Installing %1$d/%2$d: %3$s</string>
+    <string name="queue_summary_title">Installation results</string>
+    <string name="queue_counts">Installed: %1$d · Not installed: %2$d</string>
+    <string name="split_section">APK parts</string>
+    <string name="split_summary">Selected: %1$d of %2$d · %3$s</string>
+    <string name="split_hint">The best parts for this device are selected. Unneeded screen-density and language parts can be left out to save space.</string>
+    <string name="split_missing_abi">No CPU part is selected for a module that needs native code; installation will be stopped.</string>
+    <string name="split_recommended">recommended</string>
+    <string name="split_reset">Use recommended parts</string>
+    <string name="split_kind_base">Base</string>
+    <string name="split_kind_abi">CPU architecture</string>
+    <string name="split_kind_density">Screen density</string>
+    <string name="split_kind_locale">Language</string>
+    <string name="split_kind_feature">Feature modules</string>
+    <string name="split_kind_other">Other</string>
 </resources>

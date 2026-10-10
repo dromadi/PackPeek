@@ -24,6 +24,14 @@ import java.util.UUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
+/** One file of a multi-file installation and, once known, its outcome. */
+data class QueueEntry(
+    val name: String,
+    val label: String = "",
+    val result: InstallResult? = null,
+    val error: ErrorCode? = null,
+)
+
 data class DetailState(
     val app: AppRecord? = null,
     val report: AuditReport? = null,
@@ -61,6 +69,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val installResult = owner.installResult.asStateFlow()
     /** Layout of the archive behind the current local-file detail screen. */
     val importSummary = MutableStateFlow<Pair<ArchiveKind, Int>?>(null)
+    val splitParts = MutableStateFlow<List<SplitPart>>(emptyList())
+    val splitSelection = MutableStateFlow<Set<String>>(emptySet())
+    val queue = MutableStateFlow<List<QueueEntry>>(emptyList())
+    val queueRunning = MutableStateFlow(false)
+    private var queueJob: Job? = null
     val latestJob = dao.latest().stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val jobRecords =
         latestJob
@@ -341,8 +354,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 imported?.close()
                 imported = null
                 importSummary.value = null
-                imported = ArchiveImporter(owner, owner.apps).open(uri)
+                splitParts.value = emptyList()
+                val importer = ArchiveImporter(owner, owner.apps)
+                imported = importer.open(uri)
                 importSummary.value = imported!!.kind to imported!!.obbCount
+                if (imported!!.files.size > 1) {
+                    val parts = importer.plan(imported!!)
+                    splitParts.value = parts
+                    splitSelection.value = parts.filter { it.recommended }.map { it.name }.toSet()
+                }
                 inspect(imported!!.app)
                 onReady()
             } catch (e: CancellationException) {
@@ -361,7 +381,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         installing.value = true
         viewModelScope.launch {
             try {
-                val files = ArchiveImporter(owner, owner.apps).validateForInstall(archive)
+                val files =
+                    ArchiveImporter(owner, owner.apps)
+                        .validateForInstall(
+                            archive,
+                            splitSelection.value.takeIf { splitParts.value.isNotEmpty() },
+                        )
                 installPackage(owner, archive.app.packageName, files)
             } catch (e: CancellationException) {
                 throw e
@@ -371,6 +396,94 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 installing.value = false
             }
         }
+    }
+
+    fun toggleSplit(name: String) {
+        if (splitParts.value.any { it.name == name && it.kind == SplitKind.BASE }) return
+        splitSelection.value =
+            if (name in splitSelection.value) splitSelection.value - name
+            else splitSelection.value + name
+    }
+
+    fun resetSplits() {
+        splitSelection.value = splitParts.value.filter { it.recommended }.map { it.name }.toSet()
+    }
+
+    /** Installs several files one after another, each with its recommended parts. */
+    fun installMany(uris: List<Uri>) {
+        if (uris.isEmpty() || installing.value || importing.value) return
+        installing.value = true
+        queueRunning.value = true
+        val resolver = owner.contentResolver
+        // Picker grants can end with the activity; keep reads alive for the whole queue.
+        uris.forEach {
+            runCatching {
+                resolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        }
+        queue.value =
+            uris.map {
+                QueueEntry(
+                    runCatching { DocumentFile.fromSingleUri(owner, it)?.name }.getOrNull()
+                        ?: it.lastPathSegment.orEmpty()
+                )
+            }
+        fun update(index: Int, change: (QueueEntry) -> QueueEntry) {
+            queue.value = queue.value.mapIndexed { i, e -> if (i == index) change(e) else e }
+        }
+        queueJob = viewModelScope.launch {
+            try {
+                val importer = ArchiveImporter(owner, owner.apps)
+                uris.forEachIndexed { index, uri ->
+                    ensureActive()
+                    var archive: ImportedArchive? = null
+                    try {
+                        archive = importer.open(uri)
+                        val label = archive.app.label
+                        update(index) { it.copy(label = label) }
+                        val files = importer.validateForInstall(archive)
+                        owner.installResult.value = null
+                        installPackage(owner, archive.app.packageName, files)
+                        // The system reports back through InstallStatusActivity, after the user
+                        // confirms or dismisses its prompt.
+                        val pkg = archive.app.packageName
+                        val result =
+                            owner.installResult
+                                .filterNotNull()
+                                .first { it.packageName.isBlank() || it.packageName == pkg }
+                        owner.installResult.value = null
+                        update(index) { it.copy(result = result) }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        update(index) {
+                            it.copy(error = (e as? AppFailure)?.code ?: ErrorCode.UNKNOWN)
+                        }
+                    } finally {
+                        withContext(NonCancellable + Dispatchers.IO) { archive?.close() }
+                    }
+                }
+            } finally {
+                uris.forEach {
+                    runCatching {
+                        resolver.releasePersistableUriPermission(
+                            it,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                        )
+                    }
+                }
+                queueRunning.value = false
+                installing.value = false
+            }
+        }
+    }
+
+    fun cancelQueue() {
+        queueJob?.cancel()
+    }
+
+    fun dismissQueue() {
+        queue.value = emptyList()
     }
 
     fun dismissInstallResult() {

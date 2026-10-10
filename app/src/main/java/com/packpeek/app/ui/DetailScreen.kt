@@ -36,6 +36,8 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
     val latest by vm.latestJob.collectAsStateWithLifecycle()
     val installing by vm.installing.collectAsStateWithLifecycle()
     val summary by vm.importSummary.collectAsStateWithLifecycle()
+    val parts by vm.splitParts.collectAsStateWithLifecycle()
+    val chosen by vm.splitSelection.collectAsStateWithLifecycle()
     var tab by remember(app.basePath) { mutableIntStateOf(0) }
     var menu by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
@@ -245,6 +247,8 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                         }
                         if (report != null && app.fromFile)
                             item { ReadinessCard(app, report) }
+                        if (app.fromFile && parts.isNotEmpty())
+                            item { SplitCard(parts, chosen, vm::toggleSplit, vm::resetSplits) }
                         if (report != null) {
                             item {
                                 Card(
@@ -432,6 +436,97 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
         }
     }
 }
+
+@Composable
+private fun SplitCard(
+    parts: List<SplitPart>,
+    selected: Set<String>,
+    toggle: (String) -> Unit,
+    reset: () -> Unit,
+) {
+    val kept = remember(parts, selected) { SplitPlanner.resolve(parts, selected) }
+    val missingAbi = remember(parts, selected) { SplitPlanner.missingAbi(parts, selected) }
+    OutlinedCard {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(R.string.split_section), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(
+                    R.string.split_summary,
+                    kept.size,
+                    parts.size,
+                    sizeText(parts.filter { it.name in kept }.sumOf { it.bytes }),
+                ),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(stringResource(R.string.split_hint), style = MaterialTheme.typography.bodySmall)
+            if (missingAbi)
+                Text(
+                    stringResource(R.string.split_missing_abi),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            SplitKind.entries.forEach { kind ->
+                val group = parts.filter { it.kind == kind }
+                if (group.isEmpty()) return@forEach
+                Text(
+                    stringResource(splitKindTitle(kind)),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+                group.forEach { part ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = part.name in kept,
+                            onCheckedChange = { toggle(part.name) },
+                            // Config parts of a feature follow that feature's checkbox.
+                            enabled =
+                                kind != SplitKind.BASE &&
+                                    (kind == SplitKind.FEATURE ||
+                                        part.module.isEmpty() ||
+                                        parts.any {
+                                            it.kind == SplitKind.FEATURE &&
+                                                it.module == part.module &&
+                                                it.name in kept
+                                        }),
+                        )
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                when {
+                                    kind == SplitKind.BASE -> "base.apk"
+                                    part.module.isEmpty() -> part.value.ifBlank { part.name }
+                                    part.value.isBlank() -> part.module
+                                    else -> "${part.value} · ${part.module}"
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            Text(
+                                buildString {
+                                    append(sizeText(part.bytes))
+                                    if (part.recommended && kind != SplitKind.BASE)
+                                        append(" · ").append(stringResource(R.string.split_recommended))
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
+                }
+            }
+            TextButton(onClick = reset) { Text(stringResource(R.string.split_reset)) }
+        }
+    }
+}
+
+private fun splitKindTitle(kind: SplitKind): Int =
+    when (kind) {
+        SplitKind.BASE -> R.string.split_kind_base
+        SplitKind.ABI -> R.string.split_kind_abi
+        SplitKind.DENSITY -> R.string.split_kind_density
+        SplitKind.LOCALE -> R.string.split_kind_locale
+        SplitKind.FEATURE -> R.string.split_kind_feature
+        SplitKind.OTHER -> R.string.split_kind_other
+    }
 
 @Composable
 private fun ReadinessCard(app: AppRecord, report: AuditReport) {

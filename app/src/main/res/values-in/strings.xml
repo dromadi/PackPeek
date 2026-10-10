@@ -250,4 +250,20 @@
     <string name="ready_downgrade">• Lebih lama dari aplikasi terpasang (version code %1$d vs %2$d). Android memblokir downgrade.</string>
     <string name="ready_note">Pemeriksaan ini mencakup masalah umum; keputusan akhir ada di Android.</string>
     <string name="obb_notice">Arsip ini berisi %1$d berkas OBB. Berkas itu tidak ikut dipasang; salin manual ke Android/obb jika aplikasi membutuhkannya.</string>
+    <string name="install_files">Pasang berkas</string>
+    <string name="queue_progress">Memasang %1$d/%2$d: %3$s</string>
+    <string name="queue_summary_title">Hasil pemasangan</string>
+    <string name="queue_counts">Terpasang: %1$d · Tidak terpasang: %2$d</string>
+    <string name="split_section">Bagian APK</string>
+    <string name="split_summary">Dipilih: %1$d dari %2$d · %3$s</string>
+    <string name="split_hint">Bagian terbaik untuk perangkat ini sudah dipilih. Bagian kepadatan layar dan bahasa yang tidak perlu bisa dilewati untuk menghemat ruang.</string>
+    <string name="split_missing_abi">Tidak ada bagian CPU yang dipilih untuk modul yang membutuhkan kode native; pemasangan akan dihentikan.</string>
+    <string name="split_recommended">disarankan</string>
+    <string name="split_reset">Pakai bagian yang disarankan</string>
+    <string name="split_kind_base">Dasar</string>
+    <string name="split_kind_abi">Arsitektur CPU</string>
+    <string name="split_kind_density">Kepadatan layar</string>
+    <string name="split_kind_locale">Bahasa</string>
+    <string name="split_kind_feature">Modul fitur</string>
+    <string name="split_kind_other">Lainnya</string>
 </resources>

@@ -19,6 +19,8 @@ data class ImportedArchive(
     val files: List<File>,
     val kind: ArchiveKind = ArchiveKind.APK,
     val obbCount: Int = 0,
+    /** Split name of each entry of [files]; "" for the base APK. */
+    val splitNames: List<String> = files.map { "" },
 ) {
     fun close() {
         directory.deleteRecursively()
@@ -43,24 +45,31 @@ class ArchiveImporter(private val context: Context, private val apps: AppReposit
                         var total = 0L
                         val result = mutableListOf<File>()
                         ZipFile(outer).use { zip ->
-                            val entries = zip.entries()
-                            var count = 0
-                            while (entries.hasMoreElements()) {
+                            val entries = mutableListOf<java.util.zip.ZipEntry>()
+                            val all = zip.entries()
+                            while (all.hasMoreElements()) {
                                 ensureActive()
-                                if (++count > 10000) throw AppFailure(ErrorCode.ARCHIVE)
-                                val entry = entries.nextElement()
+                                if (entries.size >= 10000) throw AppFailure(ErrorCode.ARCHIVE)
+                                val entry = all.nextElement()
                                 if (!FileNames.safeZipEntry(entry.name))
                                     throw AppFailure(ErrorCode.ARCHIVE)
                                 names += entry.name
-                                if (!entry.isDirectory && entry.name.endsWith(".apk", true)) {
-                                    if (result.size >= 512) throw AppFailure(ErrorCode.ARCHIVE)
-                                    val file = File(directory, "part_${result.size}.apk")
-                                    zip.getInputStream(entry).use {
-                                        total +=
-                                            copyBounded(it, file, 4L * 1024 * 1024 * 1024 - total)
-                                    }
-                                    result += file
+                                entries += entry
+                            }
+                            val wanted =
+                                archiveApkEntries(
+                                        entries.filterNot { it.isDirectory }.map { it.name }
+                                    )
+                                    .toSet()
+                            for (entry in entries) {
+                                ensureActive()
+                                if (entry.name !in wanted) continue
+                                if (result.size >= 512) throw AppFailure(ErrorCode.ARCHIVE)
+                                val file = File(directory, "part_${result.size}.apk")
+                                zip.getInputStream(entry).use {
+                                    total += copyBounded(it, file, 4L * 1024 * 1024 * 1024 - total)
                                 }
+                                result += file
                             }
                         }
                         outer.delete()
@@ -96,6 +105,7 @@ class ArchiveImporter(private val context: Context, private val apps: AppReposit
                     archiveKind(single, names),
                     // OBB data cannot be placed under Android/obb without all-files access.
                     names.count { it.endsWith(".obb", true) },
+                    ordered.map { metadata.getValue(it)["split"].orEmpty() },
                 )
             } catch (e: CancellationException) {
                 directory.deleteRecursively()
@@ -122,7 +132,26 @@ class ArchiveImporter(private val context: Context, private val apps: AppReposit
         return size
     }
 
-    suspend fun validateForInstall(archive: ImportedArchive): List<File> =
+    /** The device-recommended parts of [archive]. */
+    fun plan(archive: ImportedArchive): List<SplitPart> {
+        val config = context.resources.configuration
+        val languages =
+            (0 until config.locales.size()).map { config.locales[it].toLanguageTag() }
+        val sizes = archive.splitNames.zip(archive.files).toMap()
+        return SplitPlanner.plan(
+                archive.splitNames,
+                Build.SUPPORTED_ABIS.toList(),
+                context.resources.displayMetrics.densityDpi,
+                languages,
+            )
+            .map { it.copy(bytes = sizes[it.name]?.length() ?: 0) }
+    }
+
+    /** Verifies every APK and returns the parts to install; [selected] defaults to [plan]. */
+    suspend fun validateForInstall(
+        archive: ImportedArchive,
+        selected: Set<String>? = null,
+    ): List<File> =
         withContext(Dispatchers.IO) {
             var expected: Set<String>? = null
             for (file in archive.files) {
@@ -138,12 +167,12 @@ class ArchiveImporter(private val context: Context, private val apps: AppReposit
                     throw AppFailure(ErrorCode.SIGNATURE)
                 expected = signers
             }
-            fun abi(file: File): String? =
-                AbiSelector.fromSplitName(ManifestRoot.read(file)["split"].orEmpty())
-            val declared = archive.files.mapNotNull(::abi).toSet()
-            if (declared.isEmpty()) return@withContext archive.files
-            val best = AbiSelector.choose(declared, Build.SUPPORTED_ABIS.toList())
-            archive.files.filter { abi(it) == null || abi(it) == best }
+            if (archive.files.size == 1) return@withContext archive.files
+            val parts = plan(archive)
+            val choice = selected ?: parts.filter { it.recommended }.map { it.name }.toSet()
+            if (SplitPlanner.missingAbi(parts, choice)) throw AppFailure(ErrorCode.ABI)
+            val keep = SplitPlanner.resolve(parts, choice)
+            archive.files.filterIndexed { i, _ -> archive.splitNames[i] in keep }
         }
 }
 

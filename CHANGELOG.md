@@ -6,6 +6,9 @@
 - Kartu "Siap dipasang?" untuk berkas lokal: tanda tangan, Android minimum, target SDK yang ditolak Android 14+, ABI, fitur perangkat wajib, signer dan downgrade terhadap aplikasi terpasang.
 - Arsip XAPK/APKM dikenali dan bisa dibuka dari file manager; jumlah OBB yang tidak ikut terpasang ditampilkan.
 - Tema hitam AMOLED dan ekspor daftar aplikasi (hasil filter) sebagai CSV.
+- Pilih bagian APK sebelum memasang: CPU, kepadatan layar, bahasa dan modul fitur, dengan pilihan terbaik untuk perangkat dicentang otomatis; pemasangan dihentikan bila modul kehilangan bagian CPU.
+- Arsip `.apks` bundletool diterima: `standalones/` diabaikan bila `splits/` ada.
+- Pasang beberapa berkas sekaligus melalui antrean dengan progres, batal dan ringkasan hasil.
 - Perbaikan: kunci backup yang macet, indikator progres yang hilang terlalu cepat, pembaruan notifikasi backup, ekspor ikon adaptif.
 
 ## 2.0.0-alpha.1 — 2026-10-10
