@@ -39,11 +39,26 @@ data class AppRecord(
             }
 }
 
+/** Container for apps installed as base + split APKs. Standalone apps are always .apk. */
+enum class SplitFormat(val extension: String) {
+    /** ZIP of base.apk + splits, read by SAI and PackPeek. */
+    APKS("apks"),
+    /** ZIP with manifest.json, read by APKPure and other XAPK installers. */
+    XAPK("xapk"),
+    /** Same layout as APKS under a generic extension. */
+    ZIP("zip");
+
+    companion object {
+        fun of(value: String?) = entries.firstOrNull { it.name == value } ?: APKS
+    }
+}
+
 data class NamingConfig(
     val name: Boolean = true,
     val pkg: Boolean = false,
     val version: Boolean = true,
     val code: Boolean = false,
+    val split: SplitFormat = SplitFormat.APKS,
 )
 
 object FileNames {
@@ -62,8 +77,12 @@ object FileNames {
             if (config.version) add("v${app.version}")
             if (config.code) add("c${app.versionCode}")
         }
-        return clean(parts.joinToString("_").ifBlank { app.packageName }) + ".${app.format}"
+        return clean(parts.joinToString("_").ifBlank { app.packageName }) +
+            ".${extension(app, config)}"
     }
+
+    fun extension(app: AppRecord, config: NamingConfig): String =
+        if (app.split) config.split.extension else "apk"
 
     fun numbered(name: String, n: Int): String =
         if (n == 0) name

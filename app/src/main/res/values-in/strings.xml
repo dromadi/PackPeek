@@ -191,7 +191,7 @@
     <string name="filename_parts">Bagian nama berkas</string>
     <string name="app_label">Nama aplikasi</string>
     <string name="preview">Pratinjau</string>
-    <string name="format_explanation">Format dipilih per aplikasi: .apk untuk aplikasi tunggal, .apks untuk split. Nama yang sudah ada diberi nomor tambahan.</string>
+    <string name="format_explanation">Aplikasi tunggal selalu disimpan sebagai .apk. Aplikasi split memakai format yang dipilih di atas. Nama yang sudah ada diberi nomor tambahan.</string>
     <string name="appearance">Tampilan</string>
     <string name="theme">Tema</string>
     <string name="follow_system">Ikuti sistem</string>
@@ -222,4 +222,9 @@
     <string name="crash_title">PackPeek berhenti sebelumnya</string>
     <string name="crash_body">Detail error hanya disimpan di perangkat ini. Salin lalu kirimkan ke pengembang.</string>
     <string name="crash_copy">Salin log error</string>
+    <string name="split_format">Format aplikasi split</string>
+    <string name="split_format_apks">.apks (SAI, PackPeek)</string>
+    <string name="split_format_xapk">.xapk (APKPure, installer XAPK)</string>
+    <string name="split_format_zip">.zip (arsip biasa)</string>
+    <string name="preview_split">Pratinjau untuk aplikasi split</string>
 </resources>

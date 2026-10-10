@@ -240,7 +240,11 @@ fun AppsScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        "${sizeText(app.size)} · .${app.format}",
+                                        "${sizeText(app.size)} · ." +
+                                            FileNames.extension(
+                                                app,
+                                                settings?.naming ?: NamingConfig(),
+                                            ),
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.primary,
                                     )

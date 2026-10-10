@@ -29,6 +29,7 @@ import java.util.Date
 @Composable
 fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
     val state by vm.detail.collectAsStateWithLifecycle()
+    val settings by vm.settings.collectAsStateWithLifecycle()
     val app = state.app ?: return
     val c = LocalContext.current
     val resources = LocalResources.current
@@ -209,7 +210,8 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                         item {
                             InfoRow(
                                 stringResource(R.string.archive_format),
-                                ".${app.format} · ${app.paths.size} APK · ${sizeText(app.size)}",
+                                ".${FileNames.extension(app, settings?.naming ?: NamingConfig())} · " +
+                                    "${app.paths.size} APK · ${sizeText(app.size)}",
                             )
                         }
                         item {

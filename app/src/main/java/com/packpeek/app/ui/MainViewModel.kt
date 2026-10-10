@@ -306,7 +306,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             packageName = it.packageName,
                             label = it.label,
                             version = it.version,
-                            format = it.format,
+                            format = FileNames.extension(it, s.naming),
                         )
                     },
                 )

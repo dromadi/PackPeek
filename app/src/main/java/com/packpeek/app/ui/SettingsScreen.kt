@@ -74,7 +74,24 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
             }
         }
         item {
+            ChoiceMenu(
+                stringResource(R.string.split_format),
+                s.naming.split.name,
+                listOf(
+                    SplitFormat.APKS.name to R.string.split_format_apks,
+                    SplitFormat.XAPK.name to R.string.split_format_xapk,
+                    SplitFormat.ZIP.name to R.string.split_format_zip,
+                ),
+            ) {
+                vm.text("split_format", it)
+            }
+        }
+        item {
             InfoRow(stringResource(R.string.preview), FileNames.format(sample, s.naming))
+            InfoRow(
+                stringResource(R.string.preview_split),
+                FileNames.format(sample.copy(splitPaths = listOf("split.apk")), s.naming),
+            )
             Text(
                 stringResource(R.string.format_explanation),
                 style = MaterialTheme.typography.bodySmall,

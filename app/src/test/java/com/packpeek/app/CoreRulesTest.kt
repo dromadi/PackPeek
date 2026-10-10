@@ -43,6 +43,19 @@ class CoreRulesTest {
     }
 
     @Test
+    fun splitFormatOnlyChangesSplitApps() {
+        val xapk = NamingConfig(split = SplitFormat.XAPK)
+        assertEquals("Example_v1.0.apk", FileNames.format(app(), xapk))
+        assertEquals(
+            "Split_v1.0.xapk",
+            FileNames.format(app("Split", splits = listOf("config.apk")), xapk),
+        )
+        assertEquals(SplitFormat.APKS, SplitFormat.of(null))
+        assertEquals(SplitFormat.APKS, SplitFormat.of("UNKNOWN"))
+        assertEquals(SplitFormat.ZIP, SplitFormat.of("ZIP"))
+    }
+
+    @Test
     fun unsafeAndEmptyNamesAreSanitized() {
         assertEquals("_a_b_c", FileNames.clean("../a\\b:c"))
         assertEquals("app", FileNames.clean(" ... "))

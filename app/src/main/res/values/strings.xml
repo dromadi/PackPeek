@@ -191,7 +191,7 @@
     <string name="filename_parts">File name parts</string>
     <string name="app_label">App name</string>
     <string name="preview">Preview</string>
-    <string name="format_explanation">Format is chosen per app: .apk for standalone apps, .apks for splits. Existing names get a numbered suffix.</string>
+    <string name="format_explanation">Standalone apps are always saved as .apk. Split apps use the format chosen above. Existing names get a numbered suffix.</string>
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
     <string name="follow_system">Follow system</string>
@@ -222,4 +222,9 @@
     <string name="crash_title">PackPeek stopped last time</string>
     <string name="crash_body">The error details are saved on this device only. Copy them and send them to the developer.</string>
     <string name="crash_copy">Copy error log</string>
+    <string name="split_format">Split app format</string>
+    <string name="split_format_apks">.apks (SAI, PackPeek)</string>
+    <string name="split_format_xapk">.xapk (APKPure, XAPK installers)</string>
+    <string name="split_format_zip">.zip (plain archive)</string>
+    <string name="preview_split">Preview for split apps</string>
 </resources>

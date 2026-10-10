@@ -5,6 +5,7 @@ import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.packpeek.app.model.NamingConfig
+import com.packpeek.app.model.SplitFormat
 import java.io.IOException
 import kotlinx.coroutines.flow.*
 
@@ -42,6 +43,7 @@ class SettingsRepository(context: Context) {
                         p[booleanPreferencesKey("pkg")] ?: false,
                         p[booleanPreferencesKey("version")] ?: true,
                         p[booleanPreferencesKey("code")] ?: false,
+                        SplitFormat.of(p[stringPreferencesKey("split_format")]),
                     ),
                 )
             }

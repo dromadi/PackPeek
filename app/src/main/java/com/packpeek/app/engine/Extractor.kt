@@ -10,8 +10,40 @@ import java.util.zip.Deflater
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlinx.coroutines.*
+import org.json.JSONArray
+import org.json.JSONObject
 
 data class Extracted(val uri: String, val name: String, val bytes: Long)
+
+/** Split name as Android declares it (e.g. config.arm64_v8a), falling back to the file name. */
+private fun splitId(path: String, index: Int): String =
+    runCatching { ManifestRoot.read(File(path))["split"] }.getOrNull()?.takeIf { it.isNotBlank() }
+        ?: File(path).name.removeSuffix(".apk").removePrefix("split_").ifBlank { "split_$index" }
+
+/** manifest.json in the layout APKPure-compatible installers read (xapk_version 2). */
+private fun xapkManifest(
+    app: AppRecord,
+    ids: List<String>,
+    files: List<String>,
+    total: Long,
+): String =
+    JSONObject()
+        .put("xapk_version", 2)
+        .put("package_name", app.packageName)
+        .put("name", app.label)
+        .put("version_code", app.versionCode.toString())
+        .put("version_name", app.version)
+        .put("min_sdk_version", app.minSdk.toString())
+        .put("target_sdk_version", app.targetSdk.toString())
+        .put("total_size", total)
+        .put("split_configs", JSONArray(ids.drop(1)))
+        .put(
+            "split_apks",
+            JSONArray(
+                ids.indices.map { JSONObject().put("file", files[it]).put("id", ids[it]) }
+            ),
+        )
+        .toString(2)
 
 class Extractor(private val context: Context) {
     suspend fun extract(
@@ -96,16 +128,34 @@ class Extractor(private val context: Context) {
                             ?: throw AppFailure(ErrorCode.FOLDER)
                     ZipOutputStream(BufferedOutputStream(stream)).use { zip ->
                         zip.setLevel(Deflater.NO_COMPRESSION) // APKs are already compressed and aligned.
+                        val xapk = naming.split == SplitFormat.XAPK
+                        val ids = app.paths.mapIndexed { index, path ->
+                            if (index == 0) "base" else splitId(path, index)
+                        }
                         val names = mutableSetOf<String>()
+                        val entries =
+                            app.paths.mapIndexed { index, path ->
+                                var entry =
+                                    when {
+                                        index == 0 && xapk -> "${app.packageName}.apk"
+                                        index == 0 -> "base.apk"
+                                        xapk -> FileNames.clean("${ids[index]}.apk")
+                                        else -> FileNames.clean(File(path).name)
+                                    }
+                                if (!names.add(entry)) {
+                                    entry = "split_${index}.apk"
+                                    names += entry
+                                }
+                                entry
+                            }
+                        if (xapk) {
+                            zip.putNextEntry(ZipEntry("manifest.json"))
+                            zip.write(xapkManifest(app, ids, entries, total).toByteArray())
+                            zip.closeEntry()
+                        }
                         app.paths.forEachIndexed { index, path ->
                             ensureActive()
-                            var entry =
-                                if (index == 0) "base.apk" else FileNames.clean(File(path).name)
-                            if (!names.add(entry)) {
-                                entry = "split_${index}.apk"
-                                names += entry
-                            }
-                            zip.putNextEntry(ZipEntry(entry))
+                            zip.putNextEntry(ZipEntry(entries[index]))
                             val expected = File(path).length()
                             var copied = 0L
                             FileInputStream(path).use { source ->
