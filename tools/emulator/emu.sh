@@ -17,6 +17,8 @@
 #   emu.sh wait <text> [secs]     wait until <text> is on screen (default 120 s)
 #   emu.sh gone <text> [secs]     wait until <text> is no longer on screen
 #   emu.sh tap <text>             tap the first element whose text or description contains <text>
+#   emu.sh tapre <regex>          tap the first element whose whole text matches <regex>
+#   emu.sh scroll                 scroll the screen down by about two thirds
 #   emu.sh shot <file.png>        save a screenshot
 #   emu.sh texts                  print the texts on screen (quick look without a screenshot)
 #
@@ -58,6 +60,25 @@ tap_text() {
     read -r x1 y1 x2 y2 <<<"$bounds"
     "$ADB" shell input tap $(((x1 + x2) / 2)) $(((y1 + y2) / 2))
     echo "tapped '$wanted' at $(((x1 + x2) / 2)),$(((y1 + y2) / 2))"
+}
+
+tap_regex() {
+    local pattern="$1" xml node bounds
+    xml="$(ui)" || return 1
+    node="$(printf '%s' "$xml" | tr '>' '\n' | grep -E "text=\"$pattern\"" | head -1)"
+    [ -z "$node" ] && { echo "not on screen: /$pattern/" >&2; return 1; }
+    bounds="$(printf '%s' "$node" | grep -o 'bounds="\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]"' | grep -o '[0-9]*' | tr '\n' ' ')"
+    read -r x1 y1 x2 y2 <<<"$bounds"
+    "$ADB" shell input tap $(((x1 + x2) / 2)) $(((y1 + y2) / 2))
+    echo "tapped /$pattern/ at $(((x1 + x2) / 2)),$(((y1 + y2) / 2))"
+}
+
+scroll() {
+    local size w h
+    size="$("$ADB" shell wm size | grep -o '[0-9]*x[0-9]*' | tail -1)"
+    w="${size%x*}"
+    h="${size#*x}"
+    "$ADB" shell input swipe $((w / 2)) $((h * 3 / 4)) $((w / 2)) $((h / 4)) 400
 }
 
 wait_for() {
@@ -105,7 +126,9 @@ case "${1:-}" in
     wait) wait_for "$2" "${3:-120}" yes ;;
     gone) wait_for "$2" "${3:-120}" no ;;
     tap) dismiss_anr; tap_text "$2" ;;
+    tapre) dismiss_anr; tap_regex "$2" ;;
+    scroll) scroll ;;
     shot) "$ADB" exec-out screencap -p >"$2" && echo "saved $2" ;;
     texts) ui | grep -o 'text="[^"]\+"' | sed 's/text="//; s/"$//' ;;
-    *) sed -n '2,25p' "$0"; exit 1 ;;
+    *) sed -n '2,27p' "$0"; exit 1 ;;
 esac
