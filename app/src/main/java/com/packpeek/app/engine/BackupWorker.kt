@@ -12,7 +12,7 @@ import androidx.work.*
 import com.packpeek.app.MainActivity
 import com.packpeek.app.PackPeekApp
 import com.packpeek.app.R
-import com.packpeek.app.data.pruneTargets
+import com.packpeek.app.data.prunePlan
 import com.packpeek.app.model.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
@@ -61,7 +61,7 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                         }
                     dao.finish(record.id, "SUCCESS", result.uri, result.name, result.bytes)
                     dao.setSigner(record.id, app.apps.signerDigest(record.packageName))
-                    prune(record.packageName, settings.keep)
+                    prune(record.packageName, settings.keep, job.folder)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -97,15 +97,31 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         }
     }
 
-    /** Applies the keep-N setting. A file already deleted by the user still leaves history. */
-    private suspend fun prune(pkg: String, keep: Int) {
-        for (old in pruneTargets(dao.successes(pkg), keep)) {
-            runCatching {
-                DocumentFile.fromSingleUri(applicationContext, Uri.parse(old.uri))?.delete()
-            }
-            dao.prune(old.id)
+    /**
+     * Applies the keep-N setting (see [prunePlan]). A record leaves history only once its file
+     * is gone; a file whose size no longer matches the backup was replaced and is not deleted.
+     */
+    private suspend fun prune(pkg: String, keep: Int, folder: String) {
+        val plan = prunePlan(dao.successes(pkg), keep, folder)
+        plan.forget.forEach { dao.prune(it.id) }
+        for (old in plan.delete) {
+            val doc = DocumentFile.fromSingleUri(applicationContext, Uri.parse(old.uri))
+            val outcome =
+                runCatching {
+                        when {
+                            doc == null || !doc.exists() -> PruneOutcome.GONE
+                            old.bytes > 0 && doc.length() != old.bytes -> PruneOutcome.REPLACED
+                            doc.delete() -> PruneOutcome.GONE
+                            else -> PruneOutcome.KEPT
+                        }
+                    }
+                    .getOrDefault(PruneOutcome.KEPT)
+            // KEPT: deletion failed (e.g. folder access revoked), so history keeps the record.
+            if (outcome != PruneOutcome.KEPT) dao.prune(old.id)
         }
     }
+
+    private enum class PruneOutcome { GONE, REPLACED, KEPT }
 
     private fun notification(progress: Int, label: String): ForegroundInfo {
         val c = applicationContext

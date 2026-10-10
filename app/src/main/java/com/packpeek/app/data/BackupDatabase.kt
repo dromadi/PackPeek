@@ -121,9 +121,33 @@ abstract class BackupDatabase : RoomDatabase() {
     }
 }
 
-/** Successful backups beyond the newest [keep] (0 keeps all); input is newest first. */
-fun pruneTargets(newestFirst: List<BackupRecord>, keep: Int): List<BackupRecord> =
-    if (keep <= 0) emptyList() else newestFirst.drop(keep)
+/** What the keep-N setting does with older backups of one app. */
+data class PrunePlan(
+    /** Delete the file, then drop the record once the file is gone. */
+    val delete: List<BackupRecord>,
+    /** Drop the record only; its file is not ours to delete. */
+    val forget: List<BackupRecord>,
+)
+
+/**
+ * Plans the keep-N setting (0 keeps all) for successful backups of one app, newest first.
+ * - SAF document URIs are path based: after a user deletes an old backup by hand, a new backup
+ *   can get the same name and URI. A URI that a kept backup still uses is never deleted.
+ * - Only files inside [folder], the backup folder tree in use now, are deleted. Backups in a
+ *   previous folder are left alone, records included.
+ */
+fun prunePlan(newestFirst: List<BackupRecord>, keep: Int, folder: String): PrunePlan {
+    if (keep <= 0) return PrunePlan(emptyList(), emptyList())
+    val keptUris = newestFirst.take(keep).map { it.uri }.toSet()
+    val older = newestFirst.drop(keep)
+    val forget = older.filter { it.uri.isBlank() || it.uri in keptUris }
+    val delete = (older - forget.toSet()).filter { inFolder(it.uri, folder) }
+    return PrunePlan(delete, forget)
+}
+
+/** True when a document URI was created inside the tree URI [folder]. */
+fun inFolder(documentUri: String, folder: String): Boolean =
+    folder.isNotBlank() && documentUri.startsWith(folder.trimEnd('/') + "/document/")
 
 /**
  * Ids of backups whose signer differs from the previous backup of the same package. A change

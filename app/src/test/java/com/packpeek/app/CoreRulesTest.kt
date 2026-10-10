@@ -1,7 +1,9 @@
 package com.packpeek.app
 
 import com.packpeek.app.data.BackupRecord
-import com.packpeek.app.data.pruneTargets
+import com.packpeek.app.data.PrunePlan
+import com.packpeek.app.data.inFolder
+import com.packpeek.app.data.prunePlan
 import com.packpeek.app.data.signerChanges
 import com.packpeek.app.engine.ManifestRoot
 import com.packpeek.app.model.*
@@ -175,12 +177,39 @@ class CoreRulesTest {
             signer = signer,
         )
 
+    private val folder = "content://com.android.externalstorage.documents/tree/primary%3ABackup"
+
+    private fun doc(name: String) = "$folder/document/primary%3ABackup%2F$name"
+
+    private fun stored(id: Long, uri: String) = record(id, "a", id, "s").copy(uri = uri)
+
     @Test
     fun pruneKeepsNewestOnly() {
-        val rows = (5L downTo 1L).map { record(it, "a", it, "s") }
-        assertEquals(listOf(2L, 1L), pruneTargets(rows, 3).map { it.id })
-        assertTrue(pruneTargets(rows, 0).isEmpty())
-        assertTrue(pruneTargets(rows, 9).isEmpty())
+        val rows = (5L downTo 1L).map { stored(it, doc("v$it.apk")) }
+        val plan = prunePlan(rows, 3, folder)
+        assertEquals(listOf(2L, 1L), plan.delete.map { it.id })
+        assertTrue(plan.forget.isEmpty())
+        assertEquals(PrunePlan(emptyList(), emptyList()), prunePlan(rows, 0, folder))
+        assertTrue(prunePlan(rows, 9, folder).delete.isEmpty())
+    }
+
+    /** The user deleted the old file by hand; the new backup reused its name and URI. */
+    @Test
+    fun pruneNeverDeletesAUriStillUsedByAKeptBackup() {
+        val shared = doc("App_v1.apk")
+        val plan = prunePlan(listOf(stored(2, shared), stored(1, shared)), 1, folder)
+        assertTrue(plan.delete.isEmpty())
+        assertEquals(listOf(1L), plan.forget.map { it.id })
+    }
+
+    @Test
+    fun pruneLeavesBackupsInAnotherFolder() {
+        val other = "content://com.android.externalstorage.documents/tree/primary%3AOld/document/primary%3AOld%2Fa.apk"
+        val plan = prunePlan(listOf(stored(3, doc("a3.apk")), stored(2, other), stored(1, "")), 1, folder)
+        assertTrue(plan.delete.isEmpty())
+        assertEquals(listOf(1L), plan.forget.map { it.id })
+        assertFalse(inFolder(doc("x.apk"), ""))
+        assertFalse(inFolder("$folder-evil/document/x", folder))
     }
 
     @Test
