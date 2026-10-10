@@ -2,7 +2,8 @@
 # PackPeek end-to-end scenario on a running emulator. Used by .github/workflows/emulator.yml and
 # usable locally with tools/emulator/emu.sh start.
 #
-# Usage: scenario.sh <debug.apk> <undangan-sim.apk> <output dir>
+# Usage: scenario.sh <debug.apk> <undangan-sim.apk> <output dir> [control-clean.apk]
+# The optional control APK (inert, hasCode=false) is installed through PackPeek to test installing.
 # Writes numbered screenshots, logcat and SUMMARY.md (steps with pass/fail) to <output dir>.
 # Exits non-zero if PackPeek crashed or a required step failed.
 set -uo pipefail
@@ -10,6 +11,7 @@ set -uo pipefail
 APK="$1"
 SAMPLE="$2"
 OUT="$3"
+CONTROL="${4:-}"
 PKG=com.packpeek.app.debug
 HERE="$(cd "$(dirname "$0")" && pwd)"
 E="$HERE/emu.sh"
@@ -82,25 +84,76 @@ if step "Start the app check" yes "$E" tapre 'Check [0-9]+ apps?'; then
     shot overview-analysis "App analysis"
 fi
 
-# Inspect the harmless sample through the system file picker (best effort: pickers differ).
-step "Back to the app list" no "$E" tap "Apps"
-"$E" wait "Select all results" 60 >/dev/null 2>&1 || true
-if step "Open the file picker" no "$E" tap "Inspect file"; then
-    sleep 3
-    shot picker "File picker"
-    "$E" tap "undangan-sim" >/dev/null 2>&1 || { "$E" tap "Downloads" >/dev/null 2>&1; sleep 2; "$E" tap "undangan-sim" >/dev/null 2>&1; } || true
-    if step "Sample analysed" no "$E" wait "OTP theft" 180; then
-        shot sample "undangan-sim: concerns"
-        "$E" scroll
-        shot sample-evidence "undangan-sim: evidence"
-        "$E" scroll
-        shot sample-more "undangan-sim: more evidence"
-        # Deep analysis: the button sits under the concern summary.
-        for _ in 1 2 3; do "$E" tap "Deep analysis" >/dev/null 2>&1 && break; "$E" scroll; done
-        if step "Deep analysis finishes" no "$E" wait "Finished in" 240; then
-            shot deep "Deep analysis"
-            "$E" tap "Data paths" >/dev/null 2>&1 || "$E" scroll
-            for k in 1 2 3 4; do "$E" scroll; shot "deep-$k" "Deep analysis, part $k"; done
+# Open a file in PackPeek: first through the system file picker like a user, then, when the
+# picker layout is not recognised, through a VIEW intent on PackPeek's own FileProvider (the same
+# import path the picker leads to). The summary says which way was used.
+open_file() {
+    local file="$1" name="${1%.apk}"
+    "$ADB" shell input keyevent 4 # back to the app list (the start destination)
+    "$E" wait "Select all results" 60 >/dev/null 2>&1 || true
+    if "$E" tap "Inspect file" >>"$OUT/steps.log" 2>&1; then
+        sleep 4
+        "$E" tap "$name" >>"$OUT/steps.log" 2>&1 ||
+            { "$E" tap "Show roots" && sleep 2 && "$E" tap "Downloads" && sleep 3 && "$E" tap "$name"; } >>"$OUT/steps.log" 2>&1 ||
+            { "$E" tap "Download" && sleep 3 && "$E" tap "$name"; } >>"$OUT/steps.log" 2>&1
+        if "$E" wait "Install backup" 120 >>"$OUT/steps.log" 2>&1; then
+            echo "| | Open $file with the file picker | ✅ |" >>"$SUMMARY"
+            return 0
+        fi
+        "$ADB" shell input keyevent 4
+    fi
+    "$ADB" shell "chmod 644 /data/local/tmp/$file"
+    "$ADB" shell "run-as $PKG sh -c 'mkdir -p cache/shared && cp /data/local/tmp/$file cache/shared/$file'"
+    "$ADB" shell am start -a android.intent.action.VIEW -t application/vnd.android.package-archive \
+        -d "content://$PKG.fileprovider/shared/$file" -p "$PKG" >>"$OUT/steps.log" 2>&1
+    if "$E" wait "Install backup" 120 >>"$OUT/steps.log" 2>&1; then
+        echo "| | Open $file (picker not recognised, opened by VIEW intent) | ✅ |" >>"$SUMMARY"
+        return 0
+    fi
+    echo "| | Open $file | ❌ |" >>"$SUMMARY"
+    failed=1
+    return 1
+}
+
+"$ADB" push "$SAMPLE" /data/local/tmp/undangan-sim.apk >/dev/null
+if open_file undangan-sim.apk; then
+    step "Sample analysed" yes "$E" wait "OTP theft" 180
+    shot sample "undangan-sim: concerns"
+    "$E" scroll
+    shot sample-evidence "undangan-sim: evidence"
+    # Deep analysis: the button sits under the concern summary.
+    for _ in 1 2 3 4; do "$E" tap "Deep analysis" >/dev/null 2>&1 && break; "$E" scroll; done
+    if step "Deep analysis finishes" yes "$E" wait "Finished in" 300; then
+        shot deep "Deep analysis"
+        for k in 1 2 3; do "$E" scroll; shot "deep-$k" "Deep analysis, part $k"; done
+        # Evidence report: the PDF is written, then handed to the share sheet.
+        for _ in 1 2 3 4 5 6 7 8; do "$E" tap "Share as PDF" >/dev/null 2>&1 && break; "$E" scroll; done
+        sleep 5
+        if step "Report PDF reaches the share sheet" yes sh -c "'$ADB' shell dumpsys activity activities | grep -q -E 'ChooserActivity|ResolverActivity|intentresolver'"; then
+            shot report-share "Report: share sheet with the PDF"
+            "$ADB" shell input keyevent 4
+        fi
+    fi
+fi
+
+# Installing a file: the inert control APK through PackPeek and the system installer.
+if [ -n "$CONTROL" ]; then
+    "$ADB" shell appops set "$PKG" REQUEST_INSTALL_PACKAGES allow >/dev/null 2>&1 || true
+    "$ADB" push "$CONTROL" /data/local/tmp/control-clean.apk >/dev/null
+    "$ADB" push "$CONTROL" /sdcard/Download/control-clean.apk >/dev/null
+    "$ADB" shell content call --method scan_volume --uri content://media --arg external_primary >/dev/null 2>&1 || true
+    for _ in 1 2 3 4 5 6; do "$ADB" shell input keyevent 4; done
+    "$E" launch "$PKG" >/dev/null
+    if open_file control-clean.apk; then
+        shot control "control-clean: ready to install"
+        "$E" tap "Install backup" >>"$OUT/steps.log" 2>&1
+        # The system asks for confirmation; its button is "Install" (or "Update").
+        if step "System install prompt" yes sh -c "for i in \$(seq 30); do '$ADB' shell dumpsys window | grep mCurrentFocus | grep -qi packageinstaller && exit 0; sleep 2; done; exit 1"; then
+            shot install-prompt "System install prompt"
+            "$E" tapre 'Install|INSTALL|Update|UPDATE' >>"$OUT/steps.log" 2>&1
+            step "PackPeek shows the install result" yes "$E" wait "Installation completed" 180
+            shot install-result "Install result"
+            step "Control app is installed" yes sh -c "'$ADB' shell pm list packages | grep -q sim.app.notes"
         fi
     fi
 fi
