@@ -107,7 +107,7 @@
     <string name="deep_failed">Derin analiz bu uygulamanın kodunu okuyamadı.</string>
     <string name="deep_done">%1$d sn\'de bitti · %2$d veri yolu · %3$d gizli metin · %4$d gizli kod dosyası</string>
     <string name="section_chains">Veri yolları</string>
-    <string name="chains_note">Verinin, kodun onu okuduğu yerden gönderdiği yere nasıl ilerlediği; diğer bileşenlere aktarımlar dahil, üç çağrı derinliğe kadar izlenir.</string>
+    <string name="chains_note">Kodun veriyi okuduğu yerden gönderdiği yere kadar, diğer bileşenlere aktarımlar dahil, üç çağrı derinliğine kadar izlenen kod yolları. Bir yol, okuma ve göndermenin kodda bağlantılı olduğunu gösterir; aynı değerin gönderildiğini göstermez.</string>
     <string name="chains_none">Üç çağrı derinlikte bile kişisel veriden gönderime giden bir yol bulunmadı.</string>
     <string name="chain_read">Okuma: %1$s</string>
     <string name="chain_send">Gönderme: %1$s</string>
@@ -175,7 +175,7 @@
     <string name="report_from_file">APK dosyası olarak kontrol edildi; kurulu değil</string>
     <string name="report_installed">Kurulu · kaynak: %1$s</string>
     <string name="report_counts">%1$d güçlü gösterge · %2$d dikkat gerektiren · %3$d not</string>
-    <string name="report_disclaimer">Bu sonuçlar bir uygulamanın zararlı veya güvenli olduğunu kanıtlamaz. Kanıt düzeyleri: T1 manifestte yazılı, T2 kodda bulundu, T3 veriyi okuyup gönderen bir kod yolu, T4 bu cihazda gözlemlendi.</string>
+    <string name="report_disclaimer">Bu sonuçlar bir uygulamanın zararlı ya da güvenli olduğunu kanıtlamaz. Kanıt düzeyleri: T1 manifest içinde yazılı, T2 kodda bulundu, T3 okuma ve gönderme aynı kod yolunda (değerin kendisi izlendiğinde işaretlenir), T4 bu cihazda gözlemlendi.</string>
     <string name="report_findings">Bulgular</string>
     <string name="report_deep">Derin analiz</string>
     <string name="report_lookup">VirusTotal</string>
@@ -347,9 +347,9 @@
     <string name="risk_action">Önerilen işlem</string>
     <string name="level_declared">T1 Beyan edildi</string>
     <string name="level_code">T2 Kodda</string>
-    <string name="level_flow">T3 Veri akışı</string>
+    <string name="level_flow">T3 Kod yolu</string>
     <string name="level_observed">T4 Gözlemlendi</string>
-    <string name="levels_explained">T1: manifestte yazılı. T2: işlev kodda bulundu. T3: veri akışına işaret var. T4: bu cihazda gözlemlendi.</string>
+    <string name="levels_explained">T1: manifest içinde yazılı. T2: kodda fonksiyon bulundu. T3: okuma ve gönderme aynı kod yolunda; değerin kendisi izlendiğinde işaretlenir. T4: bu cihazda gözlemlendi.</string>
     <string name="ev_permission">İstediği izin: %1$s</string>
     <string name="ev_component">Bileşen %1$s</string>
     <string name="ev_config_retrieve">Yapılandırma: diğer uygulamaların ekran içeriğini okuyabilir</string>
@@ -424,7 +424,7 @@
     </string-array>
     <string-array name="risk_dynamic_code">
         <item>Ek kod yükler</item>
-        <item>Uygulama, kontrol edilenin parçası olmayan kodu yükleyebilir veya çalıştırabilir: paket içinde gizli bir DEX/APK, şifreleyen bir paketleyici, bir sınıf yükleyici veya shell komutları.</item>
+        <item>Uygulama, kontrol edilenin parçası olmayan kodu yükleyebilir veya çalıştırabilir: paketin içinde gizli bir DEX/APK, şifreleyen bir packer veya bir class loader.</item>
         <item>Büyük uygulamalar eklentiler ve güncellemeler için dinamik yükleme kullanır; bazı şirketler kodlarını paketleyicilerle korur.</item>
         <item></item>
         <item>Bu kontrolün sonucunu bu uygulama için eksik kabul edin. Uygulama ayrıca uygulama mağazası dışından geliyorsa dikkatli olun.</item>
@@ -473,7 +473,7 @@
     <string name="cap_discord">bir Discord webhook\'u</string>
     <string name="ev_code_call">Çağırır: %1$s</string>
     <string name="ev_code_string">İçerdiği metin: %1$s</string>
-    <string name="ev_flow">Okur: %1$s → gönderir: %2$s</string>
+    <string name="ev_flow">%1$s okur ve aynı kod yolunda gönderir: %2$s (değer izlenmedi)</string>
     <string name="ev_destination">Bağlandığı adres: %1$s</string>
     <string name="ev_destination_cleartext">%1$s (şifresiz http)</string>
     <string name="ev_destination_ip">%1$s (IP adresi, alan adı yok)</string>
@@ -481,14 +481,14 @@
     <string name="ev_origin_library">kitaplık: %1$s</string>
     <string name="ev_hidden_code">Gizli kod dosyası: %1$s</string>
     <string name="ev_packer">Kod paketleyici: %1$s</string>
-    <string name="unproven_flow">Bir kod yolu bu veriyi okuyup dışarı gönderiyor (T3). Bu yolun cihazınızda çalıştığı yine de kanıtlanmış değil; bunu ancak uygulama çalışırken izlemek gösterebilir.</string>
+    <string name="unproven_flow">Bu veriden okunan değer, onu dışarı gönderen bir çağrıya kadar izlendi (T3). Bu yolun cihazınızda çalıştığı hâlâ kanıtlanmış değil; bunu yalnızca uygulama çalışırken izlemek gösterebilir.</string>
     <string name="unproven_calls">Kod bunun için gereken işlevleri çağırıyor (T2), ancak veriyi dışarı gönderen bir yol bulunmadı. Hiç çalışmayan kod veya sonradan yüklenen kod göz ardı edilemez.</string>
     <string name="unproven_none">Uygulamanın kendi kodu kontrol edildi ve bunun için gereken işlevleri çağırmıyor. Kitaplıklar veya sonradan yüklenen kod yine de bunu kullanabilir.</string>
     <string name="unproven_gaps">Uygulamanın bazı bölümleri analiz edilemedi (Kontrol kapsamı\'na bakın); bu nedenle kod sonucu eksik olabilir.</string>
     <string name="evidence_strength">En güçlü kanıt: %1$s</string>
     <string name="strength_t1">yalnızca manifestte yazılı</string>
     <string name="strength_t2">kod bu çağrıları yapıyor</string>
-    <string name="strength_t3">bir kod yolu veriyi okuyup dışarı gönderiyor</string>
+    <string name="strength_t3">okuma ve gönderme aynı kod yolunda</string>
     <string name="strength_t4">bu cihazda gözlemlendi</string>
     <string name="coverage_code">Kod (DEX) analiz edildi: %1$d DEX dosyası, %2$d sınıf, bunların %3$d tanesi uygulamanın kendi kodunda</string>
     <string name="coverage_code_failed">Uygulama kodu (DEX) analiz edilemedi</string>
@@ -501,4 +501,15 @@
     <string name="find_exported_body">Bileşen izni olmayan etkin dışa aktarılmış bileşenler: %1$d. Başlatıcı giriş noktaları sayılmaz.</string>
     <string name="format_explanation">Tek parça uygulamalar her zaman .apk olarak kaydedilir. Bölünmüş uygulamalar yukarıda seçilen biçimi kullanır. Var olan adlara numaralı bir sonek eklenir.</string>
     <string name="report_share_quick">Kanıt raporunu paylaş (PDF)</string>
+    <string name="ev_flow_traced">%1$s değeri, gönderen çağrıya kadar izlendi: %2$s</string>
+    <string name="unproven_flow_untraced">Bu verinin okunması ve gönderme aynı kod yolunda (T3), ancak okunan değer gönderilene kadar izlenemedi; ikisi ilgisiz olabilir. Neyin gönderildiğini yalnızca uygulama çalışırken izlemek gösterebilir.</string>
+    <string name="install_fail_no_result">Android bu kurulumun sonucunu bildirmedi. Uygulamanın kurulu olup olmadığını kontrol edin ve tekrar deneyin.</string>
+    <string name="ready_target_min">• Hedef API %1$d; bu Android sürümü API %2$d altındaki yeni uygulamaları reddeder.</string>
+    <string-array name="risk_shell_command">
+        <item>Kabuk komutları çalıştırır</item>
+        <item>Kod sistem komutları başlatır (Runtime.exec veya ProcessBuilder). Komutlar cihaz bilgilerini veya günlükleri okuyabilir, root\'lu bir cihazda çok daha fazlasını yapabilir.</item>
+        <item>Çökme raporlayıcıları ve cihaz bilgisi SDK\'ları sık sık getprop veya logcat gibi zararsız komutlar çalıştırır. En çok, bunu uygulamanın kendi kodu yaptığında önemlidir.</item>
+        <item></item>
+        <item>Uygulamanın işlevi için buna gerçekten ihtiyaç duyup duymadığını kontrol edin. Root erişimi de istiyorsa veya bir uygulama mağazası dışından geldiyse dikkatli olun.</item>
+    </string-array>
 </resources>

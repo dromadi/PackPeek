@@ -100,7 +100,7 @@
     <string name="deep_failed">Phân tích sâu không đọc được mã của ứng dụng này.</string>
     <string name="deep_done">Xong trong %1$d giây · %2$d đường dữ liệu · %3$d văn bản ẩn · %4$d tệp mã ẩn</string>
     <string name="section_chains">Đường đi của dữ liệu</string>
-    <string name="chains_note">Cách dữ liệu đi từ chỗ mã đọc nó đến chỗ mã gửi nó đi, lần theo sâu tới ba lệnh gọi, kể cả khi chuyển sang thành phần khác.</string>
+    <string name="chains_note">Các đường mã từ nơi mã đọc dữ liệu tới nơi mã gửi, được lần theo sâu tới ba lệnh gọi, gồm cả việc chuyển sang thành phần khác. Một đường cho thấy việc đọc và gửi có liên kết trong mã, không cho thấy cùng một giá trị được gửi.</string>
     <string name="chains_none">Không tìm thấy đường nào từ dữ liệu cá nhân đến việc gửi đi, kể cả ở độ sâu ba lệnh gọi.</string>
     <string name="chain_read">Đọc bằng %1$s</string>
     <string name="chain_send">Gửi bằng %1$s</string>
@@ -168,7 +168,7 @@
     <string name="report_from_file">Kiểm tra dưới dạng tệp APK; chưa cài</string>
     <string name="report_installed">Đã cài · nguồn: %1$s</string>
     <string name="report_counts">%1$d dấu hiệu mạnh · %2$d cần chú ý · %3$d ghi chú</string>
-    <string name="report_disclaimer">Kết quả này không chứng minh ứng dụng có hại hay an toàn. Mức bằng chứng: T1 ghi trong manifest, T2 tìm thấy trong mã, T3 đường mã đọc dữ liệu và gửi đi, T4 quan sát được trên thiết bị này.</string>
+    <string name="report_disclaimer">Kết quả này không chứng minh ứng dụng có hại hay an toàn. Mức bằng chứng: T1 ghi trong manifest, T2 tìm thấy trong mã, T3 đọc và gửi trong cùng một đường mã (được đánh dấu khi chính giá trị được lần theo), T4 quan sát trên thiết bị này.</string>
     <string name="report_findings">Phát hiện</string>
     <string name="report_deep">Phân tích sâu</string>
     <string name="report_lookup">VirusTotal</string>
@@ -337,9 +337,9 @@
     <string name="risk_action">Hành động đề xuất</string>
     <string name="level_declared">T1 Khai báo</string>
     <string name="level_code">T2 Trong mã</string>
-    <string name="level_flow">T3 Luồng dữ liệu</string>
+    <string name="level_flow">T3 Đường mã</string>
     <string name="level_observed">T4 Quan sát được</string>
-    <string name="levels_explained">T1: ghi trong manifest. T2: tìm thấy hàm trong mã. T3: có dấu hiệu luồng dữ liệu. T4: quan sát được trên thiết bị này.</string>
+    <string name="levels_explained">T1: ghi trong manifest. T2: tìm thấy hàm trong mã. T3: đọc và gửi trong cùng một đường mã; được đánh dấu khi chính giá trị được lần theo. T4: quan sát trên thiết bị này.</string>
     <string name="ev_permission">Yêu cầu %1$s</string>
     <string name="ev_component">Thành phần %1$s</string>
     <string name="ev_config_retrieve">Cấu hình: có thể đọc nội dung màn hình của ứng dụng khác</string>
@@ -412,7 +412,7 @@
     </string-array>
     <string-array name="risk_dynamic_code">
         <item>Tải thêm mã</item>
-        <item>Ứng dụng có thể tải hoặc chạy mã không nằm trong phần đã kiểm tra: DEX/APK ẩn trong gói, packer mã hóa, class loader hoặc lệnh shell.</item>
+        <item>Ứng dụng có thể tải hoặc chạy mã không nằm trong phần đã kiểm tra: DEX/APK ẩn trong gói, packer mã hóa hoặc class loader.</item>
         <item>Ứng dụng lớn dùng tải động cho plug-in và cập nhật, và một số công ty bảo vệ mã bằng packer.</item>
         <item></item>
         <item>Hãy coi kết quả kiểm tra này là chưa đầy đủ đối với ứng dụng này. Cẩn thận hơn nếu ứng dụng cũng đến từ ngoài cửa hàng ứng dụng.</item>
@@ -461,7 +461,7 @@
     <string name="cap_discord">webhook Discord</string>
     <string name="ev_code_call">Gọi %1$s</string>
     <string name="ev_code_string">Chứa văn bản %1$s</string>
-    <string name="ev_flow">Đọc %1$s và gửi đến %2$s</string>
+    <string name="ev_flow">Đọc %1$s và gửi tới %2$s trong cùng một đường mã (giá trị chưa được lần theo)</string>
     <string name="ev_destination">Kết nối tới %1$s</string>
     <string name="ev_destination_cleartext">%1$s (http không mã hóa)</string>
     <string name="ev_destination_ip">%1$s (địa chỉ IP, không có tên miền)</string>
@@ -469,14 +469,14 @@
     <string name="ev_origin_library">thư viện: %1$s</string>
     <string name="ev_hidden_code">Tệp mã ẩn: %1$s</string>
     <string name="ev_packer">Packer mã: %1$s</string>
-    <string name="unproven_flow">Có đường mã đọc dữ liệu này và gửi ra ngoài (T3). Vẫn chưa chứng minh được đường này đã chạy trên thiết bị của bạn; chỉ quan sát ứng dụng khi đang chạy mới cho thấy được điều đó.</string>
+    <string name="unproven_flow">Giá trị đọc từ dữ liệu này được lần theo tới một lệnh gọi gửi nó ra ngoài (T3). Vẫn chưa chứng minh được đường này đã chạy trên thiết bị của bạn; chỉ việc quan sát ứng dụng khi chạy mới cho thấy điều đó.</string>
     <string name="unproven_calls">Mã có gọi các hàm cần thiết cho việc này (T2), nhưng không tìm thấy đường nào gửi dữ liệu ra ngoài. Không thể loại trừ mã không bao giờ chạy hoặc mã được tải sau.</string>
     <string name="unproven_none">Mã riêng của ứng dụng đã được kiểm tra và không gọi các hàm cần thiết cho việc này. Thư viện hoặc mã được tải sau vẫn có thể dùng nó.</string>
     <string name="unproven_gaps">Một số phần của ứng dụng không phân tích được (xem Phạm vi kiểm tra), nên kết quả về mã có thể chưa đầy đủ.</string>
     <string name="evidence_strength">Bằng chứng mạnh nhất: %1$s</string>
     <string name="strength_t1">chỉ ghi trong manifest</string>
     <string name="strength_t2">mã thực hiện các lệnh gọi này</string>
-    <string name="strength_t3">có đường mã đọc dữ liệu và gửi ra ngoài</string>
+    <string name="strength_t3">đọc và gửi trong cùng một đường mã</string>
     <string name="strength_t4">quan sát được trên thiết bị này</string>
     <string name="coverage_code">Đã phân tích mã (DEX): %1$d tệp DEX, %2$d lớp, %3$d trong mã riêng của ứng dụng</string>
     <string name="coverage_code_failed">Không phân tích được mã ứng dụng (DEX)</string>
@@ -489,4 +489,15 @@
     <string name="find_exported_body">Thành phần được xuất đang bật mà không có quyền thành phần: %1$d. Không tính điểm vào từ launcher.</string>
     <string name="format_explanation">Ứng dụng đơn lẻ luôn được lưu dạng .apk. Ứng dụng chia nhỏ dùng định dạng đã chọn ở trên. Tên đã tồn tại sẽ được thêm hậu tố số.</string>
     <string name="report_share_quick">Chia sẻ báo cáo bằng chứng (PDF)</string>
+    <string name="ev_flow_traced">Giá trị %1$s được lần theo tới lệnh gọi gửi tới %2$s</string>
+    <string name="unproven_flow_untraced">Việc đọc dữ liệu này và việc gửi diễn ra trong cùng một đường mã (T3), nhưng giá trị đã đọc chưa được lần theo tới thứ được gửi, nên hai việc có thể không liên quan. Chỉ việc quan sát ứng dụng khi chạy mới cho thấy thứ gì được gửi.</string>
+    <string name="install_fail_no_result">Android không báo kết quả của lần cài đặt này. Hãy kiểm tra xem ứng dụng đã được cài chưa, rồi thử lại.</string>
+    <string name="ready_target_min">• Nhắm tới API %1$d; phiên bản Android này từ chối ứng dụng mới dưới API %2$d.</string>
+    <string-array name="risk_shell_command">
+        <item>Chạy lệnh shell</item>
+        <item>Mã khởi chạy lệnh hệ thống (Runtime.exec hoặc ProcessBuilder). Lệnh có thể đọc thông tin thiết bị hoặc nhật ký, và trên thiết bị đã root có thể làm nhiều hơn nữa.</item>
+        <item>Trình báo lỗi và SDK thông tin thiết bị thường chạy các lệnh vô hại như getprop hoặc logcat. Quan trọng nhất là khi chính mã của ứng dụng làm việc này.</item>
+        <item></item>
+        <item>Kiểm tra xem ứng dụng có thật sự cần điều này cho chức năng của nó không. Hãy thận trọng nếu nó còn xin quyền root hoặc đến từ ngoài cửa hàng ứng dụng.</item>
+    </string-array>
 </resources>

@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.0.0-alpha.13 — 2026-10-11
+
+Perbaikan dari hasil review kode, diurutkan menurut dampaknya pada kepercayaan laporan.
+
+- **Identitas metode lengkap**: metode di DEX kini dikenali dari kelas, nama, *dan* signature parameternya. Sebelumnya overload seperti `a(String)` yang membaca clipboard dan `a(int)` yang mengirim statistik dianggap satu metode, sehingga muncul jalur clipboard→internet palsu.
+- **T3 dikalibrasi, nilai data dilacak**:
+  - Nilai yang dibaca dari sumber data diikuti lewat register, field (termasuk field objek), builder/koleksi, dan pemanggilan metode aplikasi (ringkasan parameter→pengiriman dan hasil→sumber).
+  - Alur ditandai **"nilai dilacak"** hanya bila nilai itu benar-benar sampai ke argumen panggilan yang mengirim.
+  - Selain itu, bukti ditulis jujur sebagai "membaca dan mengirim di jalur kode yang sama (nilainya belum dilacak)". Contohnya membaca cookie lalu membuat request yang tidak membawa cookie itu.
+- **Siklus sesi pemasangan**:
+  - Hasil dicocokkan per `sessionId`.
+  - Pemasangan tunggal tetap terkunci sampai Android memberi hasil akhir.
+  - Antrean tidak bisa macet lagi: sesi diperiksa tiap detik. Bila hilang tanpa laporan, versi yang terpasang dibandingkan. Setelah 10 menit sesi dibatalkan dengan hasil "Android tidak melaporkan hasil".
+- **Kartu "Siap dipasang?"**: batas target SDK mengikuti versi Android (API 23 di Android 14, **API 24 di Android 15+**).
+- **Teks gabungan hanya dari kode yang benar-benar menggabungkan** (StringBuilder/`concat`), bukan dari semua konstanta dalam satu metode.
+- **Parser manifest**: ukuran header dokumen harus cocok dengan berkas, dan chunk harus habis tepat di akhir. Sisa 1–7 byte kini ditolak.
+- **Perintah shell dipisah** dari "Memuat kode tambahan" menjadi temuan sendiri, "Menjalankan perintah shell".
+- **Pemindaian folder backup dibatasi**: maks 1 GiB dibaca dan 20 detik per berkas, berhenti segera saat dibatalkan. Zip bomb atau arsip raksasa tidak lagi membuat pemindaian macet.
+- Tes: 121 (sebelumnya 109), termasuk 3 APK uji baru (`control-overload`, `control-unlinked`, `joined-pieces`).
+
 ## 2.0.0-alpha.12 — 2026-10-11
 
 - **Perbaikan pemasangan di Android 15/16**: tombol Pasang tidak memunculkan prompt sistem karena Android memblokir layar status pemasangan (pembatasan "background activity launch" untuk target SDK 35+). PendingIntent pemasangan kini memberi izin yang diperlukan. Ditemukan lewat uji emulator Android 16.

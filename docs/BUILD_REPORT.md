@@ -1,21 +1,21 @@
-# Hasil verifikasi — 2.0.0-alpha.12 (2026-10-11)
+# Hasil verifikasi — 2.0.0-alpha.13 (2026-10-11)
 
 | Pemeriksaan | Hasil |
 |---|---|
 | assembleDebug | Lulus |
-| testDebugUnitTest | 109 tes, 0 gagal, 0 error (JVM, termasuk render layar Robolectric dan 10 sampel uji modus penipuan) |
-| lintDebug | 0 error, 70 peringatan |
+| testDebugUnitTest | 121 tes, 0 gagal, 0 error (JVM, termasuk render layar Robolectric dan 13 APK uji: 8 modus penipuan, 4 pembanding, 1 fixture) |
+| lintDebug | 0 error, 71 peringatan |
 | assembleRelease + R8 | Lulus; keluaran unsigned, bukan APK produksi siap pasang |
 | apksigner verify APK debug | Lulus |
 | zipalign 16 KiB APK debug | Lulus |
-| Identitas | com.packpeek.app.debug, 2.0.0-alpha.12-debug (versionCode 20012) |
+| Identitas | com.packpeek.app.debug, 2.0.0-alpha.13-debug (versionCode 20013) |
 | SDK | minimum 24, target 36 |
 | Izin Internet | **Ada** sejak alpha.10, hanya untuk cek hash VirusTotal opsional (kunci milik pengguna; hanya SHA-256 yang dikirim) |
-| Uji emulator | Workflow GitHub (API 36): daftar aplikasi, ringkasan, buka berkas, analisis mendalam, laporan PDF, pemasangan. Hasil di branch `emulator-results` |
+| Uji emulator | GitHub API 36 (run 12): buka berkas lewat pemilih, analisis, pemasangan sampai dialog hasil dan aplikasi terpasang — lulus. Analisis mendalam & laporan PDF diuji ulang di alpha.13. Hasil di branch `emulator-results` |
 | HP fisik | Belum diuji oleh pengembang |
 
-Ukuran APK debug: 17,504,368 byte. SHA-256:
-`07eebe776042daf7828dae504b0646d9feef5f0a6edc868ca31eb88ed0e406d1`
+Ukuran APK debug: 17,535,072 byte. SHA-256:
+`8be362ae50ab3b14b7748d3f099797cb0df3cc72fa7f92c9dcc40b939e760afa`
 
 Perintah yang dijalankan:
 ```bash

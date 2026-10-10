@@ -114,7 +114,7 @@
     <string name="deep_failed">A análise profunda não conseguiu ler o código deste app.</string>
     <string name="deep_done">Concluído em %1$d s · %2$d caminhos de dados · %3$d textos ocultos · %4$d arquivos de código ocultos</string>
     <string name="section_chains">Caminhos de dados</string>
-    <string name="chains_note">Como os dados se movem de onde o código os lê até onde os envia, seguidos até três chamadas de profundidade, incluindo repasses para outros componentes.</string>
+    <string name="chains_note">Caminhos de código de onde o código lê dados até onde envia, seguidos até três chamadas de profundidade, incluindo passagens para outros componentes. Um caminho mostra que ler e enviar estão ligados no código, não que o mesmo valor é enviado.</string>
     <string name="chains_none">Nenhum caminho de dados pessoais até um envio foi encontrado, nem a três chamadas de profundidade.</string>
     <string name="chain_read">Lê com %1$s</string>
     <string name="chain_send">Envia com %1$s</string>
@@ -182,7 +182,7 @@
     <string name="report_from_file">Verificado como arquivo APK; não instalado</string>
     <string name="report_installed">Instalado · origem: %1$s</string>
     <string name="report_counts">%1$d indicadores fortes · %2$d requerem atenção · %3$d observações</string>
-    <string name="report_disclaimer">Estes resultados não provam que um app seja prejudicial ou seguro. Níveis de evidência: T1 escrito no manifesto, T2 encontrado no código, T3 um caminho de código que lê dados e os envia, T4 observado neste dispositivo.</string>
+    <string name="report_disclaimer">Estes resultados não provam que um app é prejudicial ou seguro. Níveis de evidência: T1 escrito no manifest, T2 encontrado no código, T3 leitura e envio no mesmo caminho de código (marcado quando o próprio valor foi rastreado), T4 observado neste aparelho.</string>
     <string name="report_findings">Resultados</string>
     <string name="report_deep">Análise profunda</string>
     <string name="report_lookup">VirusTotal</string>
@@ -357,9 +357,9 @@
     <string name="risk_action">Ação sugerida</string>
     <string name="level_declared">T1 Declarado</string>
     <string name="level_code">T2 No código</string>
-    <string name="level_flow">T3 Fluxo de dados</string>
+    <string name="level_flow">T3 Caminho de código</string>
     <string name="level_observed">T4 Observado</string>
-    <string name="levels_explained">T1: escrito no manifesto. T2: função encontrada no código. T3: fluxo de dados indicado. T4: observado neste dispositivo.</string>
+    <string name="levels_explained">T1: escrito no manifest. T2: função encontrada no código. T3: leitura e envio no mesmo caminho de código; marcado quando o próprio valor foi rastreado. T4: observado neste aparelho.</string>
     <string name="ev_permission">Solicita %1$s</string>
     <string name="ev_component">Componente %1$s</string>
     <string name="ev_config_retrieve">Configuração: pode ler o conteúdo da tela de outros apps</string>
@@ -436,7 +436,7 @@
     </string-array>
     <string-array name="risk_dynamic_code">
         <item>Carrega código extra</item>
-        <item>O app pode carregar ou executar código que não faz parte do que foi verificado: um DEX/APK oculto dentro do pacote, um packer com criptografia, um class loader ou comandos de shell.</item>
+        <item>O app pode carregar ou executar código que não faz parte do que foi verificado: um DEX/APK oculto no pacote, um packer com criptografia ou um class loader.</item>
         <item>Apps grandes usam carregamento dinâmico para plug-ins e atualizações, e algumas empresas protegem o código com packers.</item>
         <item></item>
         <item>Considere o resultado desta verificação incompleto para este app. Tenha cuidado se o app também vier de fora de uma loja de apps.</item>
@@ -485,7 +485,7 @@
     <string name="cap_discord">um webhook do Discord</string>
     <string name="ev_code_call">Chama %1$s</string>
     <string name="ev_code_string">Contém o texto %1$s</string>
-    <string name="ev_flow">Lê %1$s e envia para %2$s</string>
+    <string name="ev_flow">Lê %1$s e envia para %2$s no mesmo caminho de código (o valor não foi rastreado)</string>
     <string name="ev_destination">Conecta-se a %1$s</string>
     <string name="ev_destination_cleartext">%1$s (http sem criptografia)</string>
     <string name="ev_destination_ip">%1$s (endereço IP, sem nome de domínio)</string>
@@ -493,14 +493,14 @@
     <string name="ev_origin_library">biblioteca: %1$s</string>
     <string name="ev_hidden_code">Arquivo de código oculto: %1$s</string>
     <string name="ev_packer">Packer de código: %1$s</string>
-    <string name="unproven_flow">Um caminho de código lê esses dados e os envia (T3). Ainda não está provado que esse caminho foi executado no seu dispositivo; só observar o app em execução poderia mostrar isso.</string>
+    <string name="unproven_flow">O valor lido desses dados foi rastreado até uma chamada que o envia para fora (T3). Ainda não está provado que esse caminho foi executado no seu aparelho; só observar o app em execução poderia mostrar isso.</string>
     <string name="unproven_calls">O código chama as funções necessárias para isso (T2), mas nenhum caminho que envie os dados foi encontrado. Código que nunca é executado, ou carregado depois, não pode ser descartado.</string>
     <string name="unproven_none">O próprio código do app foi verificado e não chama as funções necessárias para isso. Bibliotecas ou código carregado depois ainda poderiam usá-las.</string>
     <string name="unproven_gaps">Partes do app não puderam ser analisadas (veja Cobertura da verificação), então o resultado do código pode estar incompleto.</string>
     <string name="evidence_strength">Evidência mais forte: %1$s</string>
     <string name="strength_t1">escrito só no manifesto</string>
     <string name="strength_t2">o código faz essas chamadas</string>
-    <string name="strength_t3">um caminho de código lê dados e os envia</string>
+    <string name="strength_t3">leitura e envio no mesmo caminho de código</string>
     <string name="strength_t4">observado neste dispositivo</string>
     <string name="coverage_code">Código (DEX) analisado: %1$d arquivos DEX, %2$d classes, %3$d no código próprio do app</string>
     <string name="coverage_code_failed">Não foi possível analisar o código do app (DEX)</string>
@@ -513,4 +513,15 @@
     <string name="find_exported_body">Componentes exportados ativados sem permissão de componente: %1$d. Pontos de entrada do launcher não são contados.</string>
     <string name="format_explanation">Apps independentes são sempre salvos como .apk. Apps divididos usam o formato escolhido acima. Nomes existentes recebem um sufixo numerado.</string>
     <string name="report_share_quick">Compartilhar relatório de evidências (PDF)</string>
+    <string name="ev_flow_traced">O valor de %1$s foi rastreado até a chamada que envia para %2$s</string>
+    <string name="unproven_flow_untraced">Ler esses dados e enviar acontecem no mesmo caminho de código (T3), mas o valor lido não foi rastreado até o que é enviado, então os dois podem não ter relação. Só observar o app em execução poderia mostrar o que é enviado.</string>
+    <string name="install_fail_no_result">O Android não informou o resultado desta instalação. Verifique se o app está instalado e tente novamente.</string>
+    <string name="ready_target_min">• Tem como alvo a API %1$d; esta versão do Android recusa apps novos abaixo da API %2$d.</string>
+    <string-array name="risk_shell_command">
+        <item>Executa comandos de shell</item>
+        <item>O código inicia comandos do sistema (Runtime.exec ou ProcessBuilder). Comandos podem ler informações do aparelho ou logs e, em um aparelho com root, muito mais.</item>
+        <item>Relatórios de falhas e SDKs de informações do aparelho costumam executar comandos inofensivos como getprop ou logcat. Importa principalmente quando o próprio código do app faz isso.</item>
+        <item></item>
+        <item>Verifique se o app precisa disso para sua função. Tenha cuidado se ele também pedir acesso root ou vier de fora de uma loja de apps.</item>
+    </string-array>
 </resources>

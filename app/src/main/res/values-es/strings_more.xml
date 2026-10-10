@@ -114,7 +114,7 @@
     <string name="deep_failed">El análisis profundo no pudo leer el código de esta app.</string>
     <string name="deep_done">Terminado en %1$d s · %2$d rutas de datos · %3$d textos ocultos · %4$d archivos de código ocultos</string>
     <string name="section_chains">Rutas de datos</string>
-    <string name="chains_note">Cómo se mueven los datos desde donde el código los lee hasta donde los envía, siguiendo hasta tres llamadas de profundidad, incluidos los traspasos a otros componentes.</string>
+    <string name="chains_note">Rutas de código desde donde el código lee datos hasta donde envía, seguidas hasta tres llamadas de profundidad, incluidos los traspasos a otros componentes. Una ruta muestra que leer y enviar están conectados en el código, no que se envíe el mismo valor.</string>
     <string name="chains_none">No se encontró ninguna ruta de datos personales a un envío, ni siquiera a tres llamadas de profundidad.</string>
     <string name="chain_read">Lee con %1$s</string>
     <string name="chain_send">Envía con %1$s</string>
@@ -182,7 +182,7 @@
     <string name="report_from_file">Revisado como archivo APK; no instalado</string>
     <string name="report_installed">Instalada · origen: %1$s</string>
     <string name="report_counts">%1$d indicadores fuertes · %2$d requieren atención · %3$d notas</string>
-    <string name="report_disclaimer">Estos resultados no demuestran que una app sea dañina ni segura. Niveles de evidencia: T1 escrito en el manifiesto, T2 encontrado en el código, T3 una ruta de código que lee datos y los envía, T4 observado en este dispositivo.</string>
+    <string name="report_disclaimer">Estos resultados no demuestran que una app sea dañina o segura. Niveles de evidencia: T1 escrito en el manifest, T2 encontrado en el código, T3 lectura y envío en una misma ruta de código (marcado cuando se rastreó el propio valor), T4 observado en este dispositivo.</string>
     <string name="report_findings">Hallazgos</string>
     <string name="report_deep">Análisis profundo</string>
     <string name="report_lookup">VirusTotal</string>
@@ -357,9 +357,9 @@
     <string name="risk_action">Acción sugerida</string>
     <string name="level_declared">T1 Declarado</string>
     <string name="level_code">T2 En el código</string>
-    <string name="level_flow">T3 Flujo de datos</string>
+    <string name="level_flow">T3 Ruta de código</string>
     <string name="level_observed">T4 Observado</string>
-    <string name="levels_explained">T1: escrito en el manifiesto. T2: función encontrada en el código. T3: flujo de datos indicado. T4: observado en este dispositivo.</string>
+    <string name="levels_explained">T1: escrito en el manifest. T2: función encontrada en el código. T3: lectura y envío en una misma ruta de código; marcado cuando se rastreó el propio valor. T4: observado en este dispositivo.</string>
     <string name="ev_permission">Solicita %1$s</string>
     <string name="ev_component">Componente %1$s</string>
     <string name="ev_config_retrieve">Configuración: puede leer el contenido de la pantalla de otras apps</string>
@@ -436,7 +436,7 @@
     </string-array>
     <string-array name="risk_dynamic_code">
         <item>Carga código adicional</item>
-        <item>La app puede cargar o ejecutar código que no forma parte de lo revisado: un DEX/APK oculto dentro del paquete, un packer con cifrado, un class loader o comandos de shell.</item>
+        <item>La app puede cargar o ejecutar código que no forma parte de lo revisado: un DEX/APK oculto dentro del paquete, un packer con cifrado o un class loader.</item>
         <item>Las apps grandes usan carga dinámica para complementos y actualizaciones, y algunas empresas protegen su código con packers.</item>
         <item></item>
         <item>Considera incompleto el resultado de esta revisión para esta app. Ten cuidado si la app además procede de fuera de una tienda de apps.</item>
@@ -485,7 +485,7 @@
     <string name="cap_discord">un webhook de Discord</string>
     <string name="ev_code_call">Llama a %1$s</string>
     <string name="ev_code_string">Contiene el texto %1$s</string>
-    <string name="ev_flow">Lee %1$s y lo envía a %2$s</string>
+    <string name="ev_flow">Lee %1$s y envía a %2$s en la misma ruta de código (el valor no se rastreó)</string>
     <string name="ev_destination">Se conecta a %1$s</string>
     <string name="ev_destination_cleartext">%1$s (http sin cifrar)</string>
     <string name="ev_destination_ip">%1$s (dirección IP, sin nombre de dominio)</string>
@@ -493,14 +493,14 @@
     <string name="ev_origin_library">biblioteca: %1$s</string>
     <string name="ev_hidden_code">Archivo de código oculto: %1$s</string>
     <string name="ev_packer">Packer de código: %1$s</string>
-    <string name="unproven_flow">Una ruta de código lee estos datos y los envía (T3). Aún no está demostrado que esta ruta se haya ejecutado en tu dispositivo; solo observar la app mientras se ejecuta podría mostrarlo.</string>
+    <string name="unproven_flow">El valor leído de estos datos se rastreó hasta una llamada que lo envía fuera (T3). Aún no está demostrado que esa ruta se haya ejecutado en tu dispositivo; solo observar la app mientras funciona podría mostrarlo.</string>
     <string name="unproven_calls">El código llama a las funciones necesarias para esto (T2), pero no se encontró ninguna ruta que envíe los datos. No se puede descartar código que nunca se ejecuta ni código cargado después.</string>
     <string name="unproven_none">Se revisó el propio código de la app y no llama a las funciones necesarias para esto. Las bibliotecas o el código cargado después aún podrían usarlas.</string>
     <string name="unproven_gaps">Algunas partes de la app no se pudieron analizar (consulta Cobertura de la revisión), así que el resultado del código puede estar incompleto.</string>
     <string name="evidence_strength">Evidencia más fuerte: %1$s</string>
     <string name="strength_t1">solo escrito en el manifiesto</string>
     <string name="strength_t2">el código hace estas llamadas</string>
-    <string name="strength_t3">una ruta de código lee datos y los envía</string>
+    <string name="strength_t3">lectura y envío en una misma ruta de código</string>
     <string name="strength_t4">observado en este dispositivo</string>
     <string name="coverage_code">Código (DEX) analizado: %1$d archivos DEX, %2$d clases, %3$d en el código propio de la app</string>
     <string name="coverage_code_failed">No se pudo analizar el código de la app (DEX)</string>
@@ -513,4 +513,15 @@
     <string name="find_exported_body">Componentes exportados activados sin permiso de componente: %1$d. No se cuentan los puntos de entrada del launcher.</string>
     <string name="format_explanation">Las apps independientes siempre se guardan como .apk. Las apps divididas usan el formato elegido arriba. Los nombres existentes reciben un sufijo numerado.</string>
     <string name="report_share_quick">Compartir informe de evidencias (PDF)</string>
+    <string name="ev_flow_traced">El valor de %1$s se rastreó hasta la llamada que envía a %2$s</string>
+    <string name="unproven_flow_untraced">Leer estos datos y enviar ocurren en la misma ruta de código (T3), pero el valor leído no se rastreó hasta lo que se envía, así que pueden no estar relacionados. Solo observar la app mientras funciona podría mostrar qué se envía.</string>
+    <string name="install_fail_no_result">Android no informó del resultado de esta instalación. Comprueba si la app está instalada y vuelve a intentarlo.</string>
+    <string name="ready_target_min">• Apunta a la API %1$d; esta versión de Android rechaza apps nuevas por debajo de la API %2$d.</string>
+    <string-array name="risk_shell_command">
+        <item>Ejecuta comandos de shell</item>
+        <item>El código inicia comandos del sistema (Runtime.exec o ProcessBuilder). Los comandos pueden leer información del dispositivo o registros, y en un dispositivo con root mucho más.</item>
+        <item>Los informes de fallos y los SDK de información del dispositivo suelen ejecutar comandos inofensivos como getprop o logcat. Importa sobre todo cuando lo hace el código propio de la app.</item>
+        <item></item>
+        <item>Comprueba si la app lo necesita para su función. Ten cuidado si además pide acceso root o viene de fuera de una tienda de apps.</item>
+    </string-array>
 </resources>
