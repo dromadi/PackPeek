@@ -766,6 +766,7 @@ fun installFailureText(failure: InstallFailure): Int =
         InstallFailure.TARGET -> R.string.install_fail_target
         InstallFailure.MISSING_SPLIT -> R.string.install_fail_missing_split
         InstallFailure.FEATURE -> R.string.install_fail_feature
+        InstallFailure.NO_RESULT -> R.string.install_fail_no_result
         InstallFailure.UNKNOWN -> R.string.install_fail_unknown
     }
 

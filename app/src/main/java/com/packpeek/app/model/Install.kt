@@ -20,14 +20,29 @@ enum class InstallFailure {
     TARGET,
     MISSING_SPLIT,
     FEATURE,
+    /** The system never reported back: the prompt was lost or the session expired. */
+    NO_RESULT,
     UNKNOWN,
+}
+
+/** What to conclude while waiting for the installer's report on one session. */
+enum class InstallWait {
+    WAIT,
+    SUCCESS,
+    NO_RESULT,
 }
 
 data class InstallResult(
     val packageName: String,
     val failure: InstallFailure? = null,
     val detail: String = "",
+    /** The installer session this result belongs to; -1 when unknown. */
+    val sessionId: Int = -1,
 ) {
+    /** Whether this report answers [session] (for [pkg], when the system did not name a session). */
+    fun answers(session: Int, pkg: String) =
+        if (sessionId >= 0) sessionId == session else packageName.isBlank() || packageName == pkg
+
     val success
         get() = failure == null
 }
@@ -63,6 +78,24 @@ object InstallErrors {
             "CONFLICTING_PROVIDER" to InstallFailure.CONFLICT,
             "USER_RESTRICTED" to InstallFailure.BLOCKED,
         )
+
+    /** The user may take a while in the system prompt; after this the session is given up. */
+    const val TIMEOUT_MS = 10 * 60 * 1000L
+    /** A report can arrive shortly after its session disappears. */
+    const val GRACE_MS = 5_000L
+
+    /**
+     * Decides, without a report from the system, whether to keep waiting. [goneForMs] is how long
+     * the session has been gone (null while it exists); [updated] says the package was installed
+     * or updated after the session started.
+     */
+    fun settle(goneForMs: Long?, updated: Boolean, waitedMs: Long): InstallWait =
+        when {
+            goneForMs == null -> if (waitedMs >= TIMEOUT_MS) InstallWait.NO_RESULT else InstallWait.WAIT
+            goneForMs < GRACE_MS -> InstallWait.WAIT
+            updated -> InstallWait.SUCCESS
+            else -> InstallWait.NO_RESULT
+        }
 
     fun classify(status: Int, message: String?): InstallFailure {
         val text = message.orEmpty().uppercase(Locale.ROOT)

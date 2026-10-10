@@ -16,7 +16,8 @@ import kotlinx.coroutines.*
 
 private const val EXTRA_TARGET = "com.packpeek.app.extra.TARGET_PACKAGE"
 
-suspend fun installPackage(context: Context, pkg: String, files: List<File>) =
+/** Writes and commits an installer session; returns its id so the result can be matched to it. */
+suspend fun installPackage(context: Context, pkg: String, files: List<File>): Int =
     withContext(Dispatchers.IO) {
         val installer = context.packageManager.packageInstaller
         val params =
@@ -62,6 +63,7 @@ suspend fun installPackage(context: Context, pkg: String, files: List<File>) =
                         .intentSender
                 )
             }
+            id
         } catch (e: Exception) {
             installer.abandonSession(id)
             throw e
@@ -110,6 +112,7 @@ class InstallStatusActivity : Activity() {
             intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME)
                 ?: intent.getStringExtra(EXTRA_TARGET).orEmpty()
         val message = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE).orEmpty()
+        val session = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
         val result =
             when (status) {
                 PackageInstaller.STATUS_PENDING_USER_ACTION -> {
@@ -118,10 +121,10 @@ class InstallStatusActivity : Activity() {
                             intent.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
                         else intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
                     if (confirm != null && runCatching { startActivity(confirm) }.isSuccess) null
-                    else InstallResult(pkg, InstallErrors.classify(status, message), message)
+                    else InstallResult(pkg, InstallErrors.classify(status, message), message, session)
                 }
-                PackageInstaller.STATUS_SUCCESS -> InstallResult(pkg)
-                else -> InstallResult(pkg, InstallErrors.classify(status, message), message)
+                PackageInstaller.STATUS_SUCCESS -> InstallResult(pkg, sessionId = session)
+                else -> InstallResult(pkg, InstallErrors.classify(status, message), message, session)
             }
         // The main screen shows the result, including after it is reopened.
         if (result != null) (application as PackPeekApp).installResult.value = result

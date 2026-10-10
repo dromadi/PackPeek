@@ -125,4 +125,25 @@ class InstallRulesTest {
         assertTrue(lines[0].startsWith("label,package,"))
         assertTrue(lines[1].startsWith("\"'=HYPERLINK(\"\"x\"\"), evil\",a.b,1.0,7,24,34,false,false,123,SIDE,,1970-01-01T00:00:00Z"))
     }
+
+    @Test
+    fun aLostReportDoesNotBlockForever() {
+        // Session alive: wait, until the timeout.
+        assertEquals(InstallWait.WAIT, InstallErrors.settle(null, false, 30_000))
+        assertEquals(InstallWait.NO_RESULT, InstallErrors.settle(null, false, InstallErrors.TIMEOUT_MS))
+        // Session just gone: the report may still be on its way.
+        assertEquals(InstallWait.WAIT, InstallErrors.settle(1_000, false, 60_000))
+        // Gone for a while: an updated package means it was installed, otherwise nothing came back.
+        assertEquals(InstallWait.SUCCESS, InstallErrors.settle(InstallErrors.GRACE_MS, true, 60_000))
+        assertEquals(InstallWait.NO_RESULT, InstallErrors.settle(InstallErrors.GRACE_MS, false, 60_000))
+    }
+
+    @Test
+    fun resultsAreMatchedBySession() {
+        assertTrue(InstallResult("a.b", sessionId = 7).answers(7, "a.b"))
+        assertFalse(InstallResult("a.b", sessionId = 8).answers(7, "a.b"))
+        // Without a session id, the package name decides.
+        assertTrue(InstallResult("a.b").answers(7, "a.b"))
+        assertFalse(InstallResult("c.d").answers(7, "a.b"))
+    }
 }

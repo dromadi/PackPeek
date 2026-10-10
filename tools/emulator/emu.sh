@@ -19,6 +19,7 @@
 #   emu.sh tap <text>             tap the first element whose text or description contains <text>
 #   emu.sh tapre <regex>          tap the first element whose whole text matches <regex>
 #   emu.sh scroll                 scroll the screen down by about two thirds
+#   emu.sh scrollup               scroll the screen up by about two thirds
 #   emu.sh shot <file.png>        save a screenshot
 #   emu.sh texts                  print the texts on screen (quick look without a screenshot)
 #
@@ -81,6 +82,14 @@ scroll() {
     "$ADB" shell input swipe $((w / 2)) $((h * 3 / 4)) $((w / 2)) $((h / 4)) 400
 }
 
+scroll_up() {
+    local size w h
+    size="$("$ADB" shell wm size | grep -o '[0-9]*x[0-9]*' | tail -1)"
+    w="${size%x*}"
+    h="${size#*x}"
+    "$ADB" shell input swipe $((w / 2)) $((h / 4)) $((w / 2)) $((h * 3 / 4)) 300
+}
+
 wait_for() {
     local text="$1" seconds="${2:-120}" present="$3" end=$((SECONDS + ${2:-120}))
     while [ $SECONDS -lt $end ]; do
@@ -128,6 +137,7 @@ case "${1:-}" in
     tap) dismiss_anr; tap_text "$2" ;;
     tapre) dismiss_anr; tap_regex "$2" ;;
     scroll) scroll ;;
+    scrollup) scroll_up ;;
     shot) "$ADB" exec-out screencap -p >"$2" && echo "saved $2" ;;
     texts) ui | grep -o 'text="[^"]\+"' | sed 's/text="//; s/"$//' ;;
     *) sed -n '2,27p' "$0"; exit 1 ;;

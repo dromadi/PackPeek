@@ -612,7 +612,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             archive,
                             splitSelection.value.takeIf { splitParts.value.isNotEmpty() },
                         )
-                installPackage(owner, archive.app.packageName, files)
+                owner.installResult.value = null
+                val session = installPackage(owner, archive.app.packageName, files)
+                // Stay locked until the system answers, so a second install cannot start meanwhile.
+                awaitInstall(session, archive.app.packageName)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -620,6 +623,45 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             } finally {
                 installing.value = false
             }
+        }
+    }
+
+    /**
+     * Waits for the system's report on [session]. The report normally arrives through
+     * InstallStatusActivity; if it is lost, the session is checked every second: once it is gone,
+     * an updated package counts as installed, otherwise the result says nothing came back.
+     * The result is also published in [PackPeekApp.installResult] for the dialog.
+     */
+    private suspend fun awaitInstall(session: Int, pkg: String): InstallResult {
+        val installer = owner.packageManager.packageInstaller
+        fun lastUpdate() = runCatching { owner.apps.packageInfo(pkg).lastUpdateTime }.getOrNull()
+        val before = withContext(Dispatchers.IO) { lastUpdate() }
+        val started = System.currentTimeMillis()
+        var goneAt: Long? = null
+        try {
+            while (true) {
+                owner.installResult.value?.takeIf { it.answers(session, pkg) }?.let { return it }
+                val now = System.currentTimeMillis()
+                val exists = withContext(Dispatchers.IO) { installer.getSessionInfo(session) != null }
+                if (exists) goneAt = null else if (goneAt == null) goneAt = now
+                val updated = withContext(Dispatchers.IO) { lastUpdate() }?.let { it != before } == true
+                when (InstallErrors.settle(goneAt?.let { now - it }, updated, now - started)) {
+                    InstallWait.WAIT -> Unit
+                    InstallWait.SUCCESS ->
+                        return InstallResult(pkg, sessionId = session).also { owner.installResult.value = it }
+                    InstallWait.NO_RESULT -> {
+                        if (exists) runCatching { installer.abandonSession(session) }
+                        return InstallResult(pkg, InstallFailure.NO_RESULT, "", session)
+                            .also { owner.installResult.value = it }
+                    }
+                }
+                withTimeoutOrNull(1_000) {
+                    owner.installResult.first { it != null && it.answers(session, pkg) }
+                }
+            }
+        } catch (e: CancellationException) {
+            withContext(NonCancellable) { runCatching { installer.abandonSession(session) } }
+            throw e
         }
     }
 
@@ -668,14 +710,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         update(index) { it.copy(label = label) }
                         val files = importer.validateForInstall(archive)
                         owner.installResult.value = null
-                        installPackage(owner, archive.app.packageName, files)
-                        // The system reports back through InstallStatusActivity, after the user
-                        // confirms or dismisses its prompt.
-                        val pkg = archive.app.packageName
-                        val result =
-                            owner.installResult
-                                .filterNotNull()
-                                .first { it.packageName.isBlank() || it.packageName == pkg }
+                        val session = installPackage(owner, archive.app.packageName, files)
+                        // The system reports back after the user confirms or dismisses its prompt;
+                        // a lost report ends in NO_RESULT instead of blocking the queue.
+                        val result = awaitInstall(session, archive.app.packageName)
                         owner.installResult.value = null
                         update(index) { it.copy(result = result) }
                     } catch (e: CancellationException) {

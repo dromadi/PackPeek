@@ -316,6 +316,7 @@
     <string name="install_fail_target">This app targets an Android version too old for this device to install.</string>
     <string name="install_fail_missing_split">Required split APK parts are missing. Choose the complete set for this app.</string>
     <string name="install_fail_feature">The app requires hardware or software features this device does not have.</string>
+    <string name="install_fail_no_result">Android did not report a result for this installation. Check whether the app is installed, then try again.</string>
     <string name="install_fail_unknown">Android did not give a specific reason.</string>
     <string name="ready_new">Ready to install</string>
     <string name="ready_update">Ready to update: %1$s → %2$s</string>

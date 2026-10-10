@@ -134,8 +134,9 @@ if open_file undangan-sim.apk; then
     shot sample "undangan-sim: concerns"
     "$E" scroll
     shot sample-evidence "undangan-sim: evidence"
-    # Deep analysis: the button sits under the concern summary.
-    for _ in 1 2 3 4; do "$E" tap "Deep analysis" >/dev/null 2>&1 && break; "$E" scroll; done
+    # Deep analysis: the button sits under the concern summary, above the evidence just shown.
+    for _ in 1 2 3; do "$E" scrollup >/dev/null 2>&1; done
+    for _ in 1 2 3 4; do "$E" tap "Trace data paths" >/dev/null 2>&1 && break; "$E" scroll; done
     if step "Deep analysis finishes" yes "$E" wait "Finished in" 300; then
         shot deep "Deep analysis"
         # Evidence report: the PDF is written, then handed to the share sheet. The shortcut sits

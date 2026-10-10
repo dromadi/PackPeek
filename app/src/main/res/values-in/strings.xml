@@ -307,6 +307,7 @@
     <string name="install_fail_target">Aplikasi ini menargetkan versi Android yang terlalu lama untuk dipasang di perangkat ini.</string>
     <string name="install_fail_missing_split">Bagian split APK yang wajib tidak ada. Pilih set lengkap untuk aplikasi ini.</string>
     <string name="install_fail_feature">Aplikasi membutuhkan fitur hardware atau software yang tidak dimiliki perangkat ini.</string>
+    <string name="install_fail_no_result">Android tidak melaporkan hasil pemasangan ini. Periksa apakah aplikasinya terpasang, lalu coba lagi.</string>
     <string name="install_fail_unknown">Android tidak memberi alasan spesifik.</string>
     <string name="ready_new">Siap dipasang</string>
     <string name="ready_update">Siap diperbarui: %1$s → %2$s</string>
