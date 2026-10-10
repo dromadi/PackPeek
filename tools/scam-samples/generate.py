@@ -398,6 +398,28 @@ public class Main {
     },
 )
 
+# ---- Fixture: a bot address split into pieces. bot() joins them at run time (StringBuilder);
+# notes() only holds the same pieces without joining them, which must not count as a join.
+sample(
+    "joined-pieces", "Catatan Bot", "sim.app.joined",
+    ["INTERNET"],
+    {
+        "Main.java": HEADER + """package sim.app.joined;
+public class Main {
+    String bot(String text) {
+        String a = "https://api.tele";
+        String b = "gram.org/bot";
+        String c = "/sendMessage?text=";
+        return a + b + c + text;
+    }
+    void notes(java.util.List<String> out) {
+        out.add("https://api.tele");
+        out.add("gram.org/bot");
+    }
+}""",
+    },
+)
+
 def write():
     for name, s in SAMPLES.items():
         root = os.path.join(HERE, "samples", name)

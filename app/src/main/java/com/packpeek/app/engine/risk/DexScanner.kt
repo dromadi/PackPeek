@@ -1052,6 +1052,12 @@ object DexScanner {
             val results = HashMap<Int, Set<String>>()
             var pending = 0
             var pendingResults: Set<String> = emptySet()
+            // Deep: texts built at run time from constants (StringBuilder.append, String.concat).
+            // Only pieces the code actually joins are joined; NUL marks a piece that is not known.
+            val texts = if (state.deep && lib == null) HashMap<Int, String>() else null
+            val pieces = if (texts != null) HashMap<Int, Int>() else null
+            var pendingText: String? = null
+            var pendingPieces = 0
             run {
                 val registers = u16(codeOff)
                 val ins = u16(codeOff + 2)
@@ -1062,7 +1068,15 @@ object DexScanner {
             fun set(reg: Int, bits: Int, from: Set<String> = emptySet()) {
                 if (bits == 0) taint.remove(reg) else taint[reg] = bits
                 if (from.isEmpty()) results.remove(reg) else results[reg] = from
+                texts?.remove(reg)
+                pieces?.remove(reg)
             }
+            fun text(reg: Int, value: String?, count: Int) {
+                if (texts == null || value == null || value.length > 4096) return
+                texts[reg] = value
+                pieces!![reg] = count
+            }
+            fun copyText(to: Int, from: Int) = text(to, texts?.get(from), pieces?.get(from) ?: 0)
             val name = string(b.getInt(methodIdsOff + 8 * index + 4))
             val key = methodKey(index)
             val readable = if (origin.isEmpty()) "$className.$name" else "$className.$name [$origin]"
@@ -1102,18 +1116,76 @@ object DexScanner {
                     IntArray(count) { first + it }
                 }
 
+            /** A text the code joined from constants; unknown pieces split it. */
+            fun joined(value: String) {
+                value.split('\u0000').filter { it.length >= 8 }.forEach {
+                    recordDecoded(Decoding.JOINED, it, readable, key, quiet = true)
+                }
+            }
+
+            /** Follows StringBuilder/StringBuffer and String.concat; reports a finished join. */
+            fun built(called: String, regs: IntArray) {
+                val owner = called.substringBefore("->")
+                val name = methodName(called)
+                val receiver = regs.firstOrNull() ?: return
+                fun known(r: Int) = texts!![r]
+                if (owner == "Ljava/lang/StringBuilder;" || owner == "Ljava/lang/StringBuffer;") {
+                    when (name) {
+                        "<init>" -> {
+                            val initial = regs.getOrNull(1)?.let { r -> known(r) ?: if (called.contains("(Ljava/lang/String;)")) "\u0000" else "" } ?: ""
+                            text(receiver, initial, if (initial.isEmpty() || initial == "\u0000") 0 else pieces!![regs[1]] ?: 1)
+                        }
+                        "append" -> {
+                            val current = known(receiver) ?: return
+                            val arg = regs.getOrNull(1)?.let(::known)
+                            val count = (pieces!![receiver] ?: 0) + (arg?.let { pieces[regs[1]] ?: 1 } ?: 0)
+                            text(receiver, current + (arg ?: "\u0000"), count)
+                            pendingText = texts!![receiver]
+                            pendingPieces = count
+                        }
+                        "toString" -> {
+                            val value = known(receiver) ?: return
+                            val count = pieces!![receiver] ?: 0
+                            pendingText = value
+                            pendingPieces = count
+                            if (count >= 2) joined(value)
+                        }
+                    }
+                } else if (owner == "Ljava/lang/String;" && name == "concat" && regs.size == 2) {
+                    val a = known(regs[0]) ?: return
+                    val b = known(regs[1]) ?: return
+                    pendingText = a + b
+                    pendingPieces = (pieces!![regs[0]] ?: 1) + (pieces[regs[1]] ?: 1)
+                    joined(a + b)
+                }
+            }
+
             fun track(op: Int, unit: Int, next: Int, i: Int) {
                 val mi = info!!
                 val a8 = (unit shr 8) and 0xff
                 val a4 = (unit shr 8) and 0xf
                 val b4 = (unit shr 12) and 0xf
-                if (op !in 0x0a..0x0c && op !in 0x6e..0x78 && op !in 0xfa..0xfd) pending = 0
+                if (op !in 0x0a..0x0c && op !in 0x6e..0x78 && op !in 0xfa..0xfd) {
+                    pending = 0
+                    pendingText = null
+                }
                 when (op) {
-                    0x01, 0x04, 0x07 -> set(a4, taint[b4] ?: 0, results[b4].orEmpty())
-                    0x02, 0x05, 0x08 -> set(a8, taint[next] ?: 0, results[next].orEmpty())
-                    0x03, 0x06, 0x09 -> set(next, taint[reg2(i)] ?: 0, results[reg2(i)].orEmpty())
+                    0x01, 0x04, 0x07 -> {
+                        set(a4, taint[b4] ?: 0, results[b4].orEmpty())
+                        copyText(a4, b4)
+                    }
+                    0x02, 0x05, 0x08 -> {
+                        set(a8, taint[next] ?: 0, results[next].orEmpty())
+                        copyText(a8, next)
+                    }
+                    0x03, 0x06, 0x09 -> {
+                        set(next, taint[reg2(i)] ?: 0, results[reg2(i)].orEmpty())
+                        copyText(next, reg2(i))
+                    }
                     0x0a, 0x0b, 0x0c -> {
                         set(a8, pending, pendingResults)
+                        text(a8, pendingText, pendingPieces)
+                        pendingText = null
                         pending = 0
                         pendingResults = emptySet()
                     }
@@ -1128,6 +1200,7 @@ object DexScanner {
                         // Content URIs carry their source (read once queried); bot URLs mark the destination.
                         val bits = rule?.capability?.let { if (it.source || it in Capability.hiddenDestinations) it.bit else 0 } ?: 0
                         set(a8, bits)
+                        text(a8, string(idx), 1)
                     }
                     0x1c, 0x22 -> set(a8, 0)
                     0x1f -> Unit // check-cast keeps the value
@@ -1180,10 +1253,15 @@ object DexScanner {
                         if (instance && regs.size > 1) {
                             var rest = 0
                             for (k in 1 until regs.size) rest = rest or (taint[regs[k]] ?: 0)
-                            if (rest != 0) set(regs[0], (taint[regs[0]] ?: 0) or rest, results[regs[0]].orEmpty() + from)
+                            // Only the value labels change; the builder keeps any text it is building.
+                            if (rest != 0) {
+                                taint[regs[0]] = (taint[regs[0]] ?: 0) or rest
+                                if (from.isNotEmpty()) results[regs[0]] = results[regs[0]].orEmpty() + from
+                            }
                         }
                         pending = result
                         pendingResults = resultFrom
+                        if (texts != null && called != null) built(called, regs)
                     }
                 }
             }
@@ -1316,11 +1394,6 @@ object DexScanner {
                         ?.takeIf { printable(it) }
                         ?.let { recordDecoded(Decoding.BASE64, it, readable, key) }
                 if (s.length >= 10) recordDecoded(Decoding.REVERSED, s.reversed(), readable, key, quiet = true)
-            }
-            if (strings.size >= 2) {
-                val joined = strings.joinToString("")
-                // Only when no single piece already shows what the whole does.
-                if (strings.none { interesting(it) != null }) recordDecoded(Decoding.JOINED, joined, readable, key, quiet = true)
             }
         }
 

@@ -93,4 +93,15 @@ class DeepAnalysisTest {
         assertEquals("b.invoke", com.packpeek.app.ui.EvidenceReport.shortMethod("a.b.invoke [OkHttp]"))
         assertEquals("run", com.packpeek.app.ui.EvidenceReport.shortMethod("run"))
     }
+
+    /** Only pieces the code joins (StringBuilder, concat) form a text; pieces merely in one method do not. */
+    @Test
+    fun joinsFollowTheBuildingCode() {
+        val apk = File(requireNotNull(javaClass.getResource("/samples/joined-pieces.apk")).toURI())
+        val decoded = requireNotNull(DexScanner.scan(listOf(apk), DexScanner.DEEP_TIME_LIMIT_MS, deep = true).deep).decoded
+        val joined = decoded.single { it.technique == Decoding.JOINED }
+        assertEquals("https://api.telegram.org/bot/sendMessage?text=", joined.decoded)
+        assertTrue(joined.method.endsWith("Main.bot"))
+        assertTrue(decoded.none { it.method.endsWith("Main.notes") })
+    }
 }
