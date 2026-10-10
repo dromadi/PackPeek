@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.*
@@ -56,6 +57,27 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
             rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
                 it?.let { uri -> vm.import(uri) { nav.navigate("detail") } }
             }
+        val multiPicker =
+            rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) {
+                vm.installMany(it)
+            }
+        fun canInstall(): Boolean {
+            if (Build.VERSION.SDK_INT < 26 || c.packageManager.canRequestPackageInstalls())
+                return true
+            c.launchSafe(
+                android.content.Intent(
+                    android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:${c.packageName}"),
+                )
+            )
+            return false
+        }
+        fun pickInstallFiles() {
+            if (canInstall()) multiPicker.launch(arrayOf("*/*"))
+        }
+        fun installFiles(uris: List<Uri>) {
+            if (canInstall()) vm.installMany(uris)
+        }
         val notifyPermission =
             rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
         fun backup(items: List<AppRecord>) {
@@ -82,6 +104,8 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
         val work by vm.workInfo.collectAsStateWithLifecycle()
         val importing by vm.importing.collectAsStateWithLifecycle()
         val installing by vm.installing.collectAsStateWithLifecycle()
+        val queue by vm.queue.collectAsStateWithLifecycle()
+        val queueRunning by vm.queueRunning.collectAsStateWithLifecycle()
         val snackbar = remember { SnackbarHostState() }
         val resources = LocalResources.current
         // A single successful extract gets a quick "Saved · Share" bar instead of a dialog.
@@ -210,6 +234,29 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                         }
                     }
                 }
+                if (queueRunning) {
+                    val done = queue.count { it.result != null || it.error != null }
+                    val current = queue.getOrNull(done)
+                    Surface(color = MaterialTheme.colorScheme.tertiaryContainer) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                stringResource(
+                                    R.string.queue_progress,
+                                    (done + 1).coerceAtMost(queue.size),
+                                    queue.size,
+                                    current?.label?.ifBlank { current.name } ?: "",
+                                ),
+                                Modifier.weight(1f),
+                            )
+                            TextButton(onClick = vm::cancelQueue) {
+                                Text(stringResource(R.string.cancel))
+                            }
+                        }
+                    }
+                }
                 if (importing || installing) LinearProgressIndicator(Modifier.fillMaxWidth())
                 NavHost(
                     navController = nav,
@@ -224,11 +271,19 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                             { folderPicker.launch(null) },
                             { filePicker.launch(arrayOf("*/*")) },
                             { nav.navigate("settings") { launchSingleTop = true } },
+                            ::pickInstallFiles,
                         )
                     }
                     composable("detail") { DetailScreen(vm, ::backup) { nav.navigate("deep") } }
                     composable("deep") { DeepScreen(vm) { nav.navigate("settings") { launchSingleTop = true } } }
-                    composable("history") { HistoryScreen(vm) { nav.navigate("detail") } }
+                    composable("history") {
+                        HistoryScreen(
+                            vm,
+                            { nav.navigate("detail") },
+                            { uri -> installFiles(listOf(uri)) },
+                            ::backup,
+                        )
+                    }
                     composable("dashboard") {
                         DashboardScreen(
                             vm,
@@ -535,6 +590,16 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                 },
             )
         }
+        val installResult by vm.installResult.collectAsStateWithLifecycle()
+        if (!queueRunning) installResult?.let { InstallResultDialog(it, vm) }
+        if (!queueRunning && queue.isNotEmpty()) QueueSummaryDialog(queue, vm::dismissQueue)
+        val appList by vm.appListShared.collectAsStateWithLifecycle()
+        LaunchedEffect(appList) {
+            appList?.let {
+                shareFiles(c, listOf(it), "text/csv")
+                vm.appListShared.value = null
+            }
+        }
         val icon by vm.iconSaved.collectAsStateWithLifecycle()
         val saved = icon
         if (saved != null)
@@ -564,6 +629,144 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
 private fun quickResult(job: BackupJob, records: List<BackupRecord>): BackupRecord? =
     records.singleOrNull()?.takeIf {
         job.state == "COMPLETED" && !job.dismissed && it.jobId == job.id && it.state == "SUCCESS"
+    }
+
+@Composable
+private fun InstallResultDialog(result: InstallResult, vm: MainViewModel) {
+    val c = LocalContext.current
+    val installed =
+        remember(result) {
+            result.packageName.isNotBlank() &&
+                runCatching { vm.owner.apps.packageInfo(result.packageName) }.isSuccess
+        }
+    val launch =
+        remember(result) {
+            if (result.success && result.packageName.isNotBlank())
+                c.packageManager.getLaunchIntentForPackage(result.packageName)
+            else null
+        }
+    val canUninstall =
+        installed &&
+            result.failure in
+                listOf(InstallFailure.SIGNATURE, InstallFailure.DOWNGRADE, InstallFailure.CONFLICT)
+    AlertDialog(
+        onDismissRequest = vm::dismissInstallResult,
+        title = {
+            Text(
+                stringResource(
+                    if (result.success) R.string.install_success else R.string.install_failed_title
+                )
+            )
+        },
+        text = {
+            SelectionContainer {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (result.success) Text(stringResource(R.string.install_success_body))
+                    else {
+                        Text(stringResource(installFailureText(result.failure!!)))
+                        if (result.detail.isNotBlank())
+                            Text(
+                                stringResource(R.string.install_system_message, result.detail),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (launch != null)
+                TextButton(
+                    onClick = {
+                        vm.dismissInstallResult()
+                        c.launchSafe(launch)
+                    }
+                ) {
+                    Text(stringResource(R.string.open_app))
+                }
+            else if (canUninstall)
+                TextButton(
+                    onClick = {
+                        vm.dismissInstallResult()
+                        c.launchSafe(
+                            android.content.Intent(
+                                android.content.Intent.ACTION_DELETE,
+                                Uri.parse("package:${result.packageName}"),
+                            )
+                        )
+                    }
+                ) {
+                    Text(stringResource(R.string.uninstall_current))
+                }
+            else
+                TextButton(onClick = vm::dismissInstallResult) {
+                    Text(stringResource(R.string.close))
+                }
+        },
+        dismissButton = {
+            if (launch != null || canUninstall)
+                TextButton(onClick = vm::dismissInstallResult) {
+                    Text(stringResource(R.string.close))
+                }
+        },
+    )
+}
+
+@Composable
+private fun QueueSummaryDialog(queue: List<QueueEntry>, dismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = dismiss,
+        title = { Text(stringResource(R.string.queue_summary_title)) },
+        text = {
+            LazyColumn(Modifier.heightIn(max = 360.dp)) {
+                item {
+                    Text(
+                        stringResource(
+                            R.string.queue_counts,
+                            queue.count { it.result?.success == true },
+                            queue.count { it.result?.success == false || it.error != null },
+                        )
+                    )
+                }
+                items(queue) { e ->
+                    Column(Modifier.padding(vertical = 6.dp)) {
+                        Text(e.label.ifBlank { e.name })
+                        Text(
+                            when {
+                                e.result?.success == true -> stringResource(R.string.install_success)
+                                e.result != null ->
+                                    stringResource(installFailureText(e.result.failure!!))
+                                e.error != null -> stringResource(errorText(e.error))
+                                else -> stringResource(R.string.cancelled)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color =
+                                if (e.result?.success == true) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.done)) } },
+    )
+}
+
+fun installFailureText(failure: InstallFailure): Int =
+    when (failure) {
+        InstallFailure.ABORTED -> R.string.install_fail_aborted
+        InstallFailure.BLOCKED -> R.string.install_fail_blocked
+        InstallFailure.CONFLICT -> R.string.install_fail_conflict
+        InstallFailure.INCOMPATIBLE -> R.string.install_fail_incompatible
+        InstallFailure.INVALID -> R.string.install_fail_invalid
+        InstallFailure.STORAGE -> R.string.install_fail_storage
+        InstallFailure.SIGNATURE -> R.string.install_fail_signature
+        InstallFailure.DOWNGRADE -> R.string.install_fail_downgrade
+        InstallFailure.ABI -> R.string.install_fail_abi
+        InstallFailure.SDK -> R.string.install_fail_sdk
+        InstallFailure.TARGET -> R.string.install_fail_target
+        InstallFailure.MISSING_SPLIT -> R.string.install_fail_missing_split
+        InstallFailure.FEATURE -> R.string.install_fail_feature
+        InstallFailure.UNKNOWN -> R.string.install_fail_unknown
     }
 
 @Composable

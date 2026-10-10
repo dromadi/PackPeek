@@ -7,9 +7,11 @@ import com.packpeek.app.data.*
 import com.packpeek.app.engine.AuditEngine
 import com.packpeek.app.engine.risk.DeviceStateReader
 import com.packpeek.app.engine.risk.RiskEngine
+import com.packpeek.app.model.InstallResult
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class PackPeekApp : Application() {
     val settings by lazy { SettingsRepository(this) }
@@ -25,6 +27,8 @@ class PackPeekApp : Application() {
 
     val crashFile
         get() = File(filesDir, "last_crash.txt")
+    /** Latest result reported by the system installer, shown once by the UI. */
+    val installResult = MutableStateFlow<InstallResult?>(null)
 
     override fun onCreate() {
         super.onCreate()

@@ -1,5 +1,18 @@
 # Changelog
 
+## Belum dirilis
+
+- Dialog hasil pemasangan dengan alasan spesifik (tanda tangan, downgrade, ABI, SDK, penyimpanan, split hilang, fitur perangkat), pesan sistem, tombol Buka aplikasi atau Copot aplikasi saat ini.
+- Kartu "Siap dipasang?" untuk berkas lokal: tanda tangan, Android minimum, target SDK yang ditolak Android 14+, ABI, fitur perangkat wajib, signer dan downgrade terhadap aplikasi terpasang.
+- Arsip XAPK/APKM dikenali dan bisa dibuka dari file manager; jumlah OBB yang tidak ikut terpasang ditampilkan.
+- Tema hitam AMOLED dan ekspor daftar aplikasi (hasil filter) sebagai CSV.
+- Pilih bagian APK sebelum memasang: CPU, kepadatan layar, bahasa dan modul fitur, dengan pilihan terbaik untuk perangkat dicentang otomatis; pemasangan dihentikan bila modul kehilangan bagian CPU.
+- Arsip `.apks` bundletool diterima: `standalones/` diabaikan bila `splits/` ada.
+- Pasang beberapa berkas sekaligus melalui antrean dengan progres, batal dan ringkasan hasil.
+- Enam bahasa baru: Spanyol, Portugis (Brasil), Rusia, Hindi, Vietnam dan Turki; nama bahasa selalu ditampilkan dalam bahasanya sendiri. Perlu ditinjau penutur asli sebelum rilis.
+- Tab Folder backup di Riwayat: isi folder dibaca langsung dari manifest tiap berkas dan dibandingkan dengan aplikasi terpasang (lebih baru, sama, lebih lama, tidak terpasang), plus daftar aplikasi tanpa backup; aksi Pulihkan/Perbarui, Periksa, Bagikan dan Hapus.
+- Perbaikan: kunci backup yang macet, indikator progres yang hilang terlalu cepat, pembaruan notifikasi backup, ekspor ikon adaptif.
+
 ## 2.0.0-alpha.10 — 2026-10-10
 
 **Analisis mendalam**: tombol baru di detail aplikasi, muncul bila ada temuan kode, kode yang tidak terbaca, atau indikator kuat. Semua berjalan di perangkat dan aplikasinya tidak dijalankan.

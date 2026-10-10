@@ -113,7 +113,8 @@ fun PackPeekTheme(settings: Settings?, content: @Composable () -> Unit) {
     val dark =
         when (settings?.theme) {
             "LIGHT" -> false
-            "DARK" -> true
+            "DARK",
+            "AMOLED" -> true
             else -> isSystemInDarkTheme()
         }
     val context = LocalContext.current
@@ -125,5 +126,18 @@ fun PackPeekTheme(settings: Settings?, content: @Composable () -> Unit) {
             dark -> darkScheme(light, night)
             else -> lightScheme(light)
         }
-    MaterialTheme(colorScheme = scheme, shapes = PackShapes, content = content)
+    val black = Color(0xFF000000)
+    val finalScheme =
+        if (settings?.theme == "AMOLED")
+            scheme.copy(
+                background = black,
+                surface = black,
+                surfaceContainerLowest = black,
+                surfaceContainerLow = Color(0xFF0B0B0B),
+                surfaceContainer = Color(0xFF121212),
+                surfaceContainerHigh = Color(0xFF1A1A1A),
+                surfaceContainerHighest = Color(0xFF222222),
+            )
+        else scheme
+    MaterialTheme(colorScheme = finalScheme, shapes = PackShapes, content = content)
 }

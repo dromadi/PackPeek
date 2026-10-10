@@ -1,1 +1,1 @@
-<locale-config xmlns:android="http://schemas.android.com/apk/res/android"><locale android:name="en" /><locale android:name="id" /></locale-config>
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android"><locale android:name="en" /><locale android:name="id" /><locale android:name="es" /><locale android:name="pt-BR" /><locale android:name="ru" /><locale android:name="hi" /><locale android:name="vi" /><locale android:name="tr" /></locale-config>

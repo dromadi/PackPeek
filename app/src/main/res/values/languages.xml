@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Language names are shown in their own language in every locale. -->
+<resources>
+    <string name="english" translatable="false">English</string>
+    <string name="indonesian" translatable="false">Bahasa Indonesia</string>
+    <string name="spanish" translatable="false">Español</string>
+    <string name="portuguese_br" translatable="false">Português (Brasil)</string>
+    <string name="russian" translatable="false">Русский</string>
+    <string name="hindi" translatable="false">हिन्दी</string>
+    <string name="vietnamese" translatable="false">Tiếng Việt</string>
+    <string name="turkish" translatable="false">Türkçe</string>
+</resources>

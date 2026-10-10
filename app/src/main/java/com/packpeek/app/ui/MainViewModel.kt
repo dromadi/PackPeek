@@ -11,6 +11,7 @@ import android.graphics.drawable.AdaptiveIconDrawable
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,6 +27,10 @@ import com.packpeek.app.engine.risk.RiskReport
 import com.packpeek.app.engine.risk.Severity
 import com.packpeek.app.engine.risk.codeAnalyzed
 import com.packpeek.app.model.*
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -59,6 +64,14 @@ data class RiskBrief(
             )
     }
 }
+
+/** One file of a multi-file installation and, once known, its outcome. */
+data class QueueEntry(
+    val name: String,
+    val label: String = "",
+    val result: InstallResult? = null,
+    val error: ErrorCode? = null,
+)
 
 data class DetailState(
     val app: AppRecord? = null,
@@ -112,6 +125,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val installing = MutableStateFlow(false)
     val iconSaved = MutableStateFlow<Uri?>(null)
     val lastCrash = MutableStateFlow(runCatching { owner.crashFile.readText() }.getOrNull())
+    val appListShared = MutableStateFlow<Uri?>(null)
+    val installResult = owner.installResult.asStateFlow()
+    /** Layout of the archive behind the current local-file detail screen. */
+    val importSummary = MutableStateFlow<Pair<ArchiveKind, Int>?>(null)
+    val splitParts = MutableStateFlow<List<SplitPart>>(emptyList())
+    val splitSelection = MutableStateFlow<Set<String>>(emptySet())
+    val queue = MutableStateFlow<List<QueueEntry>>(emptyList())
+    val queueRunning = MutableStateFlow(false)
+    private var queueJob: Job? = null
+    private val indexer = BackupIndexer(owner)
+    val backupIndex = MutableStateFlow<List<BackupFile>?>(null)
+    val backups =
+        combine(backupIndex, apps) { files, installed ->
+                files?.let { withInstalled(it, installed.associateBy { a -> a.packageName }) }
+            }
+            .flowOn(Dispatchers.Default)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    val indexProgress = MutableStateFlow<Pair<Int, Int>?>(null)
+    private var indexJob: Job? = null
     val latestJob = dao.latest().stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val jobRecords =
         latestJob
@@ -233,7 +265,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: Exception) {
                 error.value = ErrorCode.SOURCE
             } finally {
-                scanning.value = false
+                // A cancelled scan must not hide the indicator of the scan that replaced it.
+                if (scanJob === coroutineContext.job) scanning.value = false
                 loaded.value = true
             }
         }
@@ -270,7 +303,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     }
                 } finally {
-                    filtering.value = false
+                    if (filterJob === coroutineContext.job) filtering.value = false
                 }
             }
         else filtering.value = false
@@ -537,7 +570,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 auditJob?.cancelAndJoin()
                 imported?.close()
                 imported = null
-                imported = ArchiveImporter(owner, owner.apps).open(uri)
+                importSummary.value = null
+                splitParts.value = emptyList()
+                val importer = ArchiveImporter(owner, owner.apps)
+                imported = importer.open(uri)
+                importSummary.value = imported!!.kind to imported!!.obbCount
+                if (imported!!.files.size > 1) {
+                    val parts = importer.plan(imported!!)
+                    splitParts.value = parts
+                    splitSelection.value = parts.filter { it.recommended }.map { it.name }.toSet()
+                }
                 inspect(imported!!.app)
                 onReady()
             } catch (e: CancellationException) {
@@ -564,7 +606,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         installing.value = true
         viewModelScope.launch {
             try {
-                val files = ArchiveImporter(owner, owner.apps).validateForInstall(archive)
+                val files =
+                    ArchiveImporter(owner, owner.apps)
+                        .validateForInstall(
+                            archive,
+                            splitSelection.value.takeIf { splitParts.value.isNotEmpty() },
+                        )
                 installPackage(owner, archive.app.packageName, files)
             } catch (e: CancellationException) {
                 throw e
@@ -572,6 +619,158 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 error.value = (e as? AppFailure)?.code ?: ErrorCode.UNKNOWN
             } finally {
                 installing.value = false
+            }
+        }
+    }
+
+    fun toggleSplit(name: String) {
+        if (splitParts.value.any { it.name == name && it.kind == SplitKind.BASE }) return
+        splitSelection.value =
+            if (name in splitSelection.value) splitSelection.value - name
+            else splitSelection.value + name
+    }
+
+    fun resetSplits() {
+        splitSelection.value = splitParts.value.filter { it.recommended }.map { it.name }.toSet()
+    }
+
+    /** Installs several files one after another, each with its recommended parts. */
+    fun installMany(uris: List<Uri>) {
+        if (uris.isEmpty() || installing.value || importing.value) return
+        installing.value = true
+        queueRunning.value = true
+        val resolver = owner.contentResolver
+        // Picker grants can end with the activity; keep reads alive for the whole queue.
+        uris.forEach {
+            runCatching {
+                resolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        }
+        queue.value =
+            uris.map {
+                QueueEntry(
+                    runCatching { DocumentFile.fromSingleUri(owner, it)?.name }.getOrNull()
+                        ?: it.lastPathSegment.orEmpty()
+                )
+            }
+        fun update(index: Int, change: (QueueEntry) -> QueueEntry) {
+            queue.value = queue.value.mapIndexed { i, e -> if (i == index) change(e) else e }
+        }
+        queueJob = viewModelScope.launch {
+            try {
+                val importer = ArchiveImporter(owner, owner.apps)
+                uris.forEachIndexed { index, uri ->
+                    ensureActive()
+                    var archive: ImportedArchive? = null
+                    try {
+                        archive = importer.open(uri)
+                        val label = archive.app.label
+                        update(index) { it.copy(label = label) }
+                        val files = importer.validateForInstall(archive)
+                        owner.installResult.value = null
+                        installPackage(owner, archive.app.packageName, files)
+                        // The system reports back through InstallStatusActivity, after the user
+                        // confirms or dismisses its prompt.
+                        val pkg = archive.app.packageName
+                        val result =
+                            owner.installResult
+                                .filterNotNull()
+                                .first { it.packageName.isBlank() || it.packageName == pkg }
+                        owner.installResult.value = null
+                        update(index) { it.copy(result = result) }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        update(index) {
+                            it.copy(error = (e as? AppFailure)?.code ?: ErrorCode.UNKNOWN)
+                        }
+                    } finally {
+                        withContext(NonCancellable + Dispatchers.IO) { archive?.close() }
+                    }
+                }
+            } finally {
+                uris.forEach {
+                    runCatching {
+                        resolver.releasePersistableUriPermission(
+                            it,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                        )
+                    }
+                }
+                queueRunning.value = false
+                installing.value = false
+            }
+        }
+    }
+
+    /** Re-reads the backup folder; unchanged files come from the indexer's cache. */
+    fun scanBackups() {
+        indexJob?.cancel()
+        indexJob = viewModelScope.launch {
+            indexProgress.value = 0 to 0
+            try {
+                val folder = owner.settings.flow.first().folder
+                if (folder.isBlank()) throw AppFailure(ErrorCode.FOLDER)
+                backupIndex.value =
+                    indexer.scan(Uri.parse(folder), apps.value.associateBy { it.packageName }) {
+                        done,
+                        total ->
+                        indexProgress.value = done to total
+                    }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                error.value = (e as? AppFailure)?.code ?: ErrorCode.FOLDER
+            } finally {
+                if (indexJob === coroutineContext.job) indexProgress.value = null
+            }
+        }
+    }
+
+    fun deleteBackup(file: BackupFile) {
+        viewModelScope.launch {
+            val deleted =
+                withContext(Dispatchers.IO) {
+                    runCatching {
+                            DocumentFile.fromSingleUri(owner, Uri.parse(file.uri))?.delete() == true
+                        }
+                        .getOrDefault(false)
+                }
+            if (!deleted) {
+                error.value = ErrorCode.FOLDER
+                return@launch
+            }
+            dao.hideUri(file.uri)
+            backupIndex.value = backupIndex.value?.filterNot { it.uri == file.uri }
+        }
+    }
+
+    fun cancelQueue() {
+        queueJob?.cancel()
+    }
+
+    fun dismissQueue() {
+        queue.value = emptyList()
+    }
+
+    fun dismissInstallResult() {
+        owner.installResult.value = null
+    }
+
+    fun exportAppList(items: List<AppRecord>) {
+        if (items.isEmpty()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val dir = File(owner.cacheDir, "shared").apply { mkdirs() }
+                dir.listFiles()?.filter { it.name.endsWith(".csv") }?.forEach { it.delete() }
+                val stamp = SimpleDateFormat("yyyyMMdd-HHmm", Locale.ROOT).format(Date())
+                val file = File(dir, "packpeek-apps-$stamp.csv")
+                // A BOM lets spreadsheet apps detect UTF-8 labels.
+                file.writeText("\uFEFF" + appListCsv(items))
+                appListShared.value =
+                    FileProvider.getUriForFile(owner, "${owner.packageName}.fileprovider", file)
+            } catch (e: Exception) {
+                error.value = ErrorCode.STORAGE
             }
         }
     }
@@ -589,10 +788,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val bitmap = Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888)
                 val canvas = Canvas(bitmap)
                 if (Build.VERSION.SDK_INT >= 26 && drawable is AdaptiveIconDrawable) {
-                    drawable.background.setBounds(0, 0, 512, 512)
-                    drawable.background.draw(canvas)
-                    drawable.foreground.setBounds(0, 0, 512, 512)
-                    drawable.foreground.draw(canvas)
+                    listOfNotNull(drawable.background, drawable.foreground).forEach {
+                        it.setBounds(0, 0, 512, 512)
+                        it.draw(canvas)
+                    }
                 } else {
                     drawable.setBounds(0, 0, 512, 512)
                     drawable.draw(canvas)

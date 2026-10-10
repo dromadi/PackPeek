@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -22,11 +23,34 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.packpeek.app.R
 import com.packpeek.app.data.BackupRecord
 import com.packpeek.app.data.signerChanges
+import com.packpeek.app.model.AppRecord
 import java.text.DateFormat
 import java.util.Date
 
 @Composable
-fun HistoryScreen(vm: MainViewModel, onInspect: () -> Unit) {
+fun HistoryScreen(
+    vm: MainViewModel,
+    onInspect: () -> Unit,
+    restore: (Uri) -> Unit,
+    backup: (List<AppRecord>) -> Unit,
+) {
+    var tab by rememberSaveable { mutableIntStateOf(0) }
+    Column(Modifier.fillMaxSize()) {
+        PrimaryTabRow(selectedTabIndex = tab) {
+            listOf(R.string.history, R.string.backup_folder).forEachIndexed { i, title ->
+                Tab(
+                    selected = tab == i,
+                    onClick = { tab = i },
+                    text = { Text(stringResource(title)) },
+                )
+            }
+        }
+        if (tab == 0) HistoryList(vm, onInspect) else BackupFolderTab(vm, onInspect, restore, backup)
+    }
+}
+
+@Composable
+private fun HistoryList(vm: MainViewModel, onInspect: () -> Unit) {
     val history by vm.history.collectAsStateWithLifecycle()
     val stats by vm.stats.collectAsStateWithLifecycle()
     val installed by vm.apps.collectAsStateWithLifecycle()

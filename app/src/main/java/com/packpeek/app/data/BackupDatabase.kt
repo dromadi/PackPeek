@@ -99,6 +99,7 @@ interface BackupDao {
 
     /** Backups removed by the keep-N setting leave history and totals. */
     @Query("UPDATE backups SET state='PRUNED' WHERE id=:id") suspend fun prune(id: Long)
+    @Query("UPDATE backups SET hidden=1 WHERE uri=:uri") suspend fun hideUri(uri: String)
 
     @Transaction
     suspend fun create(job: BackupJob, records: List<BackupRecord>) {

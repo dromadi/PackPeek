@@ -37,6 +37,7 @@ fun AppsScreen(
     folder: () -> Unit,
     inspectFile: () -> Unit,
     openSettings: () -> Unit,
+    installFiles: () -> Unit,
 ) {
     val filtered by vm.filtered.collectAsStateWithLifecycle()
     val scanning by vm.scanning.collectAsStateWithLifecycle()
@@ -91,6 +92,7 @@ fun AppsScreen(
                 onText = { vm.setQuery(query.copy(text = it)) },
                 onInspect = inspectFile,
                 inspectEnabled = !importing,
+                onInstall = installFiles,
                 onSettings = openSettings,
             )
         FilterRow(query, vm)
@@ -124,8 +126,12 @@ fun AppsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
-            if (!selecting && apps.isNotEmpty())
+            if (!selecting && apps.isNotEmpty()) {
+                TextButton(onClick = { vm.exportAppList(apps) }) {
+                    Text(stringResource(R.string.export_list))
+                }
                 TextButton(onClick = vm::selectAll) { Text(stringResource(R.string.select_all)) }
+            }
         }
         if (filtering) LinearProgressIndicator(Modifier.fillMaxWidth())
         PullToRefreshBox(
@@ -203,6 +209,7 @@ private fun SearchBarRow(
     onText: (String) -> Unit,
     onInspect: () -> Unit,
     inspectEnabled: Boolean,
+    onInstall: () -> Unit,
     onSettings: () -> Unit,
 ) {
     Row(
@@ -256,6 +263,9 @@ private fun SearchBarRow(
         }
         IconButton(onClick = onInspect, enabled = inspectEnabled) {
             Icon(PackIcons.FileOpen, stringResource(R.string.analyze_file))
+        }
+        IconButton(onClick = onInstall, enabled = inspectEnabled) {
+            Icon(PackIcons.InstallMobile, stringResource(R.string.install_files))
         }
         IconButton(onClick = onSettings) {
             Icon(Icons.Rounded.Settings, stringResource(R.string.settings))

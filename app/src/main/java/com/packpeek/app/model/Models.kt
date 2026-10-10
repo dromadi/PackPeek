@@ -264,6 +264,9 @@ data class AuditReport(
     val abis: List<String>,
     val libraries: List<String>,
     val signerMatch: Boolean? = null,
+    val installedVersion: String? = null,
+    val installedVersionCode: Long? = null,
+    val missingFeatures: List<String> = emptyList(),
 ) {
     val score
         get() = riskScore(findings)

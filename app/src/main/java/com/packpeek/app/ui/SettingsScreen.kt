@@ -163,6 +163,7 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
                         "SYSTEM" to R.string.follow_system,
                         "LIGHT" to R.string.light_theme,
                         "DARK" to R.string.dark_theme,
+                        "AMOLED" to R.string.amoled_theme,
                     ),
                     PackIcons.Palette,
                 ) {
@@ -202,6 +203,12 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
                         "" to R.string.follow_system,
                         "en" to R.string.english,
                         "id" to R.string.indonesian,
+                        "es" to R.string.spanish,
+                        "pt-BR" to R.string.portuguese_br,
+                        "ru" to R.string.russian,
+                        "hi" to R.string.hindi,
+                        "vi" to R.string.vietnamese,
+                        "tr" to R.string.turkish,
                     ),
                     PackIcons.Language,
                 ) {

@@ -48,6 +48,9 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit, deepAnaly
     val report = state.report
     val latest by vm.latestJob.collectAsStateWithLifecycle()
     val installing by vm.installing.collectAsStateWithLifecycle()
+    val summary by vm.importSummary.collectAsStateWithLifecycle()
+    val parts by vm.splitParts.collectAsStateWithLifecycle()
+    val chosen by vm.splitSelection.collectAsStateWithLifecycle()
     var tab by remember(app.basePath) { mutableIntStateOf(vm.requestedTab.also { vm.requestedTab = 0 }) }
     var menu by remember { mutableStateOf(false) }
     var confirmInstall by remember { mutableStateOf(false) }
@@ -326,6 +329,19 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit, deepAnaly
                                 }
                             }
                         }
+                        val obb = summary?.second?.takeIf { app.fromFile } ?: 0
+                        if (obb > 0)
+                            item {
+                                Text(
+                                    stringResource(R.string.obb_notice, obb),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        if (report != null && app.fromFile)
+                            item { ReadinessCard(app, report) }
+                        if (app.fromFile && parts.isNotEmpty())
+                            item { SplitCard(parts, chosen, vm::toggleSplit, vm::resetSplits) }
                         item {
                             RowGroup(title = stringResource(R.string.app_info)) {
                                 InfoLine(
@@ -351,7 +367,9 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit, deepAnaly
                                 GroupDivider()
                                 InfoLine(
                                     stringResource(R.string.archive_format),
-                                    ".${FileNames.extension(app, settings?.naming ?: NamingConfig())} · " +
+                                    (summary?.first?.takeIf { app.fromFile }?.name
+                                        ?: ".${FileNames.extension(app, settings?.naming ?: NamingConfig())}") +
+                                        " · " +
                                         "${app.paths.size} APK · ${sizeText(app.size)}",
                                 )
                                 GroupDivider()
@@ -680,6 +698,175 @@ private fun ComponentLine(p: ComponentRow) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 6.dp),
             )
+    }
+}
+
+@Composable
+private fun SplitCard(
+    parts: List<SplitPart>,
+    selected: Set<String>,
+    toggle: (String) -> Unit,
+    reset: () -> Unit,
+) {
+    val kept = remember(parts, selected) { SplitPlanner.resolve(parts, selected) }
+    val missingAbi = remember(parts, selected) { SplitPlanner.missingAbi(parts, selected) }
+    OutlinedCard {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(R.string.split_section), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(
+                    R.string.split_summary,
+                    kept.size,
+                    parts.size,
+                    sizeText(parts.filter { it.name in kept }.sumOf { it.bytes }),
+                ),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(stringResource(R.string.split_hint), style = MaterialTheme.typography.bodySmall)
+            if (missingAbi)
+                Text(
+                    stringResource(R.string.split_missing_abi),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            SplitKind.entries.forEach { kind ->
+                val group = parts.filter { it.kind == kind }
+                if (group.isEmpty()) return@forEach
+                Text(
+                    stringResource(splitKindTitle(kind)),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+                group.forEach { part ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = part.name in kept,
+                            onCheckedChange = { toggle(part.name) },
+                            // Config parts of a feature follow that feature's checkbox.
+                            enabled =
+                                kind != SplitKind.BASE &&
+                                    (kind == SplitKind.FEATURE ||
+                                        part.module.isEmpty() ||
+                                        parts.any {
+                                            it.kind == SplitKind.FEATURE &&
+                                                it.module == part.module &&
+                                                it.name in kept
+                                        }),
+                        )
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                when {
+                                    kind == SplitKind.BASE -> "base.apk"
+                                    part.module.isEmpty() -> part.value.ifBlank { part.name }
+                                    part.value.isBlank() -> part.module
+                                    else -> "${part.value} · ${part.module}"
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            Text(
+                                buildString {
+                                    append(sizeText(part.bytes))
+                                    if (part.recommended && kind != SplitKind.BASE)
+                                        append(" · ").append(stringResource(R.string.split_recommended))
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
+                }
+            }
+            TextButton(onClick = reset) { Text(stringResource(R.string.split_reset)) }
+        }
+    }
+}
+
+private fun splitKindTitle(kind: SplitKind): Int =
+    when (kind) {
+        SplitKind.BASE -> R.string.split_kind_base
+        SplitKind.ABI -> R.string.split_kind_abi
+        SplitKind.DENSITY -> R.string.split_kind_density
+        SplitKind.LOCALE -> R.string.split_kind_locale
+        SplitKind.FEATURE -> R.string.split_kind_feature
+        SplitKind.OTHER -> R.string.split_kind_other
+    }
+
+@Composable
+private fun ReadinessCard(app: AppRecord, report: AuditReport) {
+    val device = Build.SUPPORTED_ABIS.toList()
+    val issues =
+        remember(app, report) {
+            readiness(
+                ReadinessInput(
+                    app.minSdk,
+                    app.targetSdk,
+                    Build.VERSION.SDK_INT,
+                    report.abis,
+                    device,
+                    report.signatureValid,
+                    report.signerMatch,
+                    app.versionCode,
+                    report.installedVersionCode,
+                    report.missingFeatures,
+                )
+            )
+        }
+    val ok = issues.isEmpty()
+    Card(
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (ok) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.errorContainer
+            )
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                when {
+                    !ok -> stringResource(R.string.ready_warning)
+                    report.installedVersionCode == null -> stringResource(R.string.ready_new)
+                    else ->
+                        stringResource(
+                            R.string.ready_update,
+                            report.installedVersion.orEmpty(),
+                            app.version,
+                        )
+                },
+                style = MaterialTheme.typography.titleLarge,
+            )
+            issues.forEach { issue ->
+                Text(
+                    when (issue) {
+                        ReadinessIssue.SIGNATURE_INVALID ->
+                            stringResource(R.string.ready_signature_invalid)
+                        ReadinessIssue.SDK ->
+                            stringResource(R.string.ready_sdk, app.minSdk, Build.VERSION.SDK_INT)
+                        ReadinessIssue.TARGET -> stringResource(R.string.ready_target, app.targetSdk)
+                        ReadinessIssue.ABI ->
+                            stringResource(
+                                R.string.ready_abi,
+                                report.abis.joinToString(),
+                                device.joinToString(),
+                            )
+                        ReadinessIssue.FEATURES ->
+                            stringResource(
+                                R.string.ready_features,
+                                report.missingFeatures.joinToString(),
+                            )
+                        ReadinessIssue.SIGNER -> stringResource(R.string.ready_signer)
+                        ReadinessIssue.DOWNGRADE ->
+                            stringResource(
+                                R.string.ready_downgrade,
+                                app.versionCode,
+                                report.installedVersionCode ?: 0L,
+                            )
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Text(stringResource(R.string.ready_note), style = MaterialTheme.typography.bodySmall)
+        }
     }
 }
 
