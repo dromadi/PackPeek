@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0-alpha.9 — 2026-10-10
+
+- **Bukti lebih bersih:** teks `content://sms` (dan `content://` lain) hanya menjadi bukti bila kelas yang sama juga menjalankan query, sama seperti alamat bot Telegram/Discord yang hanya dihitung bila kelasnya bisa mengirim data. Ini mencegah daftar tanda pengenal milik aplikasi keamanan muncul sebagai bukti.
+- **Pengujian tanpa emulator:** render layar di JVM (Robolectric) untuk Ringkasan dan kartu temuan, dalam mode terang, gelap, bahasa Indonesia, dan huruf besar. Enam layar butuh sekitar 12 detik.
+- **Skrip emulator** `tools/emulator/emu.sh`: boot dari snapshot (146 → 31 detik di mesin tanpa KVM), menunggu dan mengetuk berdasarkan teks, serta menutup dialog ANR otomatis.
+- **Build lebih stabil:** dependensi diambil dari mirror `repo1.maven.org` sebelum `repo.maven.apache.org`, yang sering membalas 429 (rate limit). Framework Robolectric diunduh lewat Gradle, sehingga render layar juga bisa berjalan offline.
+
 ## 2.0.0-alpha.8 — 2026-10-10
 
 Analisis risiko tahap 2 dan 3: PackPeek kini membaca **kode** aplikasi (DEX) untuk mencari bukti, tanpa menjalankannya. Ringkasan dirombak.

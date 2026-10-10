@@ -11,7 +11,22 @@ val signingFile = rootProject.file("keystore.properties")
 val signing =
     Properties().apply { if (signingFile.exists()) signingFile.inputStream().use { load(it) } }
 
+val robolectricRuntime: Configuration by configurations.creating
+
 android {
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all { test ->
+            test.systemProperty("robolectric.graphicsMode", "NATIVE")
+            // Robolectric's Android framework jar comes through Gradle (cached, mirrored) instead
+            // of Robolectric's own downloader, so screen renders also work offline.
+            test.inputs.files(robolectricRuntime)
+            test.doFirst {
+                test.systemProperty("robolectric.offline", "true")
+                test.systemProperty("robolectric.dependency.dir", robolectricRuntime.singleFile.parentFile.absolutePath)
+            }
+        }
+    }
     namespace = "com.packpeek.app"
     compileSdk = 36
     buildToolsVersion = "36.0.0"
@@ -19,8 +34,8 @@ android {
         applicationId = "com.packpeek.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 20008
-        versionName = "2.0.0-alpha.8"
+        versionCode = 20009
+        versionName = "2.0.0-alpha.9"
         buildConfigField("boolean", "SHOW_RATE", "false")
         buildConfigField("String", "SUPPORT_EMAIL", "\"\"")
     }
@@ -111,4 +126,11 @@ dependencies {
     arscLib("io.github.reandroid:ARSCLib:1.4.0")
     implementation(files(filteredArscLib))
     testImplementation("junit:junit:4.13.2")
+    // Screen renders on the JVM (Robolectric native graphics): checks the UI without an emulator.
+    testImplementation("org.robolectric:robolectric:4.17")
+    // Framework jar for @Config(sdk = [35]) with Robolectric 4.17.
+    robolectricRuntime("org.robolectric:android-all-instrumented:15-robolectric-13954326-i7") { isTransitive = false }
+    testImplementation(platform("androidx.compose:compose-bom:2025.12.00"))
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

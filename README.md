@@ -11,6 +11,8 @@ Gunakan JDK 17 lengkap, Android SDK Platform 36, Build Tools 36.0.0, dan Android
 ./gradlew :app:assembleRelease
 ```
 
+Pengujian dibagi tiga lapis (unit test, render layar di JVM tanpa emulator, dan emulator/HP); lihat `docs/TEST_PLAN.md`.
+
 Windows: `gradlew.bat`. Tentukan SDK melalui `ANDROID_HOME` atau `local.properties` lokal. Build awal memerlukan internet untuk dependensi.
 
 ZIP final juga menyertakan `PackPeek-history.bundle`. Untuk memulihkan riwayat Git ke folder baru, jalankan `git clone PackPeek-history.bundle PackPeek-with-history`. Folder `PackPeek` dalam ZIP dapat langsung dibuka sebagai proyek Android Studio.

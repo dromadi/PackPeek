@@ -1,5 +1,33 @@
 # Uji penerimaan perangkat
 
+## Tiga lapis pengujian
+
+Emulator tanpa akselerasi hardware (mesin build tanpa `/dev/kvm`) berjalan 10–20× lebih lambat dari HP. Karena itu pengujian dibagi menjadi tiga lapis, dari yang tercepat.
+
+| Lapis | Perintah | Waktu | Untuk |
+|---|---|---|---|
+| **1. Unit test (JVM)** | `./gradlew :app:testDebugUnitTest` | ±1 menit | Parser, aturan risiko, pemindai DEX, prune |
+| **2. Render layar (JVM, Robolectric)** | `./gradlew :app:testDebugUnitTest --tests '*ScreenRenderTest*'` → `app/build/screenshots/*.png` | ±12 detik untuk 6 layar | Tata letak terang/gelap, bahasa Indonesia, huruf besar, tanpa emulator |
+| **3. Emulator atau HP** | `tools/emulator/emu.sh` | menit | Hal yang butuh Android sungguhan: PackageManager, SAF, pemasangan, WorkManager |
+
+`tools/emulator/emu.sh` mempercepat lapis 3:
+- **boot dari snapshot**: di mesin tanpa KVM, 146 detik turun menjadi 31 detik;
+- animasi dimatikan;
+- dialog "isn't responding" ditutup otomatis;
+- **menunggu teks** (`emu.sh wait "Overview"`) dan **mengetuk berdasarkan teks** (`emu.sh tap "Check 10 apps"`), bukan `sleep` dan koordinat.
+
+```bash
+export ANDROID_HOME=/path/to/sdk
+tools/emulator/emu.sh start t26      # boot pertama: cold boot
+tools/emulator/emu.sh save           # simpan snapshot "ready" sekali
+tools/emulator/emu.sh install app/build/outputs/apk/debug/app-debug.apk
+tools/emulator/emu.sh launch com.packpeek.app.debug
+tools/emulator/emu.sh wait "Overview" && tools/emulator/emu.sh tap "Overview"
+tools/emulator/emu.sh shot overview.png
+```
+
+## Skenario
+
 Jalankan pada API 24, 29, 33, 34, 36 dan minimal satu HP fisik. Belum dinyatakan lulus hanya karena build berhasil. Catat perangkat, API, ABI, bahasa, hasil dan logcat.
 
 | Skenario | Hasil yang diharapkan |

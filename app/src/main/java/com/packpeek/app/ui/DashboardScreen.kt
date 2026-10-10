@@ -130,7 +130,7 @@ fun DashboardScreen(vm: MainViewModel, inspect: (AppRecord) -> Unit, showGroup: 
 
 /** Top card: the evidence check of all user apps and its outcome. */
 @Composable
-private fun SecurityCard(
+internal fun SecurityCard(
     total: Int,
     checked: Int,
     strong: Int,
@@ -211,7 +211,7 @@ private fun SecurityCard(
 }
 
 @Composable
-private fun ReviewLine(app: AppRecord, brief: RiskBrief, onClick: () -> Unit) {
+internal fun ReviewLine(app: AppRecord, brief: RiskBrief, onClick: () -> Unit) {
     val top = brief.top
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
@@ -258,7 +258,7 @@ private fun ReviewLine(app: AppRecord, brief: RiskBrief, onClick: () -> Unit) {
 
 /** Sensitive services switched on right now; collapses to one line when there are none. */
 @Composable
-private fun ActiveSection(
+internal fun ActiveSection(
     services: com.packpeek.app.engine.risk.ActiveServices,
     byPackage: Map<String, AppRecord>,
     inspect: (AppRecord) -> Unit,
@@ -318,7 +318,7 @@ private fun ActiveSection(
 }
 
 @Composable
-private fun StatsRow(apps: List<AppRecord>) {
+internal fun StatsRow(apps: List<AppRecord>) {
     Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, shape = MaterialTheme.shapes.large) {
         Row(Modifier.fillMaxWidth().padding(vertical = 14.dp)) {
             listOf(
@@ -350,7 +350,7 @@ private fun StatsRow(apps: List<AppRecord>) {
 
 /** Part-to-whole of the apps along one dimension: one stacked bar plus a tappable legend. */
 @Composable
-private fun AnalysisCard(
+internal fun AnalysisCard(
     apps: List<AppRecord>,
     extras: Map<String, AppExtras>,
     tech: Map<String, List<String>>,

@@ -69,7 +69,7 @@ class DexScannerTest {
     fun textsWithoutCallsAreNotFlowsOrDestinations() {
         val code = DexScanner.scan(listOf(sample))
         assertTrue(code.flows.none { it.method.contains("Detector") })
-        assertTrue(code.hits.values.flatten().none { it.method.contains("Detector") && it.capability in Capability.hiddenDestinations })
+        assertTrue(code.hits.values.flatten().none { it.method.contains("Detector") })
         // The real sender is still found.
         assertTrue(code.appHits(TELEGRAM).any { it.method.endsWith("Sender.send") })
     }

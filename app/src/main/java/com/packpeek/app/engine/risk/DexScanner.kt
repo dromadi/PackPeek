@@ -279,8 +279,11 @@ object DexScanner {
         val classMethods = HashMap<String, MutableList<String>>()
         val names = HashMap<String, String>()
         val destinations = LinkedHashMap<String, Destination>()
-        /** Telegram/Discord texts in app code, kept only if their method can also send. */
-        val pendingHidden = mutableListOf<Pair<String, CodeHit>>()
+        /**
+         * Text evidence in app code waiting for confirmation: bot/webhook texts count only in a
+         * class that can send, content:// texts only in a class that queries.
+         */
+        val pendingTexts = mutableListOf<Pair<String, CodeHit>>()
         val sdks = sortedSetOf<String>()
         val gaps = mutableListOf<CodeGap>()
         var dexFiles = 0
@@ -296,10 +299,11 @@ object DexScanner {
             if (list.size < limit) list += CodeHit(rule.capability, rule.api, method, library, rule.string)
         }
 
-        fun hits(confirmedHidden: List<CodeHit>): Map<Capability, List<CodeHit>> {
+        fun hits(confirmedTexts: List<CodeHit>): Map<Capability, List<CodeHit>> {
             val all = (appHits - CONTENT_QUERY).toMutableMap<Capability, List<CodeHit>>()
-            confirmedHidden.groupBy { it.capability }.forEach { (cap, list) ->
-                all[cap] = list.distinctBy { it.api to it.method }.take(PLACES_PER_CAPABILITY)
+            confirmedTexts.groupBy { it.capability }.forEach { (cap, list) ->
+                val texts = list.distinctBy { it.api to it.method }
+                all[cap] = (all[cap].orEmpty() + texts).take(PLACES_PER_CAPABILITY)
             }
             return (all.keys + libraryHits.keys - CONTENT_QUERY).associateWith {
                 all[it].orEmpty() + libraryHits[it].orEmpty()
@@ -338,12 +342,20 @@ object DexScanner {
                 .onFailure { state.gaps += CodeGap(GapKind.UNREADABLE, apk.name) }
         }
         if (state.stopped) state.gaps += CodeGap(GapKind.LIMIT, "time")
-        val (flows, sending) = flows(state)
+        val (flows, classes) = flows(state)
         return CodeFacts(
             dexFiles = state.dexFiles,
             classes = state.classes,
             appClasses = state.appClasses,
-            hits = state.hits(state.pendingHidden.filter { it.first.substringBefore("->") in sending }.map { it.second }),
+            hits =
+                state.hits(
+                    state.pendingTexts
+                        .filter { (key, hit) ->
+                            val owner = key.substringBefore("->")
+                            if (hit.capability.source) owner in classes.querying else owner in classes.sending
+                        }
+                        .map { it.second }
+                ),
             flows = flows,
             destinations = state.destinations.values.toList(),
             sdks = state.sdks.toList(),
@@ -403,10 +415,13 @@ object DexScanner {
         return out.copyOf(n)
     }
 
-    /** Read-then-send paths, and the classes whose methods can actually send (for hidden texts). */
-    private fun flows(state: State): Pair<List<CodeFlow>, Set<String>> {
+    private class Classes(val sending: Set<String>, val querying: Set<String>)
+
+    /** Read-then-send paths, and the classes that can actually send or query (for text evidence). */
+    private fun flows(state: State): Pair<List<CodeFlow>, Classes> {
         val result = LinkedHashMap<String, CodeFlow>()
         val sending = HashSet<String>()
+        val querying = HashSet<String>()
         fun callees(info: MethodInfo): List<MethodInfo> =
             info.callees.flatMap { key ->
                 if (key.endsWith("-><init>")) {
@@ -423,6 +438,7 @@ object DexScanner {
             // A bot URL is often a static field set in <clinit> and used by another method of the
             // same class, so a class that can send counts for all its texts.
             if (network) sending += key.substringBefore("->")
+            if (queries) querying += key.substringBefore("->")
             val sources = all.sources or (if (queries) all.stringSources else 0)
             val sinks = all.sinks or (if (network) all.stringSinks else 0)
             if (sources == 0 || sinks == 0) continue
@@ -441,7 +457,7 @@ object DexScanner {
                 }
         }
         // Hidden destinations first: they are the strongest sign.
-        return result.values.sortedBy { if (it.sink in Capability.hiddenDestinations) 0 else 1 } to sending
+        return result.values.sortedBy { if (it.sink in Capability.hiddenDestinations) 0 else 1 } to Classes(sending, querying)
     }
 
     /** One DEX file. Offsets follow the format at source.android.com/docs/core/runtime/dex-format. */
@@ -599,9 +615,9 @@ object DexScanner {
             val key = "$descriptor->$name"
             fun record(rule: Rule) {
                 val cap = rule.capability
-                val hidden = rule.string && cap in Capability.hiddenDestinations
-                if (hidden) {
-                    if (info != null) state.pendingHidden += key to CodeHit(cap, rule.api, readable, null, true)
+                val needsConfirmation = rule.string && (cap in Capability.hiddenDestinations || cap.source)
+                if (needsConfirmation) {
+                    if (info != null) state.pendingTexts += key to CodeHit(cap, rule.api, readable, null, true)
                 } else state.hit(rule, readable, lib?.name)
                 if (info != null) {
                     when {
