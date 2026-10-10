@@ -35,6 +35,7 @@ class DeepAnalysisTest {
         val xor = deep.decoded.single { it.technique == Decoding.XOR }
         assertEquals(DISCORD, xor.capability)
         assertEquals("0x2a", xor.detail)
+        assertTrue(xor.decoded.startsWith("https://discord.com/api/webhooks"))
         // The decoded bot counts as a hidden destination in a class that sends.
         assertTrue(code.appHits(TELEGRAM).any { it.method.endsWith("Courier.deliver") && it.api.startsWith("Base64") })
     }
@@ -69,5 +70,12 @@ class DeepAnalysisTest {
             )
         val otp = report.findings.single { it.id == RiskId.OTP_THEFT }
         assertTrue(otp.evidence.any { it.kind == EvidenceKind.FLOW && it.location.endsWith("OtpReceiver.onReceive") })
+    }
+
+    @Test
+    fun base64DecoderMatchesTheJdk() {
+        listOf("aGVsbG8=", "aGVsbG8gd29ybGQ=", "YQ==", "YWI=", "YWJj").forEach {
+            assertArrayEquals(java.util.Base64.getDecoder().decode(it), DexScanner.decodeBase64(it))
+        }
     }
 }

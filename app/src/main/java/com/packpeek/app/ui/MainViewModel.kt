@@ -18,7 +18,9 @@ import androidx.work.*
 import com.packpeek.app.PackPeekApp
 import com.packpeek.app.data.*
 import com.packpeek.app.engine.*
+import com.packpeek.app.engine.HashLookup
 import com.packpeek.app.engine.risk.ActiveServices
+import com.packpeek.app.engine.risk.CodeFacts
 import com.packpeek.app.engine.risk.RiskFinding
 import com.packpeek.app.engine.risk.RiskReport
 import com.packpeek.app.engine.risk.Severity
@@ -29,6 +31,16 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 data class AppExtras(val signer: Signer?, val abis: Set<String>)
+
+/** The deep analysis of the app shown in details. */
+data class DeepState(
+    val app: AppRecord? = null,
+    val running: Boolean = false,
+    val report: RiskReport? = null,
+    val code: CodeFacts? = null,
+    val failed: Boolean = false,
+    val lookup: HashLookup? = null,
+)
 
 /** What the overview needs from one app's evidence check. */
 data class RiskBrief(
@@ -483,6 +495,37 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 detail.value =
                     DetailState(app = app, error = (e as? AppFailure)?.code ?: ErrorCode.UNKNOWN)
             }
+        }
+    }
+
+    val deep = MutableStateFlow(DeepState())
+    private var deepJob: Job? = null
+
+    /** Runs the deep analysis on the app currently in details. */
+    fun analyzeDeep() {
+        val app = detail.value.app ?: return
+        if (deep.value.app == app && (deep.value.running || deep.value.report != null)) return
+        deepJob?.cancel()
+        deep.value = DeepState(app = app, running = true)
+        deepJob = viewModelScope.launch {
+            try {
+                val (report, code) = owner.risk.deep(app, detail.value.report)
+                deep.value = DeepState(app = app, report = report, code = code, failed = code?.deep == null)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                deep.value = DeepState(app = app, failed = true)
+            }
+        }
+    }
+
+    /** Looks the APK's SHA-256 up on VirusTotal with the user's own key; sends nothing else. */
+    fun lookUpHash() {
+        val sha = deep.value.code?.deep?.sha256?.takeIf { it.isNotBlank() } ?: return
+        viewModelScope.launch {
+            val key = owner.settings.flow.first().virusTotalKey
+            deep.value = deep.value.copy(lookup = HashLookup.Running)
+            deep.value = deep.value.copy(lookup = VirusTotal.lookUp(sha, key))
         }
     }
 

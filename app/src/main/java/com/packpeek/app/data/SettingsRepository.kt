@@ -28,6 +28,8 @@ data class Settings(
     val keep: Int = 0,
     /** What tapping an app in the list opens: FULL details or the QUICK sheet. */
     val tap: String = "FULL",
+    /** The user's own VirusTotal API key for the optional hash lookup; empty when not set. */
+    val virusTotalKey: String = "",
 )
 
 class SettingsRepository(context: Context) {
@@ -53,6 +55,7 @@ class SettingsRepository(context: Context) {
                     p[stringSetPreferencesKey("favorites")] ?: emptySet(),
                     p[intPreferencesKey("keep")] ?: 0,
                     p[stringPreferencesKey("tap")] ?: "FULL",
+                    p[stringPreferencesKey("vt_key")] ?: "",
                 )
             }
 

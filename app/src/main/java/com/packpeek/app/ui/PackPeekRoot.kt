@@ -118,6 +118,7 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                                         "dashboard" -> R.string.overview
                                         "settings" -> R.string.settings
                                         "about" -> R.string.about
+                                        "deep" -> R.string.deep_button_title
                                         else -> R.string.app_details
                                     }
                                 )
@@ -225,7 +226,8 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                             { nav.navigate("settings") { launchSingleTop = true } },
                         )
                     }
-                    composable("detail") { DetailScreen(vm, ::backup) }
+                    composable("detail") { DetailScreen(vm, ::backup) { nav.navigate("deep") } }
+                    composable("deep") { DeepScreen(vm) { nav.navigate("settings") { launchSingleTop = true } } }
                     composable("history") { HistoryScreen(vm) { nav.navigate("detail") } }
                     composable("dashboard") {
                         DashboardScreen(

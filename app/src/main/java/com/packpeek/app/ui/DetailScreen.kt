@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,7 +39,7 @@ import java.text.DateFormat
 import java.util.Date
 
 @Composable
-fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
+fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit, deepAnalysis: () -> Unit) {
     val state by vm.detail.collectAsStateWithLifecycle()
     val settings by vm.settings.collectAsStateWithLifecycle()
     val app = state.app ?: return
@@ -285,6 +286,8 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                                 SectionTitle(stringResource(R.string.concerns))
                                 RiskSummary(risk)
                             }
+                            if (offersDeepAnalysis(risk))
+                                item { DeepAnalysisButton(deepAnalysis) }
                             items(risk.findings, key = { "risk:${it.id}" }) {
                                 FindingCard(it, codeGaps = risk.coverage.code?.gaps?.isNotEmpty() == true)
                             }
@@ -761,4 +764,25 @@ private fun CollapsingHeader(state: CollapseState, content: @Composable ColumnSc
         },
         content = content,
     )
+}
+
+/** Entry to the deep analysis, offered when the code gave evidence or could not be read fully. */
+@Composable
+fun DeepAnalysisButton(onClick: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        shape = MaterialTheme.shapes.large,
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(PackIcons.Policy, null, Modifier.size(28.dp))
+            Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Text(stringResource(R.string.deep_button_title), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.deep_button_body), style = MaterialTheme.typography.bodySmall)
+            }
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null)
+        }
+    }
 }

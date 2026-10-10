@@ -126,4 +126,39 @@ class ScreenRenderTest {
     @Test
     @Config(qualifiers = "in-w411dp-h2400dp-xhdpi", fontScale = 1.3f)
     fun findingsIndonesianLargeFont() = render("findings-id-large") { Findings() }
+
+    private val deepState: DeepState by lazy {
+        val apk = File(requireNotNull(javaClass.getResource("/undangan-sim.apk")).toURI())
+        val code = DexScanner.scan(listOf(apk), DexScanner.DEEP_TIME_LIMIT_MS, deep = true)
+        val report =
+            RiskRules.evaluate(
+                ManifestScanner.scan(listOf(apk)),
+                RiskContext("Undangan Pernikahan", true, false, "SIDE", true, 1),
+                null,
+                code,
+            )
+        DeepState(
+            app = apps[2].copy(fromFile = true),
+            report = report,
+            code = code,
+            lookup = com.packpeek.app.engine.HashLookup.Found(41, 3, 66, "trojan.smsthief/spymax"),
+        )
+    }
+
+    @Composable
+    private fun Deep() {
+        // The screen is a LazyColumn; render its sections in a plain column for one tall image.
+        Box(Modifier.height(5200.dp)) { DeepContent(deepState, deepState.app!!, {}, {}) }
+    }
+
+    @Test
+    @Config(qualifiers = "w411dp-h5400dp-xhdpi")
+    fun deepLight() = render("deep-light") { Deep() }
+
+    @Test
+    @Config(qualifiers = "in-w411dp-h5400dp-xhdpi")
+    fun deepIndonesianDark() = render("deep-id-dark", dark = true) { Deep() }
+
+    @Test
+    fun deepButton() = render("deep-button") { DeepAnalysisButton {} }
 }

@@ -210,6 +210,18 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
             }
         }
         item {
+            var editing by remember { mutableStateOf(false) }
+            RowGroup(title = stringResource(R.string.section_lookup)) {
+                ActionRow(
+                    stringResource(R.string.vt_key_title),
+                    stringResource(if (s.virusTotalKey.isBlank()) R.string.vt_key_unset else R.string.vt_key_set),
+                    PackIcons.Policy,
+                    onClick = { editing = true },
+                )
+            }
+            if (editing) ApiKeyDialog(s.virusTotalKey, { editing = false }) { vm.text("vt_key", it.trim()) }
+        }
+        item {
             RowGroup {
                 ActionRow(
                     stringResource(R.string.about),
@@ -361,4 +373,34 @@ fun AboutScreen() {
                 )
             }
     }
+}
+
+@Composable
+private fun ApiKeyDialog(current: String, close: () -> Unit, save: (String) -> Unit) {
+    var value by remember { mutableStateOf(current) }
+    AlertDialog(
+        onDismissRequest = close,
+        title = { Text(stringResource(R.string.vt_key_title)) },
+        text = {
+            Column {
+                Text(stringResource(R.string.vt_key_note), style = MaterialTheme.typography.bodySmall)
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = { value = it },
+                    label = { Text(stringResource(R.string.vt_key_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { save(value); close() }) { Text(stringResource(R.string.save)) }
+        },
+        dismissButton = {
+            Row {
+                if (current.isNotBlank()) TextButton(onClick = { save(""); close() }) { Text(stringResource(R.string.remove)) }
+                TextButton(onClick = close) { Text(stringResource(R.string.cancel)) }
+            }
+        },
+    )
 }

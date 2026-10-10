@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.0-alpha.10 — 2026-10-10
+
+**Analisis mendalam**: tombol baru di detail aplikasi, muncul bila ada temuan kode, kode yang tidak terbaca, atau indikator kuat. Semua berjalan di perangkat dan aplikasinya tidak dijalankan.
+
+- **Jejak data** hingga tiga tingkat pemanggilan, termasuk perpindahan antarkomponen lewat Intent (Receiver → Service), objek (thread/callback), dan work request. Hasilnya: langkah demi langkah dari pembacaan data sampai pengirimannya. Jejak ini juga menjadi bukti T3 pada temuan.
+- **Teks yang disamarkan dibuka**: Base64, teks dibalik, potongan yang digabung, array byte/karakter (termasuk yang disusun elemen demi elemen oleh d8), dan XOR satu byte. Alamat bot hasil pembukaan ini dihitung sebagai tujuan tersembunyi.
+- **Kode tersembunyi dibongkar**: DEX/APK/JAR di `assets/` dipindai dengan aturan yang sama. Berkas aset yang tampak terenkripsi (entropi tinggi) dilaporkan.
+- **Kode mencurigakan**: cuplikan singkat metode di balik bukti, dengan pemanggilan sensitif ditandai ⚠.
+- **Yang bisa kamu lakukan**: uninstall, info aplikasi (cabut izin), setelan aksesibilitas, akses notifikasi, admin perangkat, cek pengalihan panggilan (`*#21#`), dan langkah mengamankan akun.
+- **Laporan bukti**: bagikan sebagai PDF atau teks, lengkap dengan SHA-256, semua bukti T1–T4, dan hasil analisis mendalam.
+- **Cek online (opsional)**: SHA-256 bisa dicocokkan dengan VirusTotal memakai kunci API milik pengguna (Pengaturan), atau dibuka di browser. Hanya sidik jari yang dikirim, tidak pernah berkasnya. Karena itu PackPeek kini meminta izin `INTERNET`, yang hanya dipakai untuk fitur ini dan hanya saat tombolnya diketuk.
+- Sampel uji v2: SMS diteruskan ke Service lewat Intent, alamat bot dalam Base64, webhook di-XOR, payload DEX kedua di aset, dan blob acak. Sampel tetap tidak pernah berjalan.
+
 ## 2.0.0-alpha.9 — 2026-10-10
 
 - **Bukti lebih bersih:** teks `content://sms` (dan `content://` lain) hanya menjadi bukti bila kelas yang sama juga menjalankan query, sama seperti alamat bot Telegram/Discord yang hanya dihitung bila kelasnya bisa mengirim data. Ini mencegah daftar tanda pengenal milik aplikasi keamanan muncul sebagai bukti.

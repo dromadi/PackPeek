@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import android.content.res.Resources
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -57,9 +59,8 @@ fun riskTexts(id: RiskId): Int =
         RiskId.DESTINATIONS -> R.array.risk_destinations
     }
 
-@Composable
-fun capabilityName(capability: Capability): String =
-    stringResource(
+fun capabilityName(res: Resources, capability: Capability): String =
+    res.getString(
         when (capability) {
             Capability.SMS_READ -> R.string.cap_sms_read
             Capability.CONTACTS -> R.string.cap_contacts
@@ -79,8 +80,11 @@ fun capabilityName(capability: Capability): String =
     )
 
 @Composable
-fun strengthText(level: EvidenceLevel): String =
-    stringResource(
+fun capabilityName(capability: Capability): String = capabilityName(LocalResources.current, capability)
+
+
+fun strengthText(res: Resources, level: EvidenceLevel): String =
+    res.getString(
         when (level) {
             EvidenceLevel.DECLARED -> R.string.strength_t1
             EvidenceLevel.CODE -> R.string.strength_t2
@@ -88,6 +92,10 @@ fun strengthText(level: EvidenceLevel): String =
             EvidenceLevel.OBSERVED -> R.string.strength_t4
         }
     )
+
+@Composable
+fun strengthText(level: EvidenceLevel): String = strengthText(LocalResources.current, level)
+
 
 @Composable
 fun severityColors(severity: Severity): Pair<Color, Color> {
@@ -333,30 +341,29 @@ private fun EvidenceLine(e: Evidence) {
     }
 }
 
-@Composable
-fun evidenceText(e: Evidence): String =
+fun evidenceText(res: Resources, e: Evidence): String =
     when (e.stateKey) {
-        StateKey.ACCESSIBILITY_ENABLED -> stringResource(R.string.ev_accessibility_enabled)
-        StateKey.NOTIFICATION_LISTENER_ENABLED -> stringResource(R.string.ev_notification_enabled)
-        StateKey.DEVICE_ADMIN_ACTIVE -> stringResource(R.string.ev_admin_active)
-        StateKey.DEFAULT_SMS_APP -> stringResource(R.string.ev_default_sms)
-        StateKey.PERMISSION_GRANTED -> stringResource(R.string.ev_granted, shortName(e.detail))
-        StateKey.OVERLAY_ALLOWED -> stringResource(R.string.ev_overlay_allowed)
-        StateKey.BATTERY_EXEMPT -> stringResource(R.string.ev_battery_exempt)
-        StateKey.SIDELOADED -> stringResource(R.string.ev_sideloaded)
-        StateKey.FILE_NOT_INSTALLED -> stringResource(R.string.ev_file)
-        StateKey.NO_LAUNCHER -> stringResource(R.string.ev_no_launcher)
-        StateKey.DEBUG_CERTIFICATE -> stringResource(R.string.ev_debug_cert)
-        StateKey.NEW_CERTIFICATE -> stringResource(R.string.ev_new_cert, e.detail)
-        StateKey.LURE_LABEL -> stringResource(R.string.ev_lure_label, e.detail)
-        StateKey.CLEARTEXT -> stringResource(R.string.ev_cleartext)
-        StateKey.INTERNET -> stringResource(R.string.ev_permission, "INTERNET")
+        StateKey.ACCESSIBILITY_ENABLED -> res.getString(R.string.ev_accessibility_enabled)
+        StateKey.NOTIFICATION_LISTENER_ENABLED -> res.getString(R.string.ev_notification_enabled)
+        StateKey.DEVICE_ADMIN_ACTIVE -> res.getString(R.string.ev_admin_active)
+        StateKey.DEFAULT_SMS_APP -> res.getString(R.string.ev_default_sms)
+        StateKey.PERMISSION_GRANTED -> res.getString(R.string.ev_granted, shortName(e.detail))
+        StateKey.OVERLAY_ALLOWED -> res.getString(R.string.ev_overlay_allowed)
+        StateKey.BATTERY_EXEMPT -> res.getString(R.string.ev_battery_exempt)
+        StateKey.SIDELOADED -> res.getString(R.string.ev_sideloaded)
+        StateKey.FILE_NOT_INSTALLED -> res.getString(R.string.ev_file)
+        StateKey.NO_LAUNCHER -> res.getString(R.string.ev_no_launcher)
+        StateKey.DEBUG_CERTIFICATE -> res.getString(R.string.ev_debug_cert)
+        StateKey.NEW_CERTIFICATE -> res.getString(R.string.ev_new_cert, e.detail)
+        StateKey.LURE_LABEL -> res.getString(R.string.ev_lure_label, e.detail)
+        StateKey.CLEARTEXT -> res.getString(R.string.ev_cleartext)
+        StateKey.INTERNET -> res.getString(R.string.ev_permission, "INTERNET")
         null ->
             when (e.kind) {
-                EvidenceKind.PERMISSION -> stringResource(R.string.ev_permission, shortName(e.detail))
-                EvidenceKind.COMPONENT -> stringResource(R.string.ev_component, e.detail)
+                EvidenceKind.PERMISSION -> res.getString(R.string.ev_permission, shortName(e.detail))
+                EvidenceKind.COMPONENT -> res.getString(R.string.ev_component, e.detail)
                 EvidenceKind.CONFIG ->
-                    stringResource(
+                    res.getString(
                         when (e.detail) {
                             "canRetrieveWindowContent" -> R.string.ev_config_retrieve
                             "canPerformGestures" -> R.string.ev_config_gestures
@@ -365,38 +372,42 @@ fun evidenceText(e: Evidence): String =
                     )
                 EvidenceKind.NETWORK -> {
                     val parts = e.detail.split('/').mapNotNull { it.toLongOrNull() }
-                    stringResource(
+                    res.getString(
                         R.string.ev_network,
                         sizeText(parts.getOrElse(0) { 0 }),
                         sizeText(parts.getOrElse(1) { 0 }),
                     )
                 }
-                EvidenceKind.CODE -> stringResource(R.string.ev_code_call, e.detail)
+                EvidenceKind.CODE -> res.getString(R.string.ev_code_call, e.detail)
                 EvidenceKind.STRING ->
                     when (e.location) {
-                        GapKind.HIDDEN_CODE.name -> stringResource(R.string.ev_hidden_code, e.detail)
-                        GapKind.PACKER.name -> stringResource(R.string.ev_packer, e.detail)
-                        else -> stringResource(R.string.ev_code_string, e.detail)
+                        GapKind.HIDDEN_CODE.name -> res.getString(R.string.ev_hidden_code, e.detail)
+                        GapKind.PACKER.name -> res.getString(R.string.ev_packer, e.detail)
+                        else -> res.getString(R.string.ev_code_string, e.detail)
                     }
                 EvidenceKind.FLOW -> {
                     val parts = e.detail.split('|')
                     val (source, sink) =
                         parts[0].split('>').map { runCatching { Capability.valueOf(it) }.getOrDefault(Capability.NETWORK) }
-                    stringResource(R.string.ev_flow, capabilityName(source), capabilityName(sink)) +
+                    res.getString(R.string.ev_flow, capabilityName(res, source), capabilityName(res, sink)) +
                         if (parts.size >= 3) "\n${parts[1]} → ${parts[2]}" else ""
                 }
                 EvidenceKind.DESTINATION -> {
                     val parts = e.detail.split('|')
                     val host = parts[0]
                     when {
-                        parts.getOrNull(2) == "true" -> stringResource(R.string.ev_destination_ip, host)
-                        parts.getOrNull(1) == "true" -> stringResource(R.string.ev_destination_cleartext, host)
-                        else -> stringResource(R.string.ev_destination, host)
+                        parts.getOrNull(2) == "true" -> res.getString(R.string.ev_destination_ip, host)
+                        parts.getOrNull(1) == "true" -> res.getString(R.string.ev_destination_cleartext, host)
+                        else -> res.getString(R.string.ev_destination, host)
                     }
                 }
                 else -> e.detail
             }
     }
+
+@Composable
+fun evidenceText(e: Evidence): String = evidenceText(LocalResources.current, e)
+
 
 private fun shortName(permission: String) = permission.substringAfterLast('.')
 

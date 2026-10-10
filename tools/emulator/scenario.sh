@@ -84,6 +84,7 @@ fi
 
 # Inspect the harmless sample through the system file picker (best effort: pickers differ).
 step "Back to the app list" no "$E" tap "Apps"
+"$E" wait "Select all results" 60 >/dev/null 2>&1 || true
 if step "Open the file picker" no "$E" tap "Inspect file"; then
     sleep 3
     shot picker "File picker"
@@ -94,6 +95,13 @@ if step "Open the file picker" no "$E" tap "Inspect file"; then
         shot sample-evidence "undangan-sim: evidence"
         "$E" scroll
         shot sample-more "undangan-sim: more evidence"
+        # Deep analysis: the button sits under the concern summary.
+        for _ in 1 2 3; do "$E" tap "Deep analysis" >/dev/null 2>&1 && break; "$E" scroll; done
+        if step "Deep analysis finishes" no "$E" wait "Finished in" 240; then
+            shot deep "Deep analysis"
+            "$E" tap "Data paths" >/dev/null 2>&1 || "$E" scroll
+            for k in 1 2 3 4; do "$E" scroll; shot "deep-$k" "Deep analysis, part $k"; done
+        fi
     fi
 fi
 

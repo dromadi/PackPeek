@@ -158,6 +158,26 @@ object DexScanner {
         setOf("onReceive", "onStartCommand", "onHandleIntent", "onHandleWork", "handleWork", "doWork",
             "startWork", "onStartJob", "onCreate", "run", "onBind")
 
+    /** Standard Base64 without padding checks; java.util.Base64 needs API 26. */
+    fun decodeBase64(s: String): ByteArray {
+        val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+        val out = java.io.ByteArrayOutputStream(s.length * 3 / 4)
+        var buffer = 0
+        var bits = 0
+        for (c in s) {
+            if (c == '=') break
+            val v = alphabet.indexOf(c)
+            require(v >= 0)
+            buffer = (buffer shl 6) or v
+            bits += 6
+            if (bits >= 8) {
+                bits -= 8
+                out.write((buffer shr bits) and 0xff)
+            }
+        }
+        return out.toByteArray()
+    }
+
     private fun printable(s: String) =
         s.isNotEmpty() && s.count { it.code in 32..126 || it.isLetterOrDigit() } >= s.length * 0.9
 
@@ -948,7 +968,9 @@ object DexScanner {
                             val value = constants!![(unit shr 8) and 0xff]
                             val array = arrays[next and 0xff]
                             val index = constants[(next shr 8) and 0xff]
-                            if (value != null && array != null && index != null && index in 0..4095) array[index] = value
+                            // First write wins: later loops over the array (e.g. the XOR decoder itself)
+                            // reuse registers whose tracked constant is stale.
+                            if (value != null && array != null && index != null && index in 0..4095) array.putIfAbsent(index, value)
                         }
                     in 0x60..0x6d -> {
                         val rule = fieldRule.getOrNull(next)
@@ -1001,7 +1023,7 @@ object DexScanner {
         fun decodeStrings(strings: List<String>, readable: String, key: String) {
             for (s in strings) {
                 if (s.length in 12..4096 && s.length % 4 == 0 && base64.matches(s))
-                    runCatching { String(java.util.Base64.getDecoder().decode(s), Charsets.UTF_8) }
+                    runCatching { String(decodeBase64(s), Charsets.UTF_8) }
                         .getOrNull()
                         ?.takeIf { printable(it) }
                         ?.let { recordDecoded(Decoding.BASE64, it, readable, key) }
