@@ -1,6 +1,6 @@
 # Ide fitur PackPeek
 
-Daftar ide pengembangan PackPeek setelah 2.0.0-alpha.3. Arah produk tetap sama: alat backup dan pemeriksa APK yang berjalan di perangkat, tanpa akun, iklan, analitik, atau izin Internet.
+Daftar ide pengembangan PackPeek setelah 2.0.0-alpha.3. Arah produk tetap sama: alat backup dan pemeriksa APK yang berjalan di perangkat, tanpa akun, iklan, atau analitik. (Catatan alpha.10: izin Internet kini ada, hanya untuk cek hash VirusTotal opsional.)
 
 **Arah utama sejak alpha.4:** analisis risiko berbasis bukti. Rencana lengkapnya ada di `docs/ANALISIS_RISIKO.md`; ide 11 (tracker), 12 (riwayat izin), 13 (manifest), dan 26 (pemeriksaan sebelum pasang) menjadi bagian dari rencana itu.
 

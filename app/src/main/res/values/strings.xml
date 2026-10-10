@@ -194,7 +194,6 @@
     <string name="rate_app">Rate on Google Play</string>
     <string name="licenses">Open-source notices</string>
     <string name="install_success">Installation completed</string>
-    <string name="install_failed">Installation failed</string>
     <string name="crash_title">PackPeek stopped last time</string>
     <string name="crash_body">The error details are saved on this device only. Copy them and send them to the developer.</string>
     <string name="crash_copy">Copy error log</string>
@@ -221,13 +220,6 @@
     <string name="keep_3">Newest 3</string>
     <string name="keep_5">Newest 5</string>
     <string name="keep_versions_explanation">After each successful backup, older backup files of the same app beyond this number are deleted from the folder.</string>
-    <string name="install_cancelled">Installation cancelled</string>
-    <string name="install_failed_downgrade">The backup is older than the installed version. Android does not install older versions over newer ones; uninstall the app first (its data will be lost), then install the backup.</string>
-    <string name="install_failed_signature">The backup is signed with a different key than the installed app (for example a merged .apk). Uninstall the app first (its data will be lost), then install the backup.</string>
-    <string name="install_failed_incompatible">This device is not compatible with the backup (Android version or CPU architecture).</string>
-    <string name="install_failed_storage">Not enough storage to install. Free some space and try again.</string>
-    <string name="install_failed_blocked">Installation was blocked by the device or its policy.</string>
-    <string name="install_failed_generic">Android did not complete the installation. Check the backup file and try again.</string>
     <string name="internal_storage">Internal storage</string>
     <string name="no_folder_hint">Choose a folder for backups</string>
     <string name="choose">Choose</string>

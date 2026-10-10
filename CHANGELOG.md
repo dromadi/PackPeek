@@ -1,6 +1,16 @@
 # Changelog
 
-## Belum dirilis
+## 2.0.0-alpha.11 — 2026-10-10
+
+Branch installer disatukan dengan alpha.10, parser manifest diperketat, dan aturan IP dikalibrasi.
+
+- **Parser manifest**: setiap tag penutup harus menutup elemen yang sedang terbuka (nama dan namespace sama). Tag penutup liar, root kedua, dan elemen yang tidak ditutup kini gagal dengan aman sebagai "arsip rusak", bukan menghasilkan pohon yang bergeser atau terpotong.
+- **Kalibrasi alamat IP**: hanya IP publik yang dihitung. Alamat lokal (10.x, 192.168.x, 172.16–31.x, 127.x, 169.254.x, CGNAT, multicast, IPv6 lokal) dan DNS publik terkenal (8.8.8.8, 1.1.1.1, …) diabaikan. IP harus berada di kelas kode yang benar-benar mengirim, dan alur data pribadinya harus sampai ke kode itu. IP di bagian lain aplikasi bukan bukti pencurian.
+- Pencurian data ke IP publik menjadi **indikator kuat hanya untuk sumber tidak tepercaya** (berkas, sideload, ikon tersembunyi, sertifikat lemah). Dari toko aplikasi, hasilnya "perlu perhatian".
+- Teks privasi kini menyebut izin Internet secara jujur: hanya untuk cek VirusTotal opsional, dan yang dikirim hanya SHA-256.
+- Teks baru alpha.7–alpha.10 diterjemahkan ke enam bahasa baru. Terjemahan mesin, perlu ditinjau penutur asli.
+
+Dari branch installer:
 
 - Dialog hasil pemasangan dengan alasan spesifik (tanda tangan, downgrade, ABI, SDK, penyimpanan, split hilang, fitur perangkat), pesan sistem, tombol Buka aplikasi atau Copot aplikasi saat ini.
 - Kartu "Siap dipasang?" untuk berkas lokal: tanda tangan, Android minimum, target SDK yang ditolak Android 14+, ABI, fitur perangkat wajib, signer dan downgrade terhadap aplikasi terpasang.
@@ -27,7 +37,7 @@
 - Sampel uji v2: SMS diteruskan ke Service lewat Intent, alamat bot dalam Base64, webhook di-XOR, payload DEX kedua di aset, dan blob acak. Sampel tetap tidak pernah berjalan.
 
 - **Set sampel uji modus penipuan** (`tools/scam-samples/`): 8 APK aman, satu per modus (pencurian OTP Telegram, OTP lewat pembaca notifikasi, overlay bank + aksesibilitas, penukar clipboard, spyware ke server IP, pengalihan panggilan, dropper DEX tersembunyi, admin perangkat), plus 2 pembanding "aman". Semua `hasCode="false"` dan tidak pernah berjalan. Setiap deteksi dikunci oleh `ScamSamplesTest`.
-- **Pengiriman data ke alamat IP mentah kini indikator kuat**: mengirim data pribadi ke IP tanpa nama domain adalah ciri server C2. Aplikasi sah memakai nama server, bukan IP mentah.
+- **Pengiriman data ke alamat IP mentah kini indikator kuat**: mengirim data pribadi ke IP tanpa nama domain adalah ciri server C2. (Dikalibrasi di alpha.11: hanya IP publik di kode pengirim, dan kuat hanya untuk sumber tidak tepercaya.)
 
 ## 2.0.0-alpha.9 — 2026-10-10
 

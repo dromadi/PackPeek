@@ -194,7 +194,6 @@
     <string name="rate_app">Beri nilai di Google Play</string>
     <string name="licenses">Lisensi sumber terbuka</string>
     <string name="install_success">Instalasi selesai</string>
-    <string name="install_failed">Instalasi gagal</string>
     <string name="crash_title">PackPeek berhenti sebelumnya</string>
     <string name="crash_body">Detail error hanya disimpan di perangkat ini. Salin lalu kirimkan ke pengembang.</string>
     <string name="crash_copy">Salin log error</string>
@@ -221,13 +220,6 @@
     <string name="keep_3">3 terbaru</string>
     <string name="keep_5">5 terbaru</string>
     <string name="keep_versions_explanation">Setelah backup berhasil, berkas backup lama dari aplikasi yang sama yang melebihi jumlah ini dihapus dari folder.</string>
-    <string name="install_cancelled">Pemasangan dibatalkan</string>
-    <string name="install_failed_downgrade">Backup lebih lama dari versi yang terpasang. Android tidak memasang versi lama di atas versi baru; uninstall aplikasinya dulu (datanya hilang), lalu pasang backup.</string>
-    <string name="install_failed_signature">Backup ditandatangani kunci yang berbeda dari aplikasi terpasang (misalnya .apk gabungan). Uninstall aplikasinya dulu (datanya hilang), lalu pasang backup.</string>
-    <string name="install_failed_incompatible">Perangkat ini tidak kompatibel dengan backup (versi Android atau arsitektur CPU).</string>
-    <string name="install_failed_storage">Ruang penyimpanan tidak cukup untuk memasang. Kosongkan ruang lalu coba lagi.</string>
-    <string name="install_failed_blocked">Pemasangan diblokir oleh perangkat atau kebijakannya.</string>
-    <string name="install_failed_generic">Android tidak menyelesaikan pemasangan. Periksa berkas backup lalu coba lagi.</string>
     <string name="internal_storage">Penyimpanan internal</string>
     <string name="no_folder_hint">Pilih folder untuk backup</string>
     <string name="choose">Pilih</string>

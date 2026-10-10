@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="crash_title">PackPeek se cerró la última vez</string>
+    <string name="crash_body">Los detalles del error se guardan solo en este dispositivo. Cópialos y envíalos al desarrollador.</string>
+    <string name="crash_copy">Copiar registro de errores</string>
+    <string name="split_format">Formato de apps divididas</string>
+    <string name="split_format_apks">.apks (SAI, PackPeek)</string>
+    <string name="split_format_xapk">.xapk (APKPure, instaladores XAPK)</string>
+    <string name="split_format_zip">.zip (archivo simple)</string>
+    <string name="preview_split">Vista previa para apps divididas</string>
+    <string name="split_format_apk">.apk combinado (experimental)</string>
+    <string name="merged_apk_warning">⚠ El .apk combinado se vuelve a firmar con la clave de PackPeek: no puede actualizar la app original (desinstálala primero y se perderán sus datos), Play Store no lo actualizará, algunas apps (bancos, juegos, Meta) se niegan a funcionar y solo contiene las partes para este dispositivo.</string>
+    <string name="error_merge">No se pudieron combinar los APK divididos. Puede que la app sea demasiado grande o no sea compatible; elige .apks, .xapk o .zip.</string>
+    <string name="folder_root">Almacenamiento %1$s</string>
+    <string name="folder_selected">Carpeta seleccionada</string>
+    <string name="favorite_apps">Favoritas</string>
+    <string name="favorite">Añadir a favoritas</string>
+    <string name="unfavorite">Quitar de favoritas</string>
+    <string name="signer_changed_title">La firma cambió</string>
+    <string name="signer_changed_body">Esta app ahora está firmada con un certificado distinto al de tu copia de la versión %1$s (%2$s). Ocurre cuando un desarrollador cambia de claves, pero también puede indicar una compilación modificada o falsa. Comprueba desde dónde se instaló.</string>
+    <string name="signer_changed_badge">⚠ El firmante difiere de la copia anterior</string>
+    <string name="reinstall">Reinstalar</string>
+    <string name="keep_versions">Copias por app</string>
+    <string name="keep_all">Conservar todas</string>
+    <string name="keep_1">La más reciente</string>
+    <string name="keep_3">Las 3 más recientes</string>
+    <string name="keep_5">Las 5 más recientes</string>
+    <string name="keep_versions_explanation">Tras cada copia correcta, se eliminan de la carpeta los archivos de copia más antiguos de la misma app que superen este número.</string>
+    <string name="internal_storage">Almacenamiento interno</string>
+    <string name="no_folder_hint">Elige una carpeta para las copias</string>
+    <string name="choose">Elegir</string>
+    <string name="selected_count">%1$d seleccionadas</string>
+    <string name="clear_selection_short">Borrar selección</string>
+    <string name="tag_split">Dividida</string>
+    <string name="tag_system">Sistema</string>
+    <string name="backup_progress">App %1$d de %2$d · %3$d%%</string>
+    <string name="dont_ask_again">No volver a preguntar</string>
+    <string name="backup_done">Copia completada</string>
+    <string name="backup_partial">Copia terminada con errores</string>
+    <string name="result_summary">%1$d de %2$d guardadas · %3$s</string>
+    <string name="app_info">Info. de la app</string>
+    <string name="score_short">puntuación</string>
+    <string name="history_empty_title">Aún no hay copias</string>
+    <string name="history_empty_body">Extrae una app desde la pestaña Apps; sus versiones aparecerán aquí.</string>
+    <string name="search_apps_short">Buscar apps</string>
+    <plurals name="version_count">
+        <item quantity="one">%1$d versión</item>
+        <item quantity="many">%1$d versiones</item>
+        <item quantity="other">%1$d versiones</item>
+    </plurals>
+    <plurals name="app_count_short">
+        <item quantity="one">%1$d app</item>
+        <item quantity="many">%1$d apps</item>
+        <item quantity="other">%1$d apps</item>
+    </plurals>
+    <plurals name="backup_summary">
+        <item quantity="one">%1$d app · %2$s</item>
+        <item quantity="many">%1$d apps · %2$s</item>
+        <item quantity="other">%1$d apps · %2$s</item>
+    </plurals>
+    <string name="saved_file">Guardado: %1$s</string>
+    <string name="min_android">Android mínimo</string>
+    <string name="target_android">Android objetivo</string>
+    <string name="first_installed">Primera instalación</string>
+    <string name="cpu_architecture">Arquitectura de CPU</string>
+    <string name="no_native_code">Sin código nativo</string>
+    <string name="show_all_groups">Mostrar todo (%1$d)</string>
+    <string name="show_fewer">Mostrar menos</string>
+    <string name="abi_note">Las apps con código nativo para varias arquitecturas aparecen en cada una de ellas.</string>
+    <string name="signer_note">Las apps firmadas con la misma clave proceden del mismo desarrollador o sistema de compilación. \"Android Debug\" indica una compilación de prueba.</string>
+    <string name="show_all_apps">Mostrar todas las apps</string>
+    <string name="quick_details">Detalles rápidos</string>
+    <string name="full_details">Detalles completos</string>
+    <string name="activities">Actividades</string>
+    <string name="services">Servicios</string>
+    <string name="receivers">Receptores</string>
+    <string name="providers">Proveedores</string>
+    <string name="tap_opens">Al tocar una app se abre</string>
+    <string name="needs_review">Requiere revisión</string>
+    <string name="security_check_title">Revisa tus apps</string>
+    <string name="security_check_body">PackPeek lee el manifiesto y el código de cada app que instalaste y busca evidencias: qué puede hacer, qué llama su código y si se envían datos a algún destino oculto. Todo se ejecuta en este teléfono.</string>
+    <plurals name="security_check_button">
+        <item quantity="one">Revisar %1$d app</item>
+        <item quantity="many">Revisar %1$d apps</item>
+        <item quantity="other">Revisar %1$d apps</item>
+    </plurals>
+    <string name="security_checking">Revisando %1$d de %2$d…</string>
+    <plurals name="security_strong">
+        <item quantity="one">%1$d app con un indicador fuerte</item>
+        <item quantity="many">%1$d apps con un indicador fuerte</item>
+        <item quantity="other">%1$d apps con un indicador fuerte</item>
+    </plurals>
+    <plurals name="security_attention">
+        <item quantity="one">Sin indicadores fuertes · %1$d app requiere atención</item>
+        <item quantity="many">Sin indicadores fuertes · %1$d apps requieren atención</item>
+        <item quantity="other">Sin indicadores fuertes · %1$d apps requieren atención</item>
+    </plurals>
+    <string name="security_clear">No se encontraron indicadores fuertes</string>
+    <string name="security_checked">Se revisaron %1$d de %2$d apps instaladas (manifiesto, código y estado del dispositivo). Esto no garantiza que una app sea segura.</string>
+    <string name="security_continue">Continuar</string>
+    <string name="security_again">Revisar de nuevo</string>
+    <string name="active_all_clear">Ninguna app tiene activados la accesibilidad, el acceso a notificaciones ni la administración del dispositivo.</string>
+    <string name="app_analysis">Análisis de apps</string>
+    <string name="tech_after_check">La tecnología se detecta durante la revisión de apps de arriba.</string>
+    <string name="reading_groups">Leyendo certificados y código nativo…</string>
+    <plurals name="other_groups">
+        <item quantity="one">%1$d grupo más</item>
+        <item quantity="many">%1$d grupos más</item>
+        <item quantity="other">%1$d grupos más</item>
+    </plurals>
+    <string name="deep_button_title">Análisis profundo</string>
+    <string name="deep_button_body">Rastrea rutas de datos en el código, decodifica textos ocultos y abre archivos de código ocultos. Tarda hasta un minuto.</string>
+    <string name="deep_running">Analizando el código… puede tardar hasta un minuto.</string>
+    <string name="deep_failed">El análisis profundo no pudo leer el código de esta app.</string>
+    <string name="deep_done">Terminado en %1$d s · %2$d rutas de datos · %3$d textos ocultos · %4$d archivos de código ocultos</string>
+    <string name="section_chains">Rutas de datos</string>
+    <string name="chains_note">Cómo se mueven los datos desde donde el código los lee hasta donde los envía, siguiendo hasta tres llamadas de profundidad, incluidos los traspasos a otros componentes.</string>
+    <string name="chains_none">No se encontró ninguna ruta de datos personales a un envío, ni siquiera a tres llamadas de profundidad.</string>
+    <string name="chain_read">Lee con %1$s</string>
+    <string name="chain_send">Envía con %1$s</string>
+    <string name="via_start">empieza aquí</string>
+    <string name="via_call">llama a</string>
+    <string name="via_intent">inicia otro componente mediante un Intent</string>
+    <string name="via_object">se ejecuta como objeto (hilo o callback)</string>
+    <string name="section_decoded">Textos ocultos</string>
+    <string name="decoded_note">Textos que el código oculta a simple vista, decodificados sin ejecutar la app.</string>
+    <string name="decoded_none">No se encontraron direcciones ni códigos ocultos.</string>
+    <string name="tech_base64">Decodificado de Base64</string>
+    <string name="tech_joined">Unido a partir de fragmentos</string>
+    <string name="tech_char_array">Construido con un array de caracteres</string>
+    <string name="tech_xor">Decodificado con la clave XOR %1$s</string>
+    <string name="tech_reversed">Texto invertido</string>
+    <string name="section_payloads">Código oculto</string>
+    <string name="payloads_note">Archivos de código guardados dentro del paquete, que los droppers suelen cargar más tarde, analizados con las mismas reglas.</string>
+    <string name="payloads_none">No hay archivos de código ocultos.</string>
+    <string name="payload_dex">Archivo DEX oculto · %1$d clases</string>
+    <string name="payload_archive">APK/JAR oculto · %1$d clases</string>
+    <string name="payload_encrypted">Parece cifrado (entropía de %1$s bits/byte); contenido desconocido</string>
+    <string name="payload_can">Su código: %1$s</string>
+    <string name="payload_nothing">Su código no hace ninguna de las llamadas sensibles que revisa PackPeek.</string>
+    <string name="section_code">Código sospechoso</string>
+    <string name="code_note">Listados breves de los métodos detrás de las evidencias. ⚠ marca una llamada sensible.</string>
+    <string name="section_actions">Qué puedes hacer</string>
+    <string name="action_uninstall">Desinstalar</string>
+    <string name="action_app_info">Info. de la app: revocar permisos</string>
+    <string name="action_accessibility">Ajustes de accesibilidad</string>
+    <string name="action_notification_access">Acceso a notificaciones</string>
+    <string name="action_admin">Ajustes de seguridad (administrador del dispositivo)</string>
+    <string name="action_call_forwarding">Comprobar desvío de llamadas (*#21#)</string>
+    <string name="action_secure_accounts">Protege tus cuentas</string>
+    <string name="secure_accounts_body">1. No vuelvas a abrir la app; desinstálala (desactiva primero el administrador del dispositivo si te lo pide).\n2. Cambia las contraseñas de WhatsApp, correo, banca móvil y billeteras electrónicas, desde otro teléfono si puedes.\n3. Vuelve a activar la verificación en dos pasos y cierra la sesión en otros dispositivos.\n4. Llama a tu banco a su número oficial si es posible que se hayan leído códigos OTP.\n5. Marca *#21# para comprobar el desvío de llamadas y ##002# para cancelarlo.</string>
+    <string name="action_dont_install">No instales este archivo. Bórralo de Descargas y del chat donde lo recibiste.</string>
+    <string name="section_report">Informe de evidencias</string>
+    <string name="report_note">Comparte los hallazgos con tu banco, la policía, tu familia o un equipo de seguridad.</string>
+    <string name="report_share_text">Compartir como texto</string>
+    <string name="report_share_pdf">Compartir como PDF</string>
+    <string name="section_lookup">Comprobación en línea (opcional)</string>
+    <string name="lookup_note">Compara la huella del archivo (SHA-256) con la base de datos de VirusTotal. Solo se envía la huella, nunca el archivo ni tu lista de apps.</string>
+    <string name="lookup_button">Comprobar huella</string>
+    <string name="lookup_browser">Abrir en el navegador</string>
+    <string name="lookup_running">Comprobando…</string>
+    <string name="lookup_no_key">Añade tu clave de API gratuita de VirusTotal en Ajustes para comprobarlo aquí, o abre el resultado en el navegador.</string>
+    <string name="lookup_not_found">VirusTotal nunca ha visto este archivo. Eso no significa que sea seguro: los APK fraudulentos nuevos suelen ser aún desconocidos.</string>
+    <string name="lookup_found">%1$d de %2$d motores de seguridad marcan este archivo</string>
+    <string name="lookup_suspicious">%1$d más lo consideran sospechoso</string>
+    <string name="lookup_label">Conocido como: %1$s</string>
+    <string name="lookup_clean">Ningún motor de seguridad marca este archivo (%1$d revisados). Los APK fraudulentos nuevos a menudo aún no se detectan.</string>
+    <string name="lookup_key_error">VirusTotal rechazó la clave de API. Revísala en Ajustes.</string>
+    <string name="lookup_quota">Se alcanzó el límite gratuito de VirusTotal. Inténtalo de nuevo en un minuto.</string>
+    <string name="lookup_network">No se pudo conectar con VirusTotal. Revisa la conexión.</string>
+    <string name="copy_sha">Copiar SHA-256</string>
+    <string name="vt_key_title">Clave de API de VirusTotal (opcional)</string>
+    <string name="vt_key_set">Configurada · solo se usa al tocar Comprobar huella</string>
+    <string name="vt_key_unset">Sin configurar · consigue una clave gratuita en virustotal.com</string>
+    <string name="vt_key_hint">Clave de API</string>
+    <string name="vt_key_note">Solo se usa para la comprobación opcional de huella en el análisis profundo. Solo se envía un SHA-256.</string>
+    <string name="save">Guardar</string>
+    <string name="remove">Quitar</string>
+    <string name="report_title">Informe de evidencias de PackPeek</string>
+    <string name="report_created">Creado: %1$s</string>
+    <string name="report_app">App: %1$s (%2$s), versión %3$s</string>
+    <string name="report_from_file">Revisado como archivo APK; no instalado</string>
+    <string name="report_installed">Instalada · origen: %1$s</string>
+    <string name="report_counts">%1$d indicadores fuertes · %2$d requieren atención · %3$d notas</string>
+    <string name="report_disclaimer">Estos resultados no demuestran que una app sea dañina ni segura. Niveles de evidencia: T1 escrito en el manifiesto, T2 encontrado en el código, T3 una ruta de código que lee datos y los envía, T4 observado en este dispositivo.</string>
+    <string name="report_findings">Hallazgos</string>
+    <string name="report_deep">Análisis profundo</string>
+    <string name="report_lookup">VirusTotal</string>
+    <string name="report_footer">Hecho con PackPeek en el propio dispositivo; la app no se ejecutó.</string>
+    <string-array name="risk_otp_theft">
+        <item>Patrón de robo de OTP / toma de control de cuentas</item>
+        <item>La app puede recibir SMS, incluidos los códigos de un solo uso del banco y de WhatsApp, y puede acceder a internet. Los APK falsos de invitaciones, multas de tráfico y paquetes usan esta combinación para tomar el control de cuentas.</item>
+        <item>Este patrón aparece porque el acceso a SMS coincide con señales de ocultación o de origen no fiable (un icono oculto, un archivo de fuera de una tienda de apps, un certificado de depuración o recién creado, un nombre engañoso), o con código que envía el contenido de los SMS, un destino oculto o desvío de llamadas.</item>
+        <item>El código de la app aún no se ha analizado, así que no está demostrado que los SMS se lean o se envíen a algún sitio. Esta evaluación se basa solo en el manifiesto y el contexto.</item>
+        <item>No instales este archivo. Si está instalado: revoca el permiso de SMS, desinstálalo y luego cambia las contraseñas y vuelve a activar la verificación en dos pasos de las cuentas importantes (WhatsApp, banco, correo).</item>
+    </string-array>
+    <string-array name="risk_screen_spying">
+        <item>Patrón de espionaje de pantalla</item>
+        <item>Un servicio de accesibilidad puede leer la pantalla de otras apps, incluidos mensajes, saldos y texto escrito, y la app podría enviarlo por internet.</item>
+        <item>Este patrón aparece porque la accesibilidad con lectura de pantalla coincide con otras señales, como un icono oculto, superposiciones, administrador del dispositivo, un lector de notificaciones o un origen no fiable.</item>
+        <item>No está demostrado que el contenido de la pantalla se envíe a algún sitio. El código de la app aún no se ha analizado.</item>
+        <item>Desactiva el servicio de accesibilidad de esta app en Ajustes → Accesibilidad, salvo que lo uses a propósito. Desinstálala si no la reconoces.</item>
+    </string-array>
+    <string-array name="risk_accessibility">
+        <item>Servicio de accesibilidad</item>
+        <item>Cuando está activado, puede leer el contenido de la pantalla y tocar en nombre del usuario.</item>
+        <item>Normal en lectores de pantalla, gestores de contraseñas, herramientas de automatización y launchers alternativos.</item>
+        <item>No está demostrado que los datos de pantalla salgan del dispositivo. Código aún no analizado.</item>
+        <item>Actívalo solo si sabes para qué sirve. Revisa Ajustes → Accesibilidad.</item>
+    </string-array>
+    <string-array name="risk_notifications">
+        <item>Lector de notificaciones</item>
+        <item>Cuando está activado, la app puede leer todas las notificaciones, incluido el texto de los mensajes y los códigos de un solo uso.</item>
+        <item>Normal en relojes inteligentes, apps de recordatorios y gestores de notificaciones.</item>
+        <item>No está demostrado que las notificaciones se guarden o se envíen.</item>
+        <item>Permítelo solo a apps de confianza. Revisa Ajustes → Notificaciones → Acceso a notificaciones.</item>
+    </string-array>
+    <string-array name="risk_device_admin">
+        <item>Administrador del dispositivo</item>
+        <item>Un administrador del dispositivo puede bloquear la pantalla, cambiar el bloqueo de pantalla o incluso borrar datos, y es difícil de desinstalar mientras está activo.</item>
+        <item>Normal en apps de trabajo (MDM), de encontrar mi dispositivo y de control parental.</item>
+        <item>No está demostrado que se usen estas políticas.</item>
+        <item>Desactívalo en Ajustes → Seguridad → Apps de administración del dispositivo si no lo necesitas.</item>
+    </string-array>
+    <string-array name="risk_sms">
+        <item>Acceso a SMS</item>
+        <item>La app puede recibir o leer SMS, incluidos los códigos de un solo uso.</item>
+        <item>Normal en apps de SMS, algunas apps bancarias que rellenan códigos de verificación y bloqueadores de spam.</item>
+        <item>No está demostrado que los SMS se lean o se envíen a algún sitio. Código aún no analizado.</item>
+        <item>Si la app no necesita SMS para sus funciones, revoca el permiso de SMS en Ajustes → Apps.</item>
+    </string-array>
+    <string-array name="risk_sms_send">
+        <item>Envío de SMS</item>
+        <item>La app puede enviar SMS desde tu número, lo que puede costar dinero o difundir enlaces a tus contactos.</item>
+        <item>Normal en apps de SMS y algunas apps de verificación.</item>
+        <item>No está demostrado que se haya enviado ningún SMS.</item>
+        <item>Revoca el permiso de SMS si no es necesario y revisa tus mensajes enviados.</item>
+    </string-array>
+    <string-array name="risk_contacts_calls">
+        <item>Contactos e historial de llamadas</item>
+        <item>La app puede leer tu lista de contactos o tu historial de llamadas.</item>
+        <item>Normal en apps de mensajería, teléfono y copia de contactos.</item>
+        <item>No está demostrado que los datos de contactos salgan del dispositivo.</item>
+        <item>Revoca el permiso de contactos o de registro de llamadas si no tiene relación con la finalidad de la app.</item>
+    </string-array>
+    <string-array name="risk_phone_identity">
+        <item>Identidad del teléfono y cuentas</item>
+        <item>La app puede leer el estado del teléfono, tu número o las cuentas del dispositivo.</item>
+        <item>Habitual en apps de llamadas, juegos y SDK de analíticas que distinguen dispositivos.</item>
+        <item>No está demostrado que estos datos se envíen.</item>
+        <item>Revoca el permiso \"Teléfono\" si la app no hace llamadas.</item>
+    </string-array>
+    <string-array name="risk_camera_mic">
+        <item>Cámara y micrófono</item>
+        <item>La app puede usar la cámara o grabar audio una vez que lo permitas.</item>
+        <item>Normal en apps de fotos, vídeo, llamadas y QR. Android 12+ muestra un indicador verde mientras se usan la cámara o el micrófono.</item>
+        <item>No está demostrado que se grabe en segundo plano.</item>
+        <item>Elige \"Solo mientras se usa la app\" o \"Preguntar siempre\" para la cámara y el micrófono.</item>
+    </string-array>
+    <string-array name="risk_location">
+        <item>Ubicación</item>
+        <item>La app puede saber dónde estás; con la ubicación en segundo plano, también cuando está cerrada.</item>
+        <item>Normal en apps de mapas, transporte, tiempo y encontrar mi dispositivo.</item>
+        <item>No está demostrado que la ubicación se envíe o se guarde.</item>
+        <item>Usa la ubicación aproximada o \"Solo mientras se usa la app\" cuando sea posible.</item>
+    </string-array>
+    <string-array name="risk_screen_capture">
+        <item>Grabación de pantalla</item>
+        <item>La app puede grabar o enviar toda la pantalla después de que aceptes el aviso de Android.</item>
+        <item>Normal en grabadores de pantalla, pantalla compartida en reuniones y streaming de juegos.</item>
+        <item>Android pregunta cada vez que empieza una grabación; no está demostrado que se haya grabado nada.</item>
+        <item>Rechaza los avisos de grabación de pantalla inesperados, sobre todo al abrir apps bancarias.</item>
+    </string-array>
+    <string-array name="risk_overlay">
+        <item>Mostrar sobre otras apps</item>
+        <item>La app puede dibujar ventanas sobre otras apps, algo que se puede usar para pantallas de inicio de sesión falsas.</item>
+        <item>Normal en burbujas de chat, grabadores de pantalla y filtros de luz azul.</item>
+        <item>No está demostrado que cubra otras apps.</item>
+        <item>Revócalo en Ajustes → Apps → Acceso especial → Mostrar sobre otras apps si no lo necesitas.</item>
+    </string-array>
+    <string-array name="risk_persistence">
+        <item>Se ejecuta en segundo plano</item>
+        <item>La app puede iniciarse de nuevo al encender el teléfono o está exenta de la optimización de batería.</item>
+        <item>Normal en apps de mensajería, alarmas y sincronización.</item>
+        <item>No está demostrado que siga ejecutándose.</item>
+        <item>Quita la exención de batería si la app no necesita ejecutarse en segundo plano.</item>
+    </string-array>
+    <string-array name="risk_hidden_icon">
+        <item>Sin icono en la pantalla de inicio</item>
+        <item>La app no aparece en el cajón de apps, así que es fácil olvidarla y más difícil encontrarla para desinstalarla.</item>
+        <item>Normal en teclados, widgets, fondos de pantalla y complementos que se abren desde otras apps.</item>
+        <item>No se sabe si el icono está oculto a propósito.</item>
+        <item>Asegúrate de saber qué es esta app. Desinstálala desde Ajustes → Apps si no la reconoces.</item>
+    </string-array>
+    <string-array name="risk_install_apps">
+        <item>Instala otras apps</item>
+        <item>La app puede pedir instalar otros APK, lo que puede usarse para descargar apps adicionales.</item>
+        <item>Normal en tiendas de apps, gestores de archivos, navegadores y herramientas de copia como PackPeek.</item>
+        <item>Android sigue preguntando antes de cada instalación; no está demostrado que se haya usado.</item>
+        <item>No permitas \"Instalar apps desconocidas\" a apps en las que no confías.</item>
+    </string-array>
+    <string-array name="risk_all_files">
+        <item>Acceso a todos los archivos</item>
+        <item>La app puede leer y modificar todos los archivos del almacenamiento, incluidas fotos y documentos.</item>
+        <item>Normal en gestores de archivos, antivirus y herramientas de copia.</item>
+        <item>No está demostrado que los archivos salgan del dispositivo.</item>
+        <item>Revoca \"Acceso a todos los archivos\" si la app no gestiona archivos.</item>
+    </string-array>
+    <string-array name="risk_cleartext">
+        <item>Tráfico sin cifrar permitido</item>
+        <item>La app puede comunicarse sin cifrado (HTTP), así que otras personas en la misma Wi-Fi podrían leer los datos.</item>
+        <item>A veces es necesario para dispositivos locales, como impresoras o cámaras de vigilancia.</item>
+        <item>No está demostrado que se envíen datos sensibles sin cifrar.</item>
+        <item>Evita iniciar sesión o pagar con esta app en redes Wi-Fi públicas.</item>
+    </string-array>
+    <string-array name="risk_network_usage">
+        <item>Uso de datos de red</item>
+        <item>Muestra cuántos datos usó la app en los últimos 30 días, incluso cuando no estaba abierta.</item>
+        <item>Los datos en segundo plano son normales para sincronización, mensajería y actualizaciones. Conviene revisar grandes cantidades en una app que usas poco.</item>
+        <item>Estas cifras no muestran qué datos eran ni adónde fueron.</item>
+        <item>Restringe los datos en segundo plano en Ajustes → Apps → Datos móviles si la cantidad no parece correcta.</item>
+    </string-array>
+    <string-array name="risk_untrusted_signer">
+        <item>Certificado de firma inusual</item>
+        <item>La app está firmada con un certificado de depuración o uno creado muy recientemente, algo habitual en APK compilados rápidamente fuera de las tiendas oficiales.</item>
+        <item>Normal en apps compiladas por uno mismo, compilaciones de prueba o archivos .apk combinados de PackPeek.</item>
+        <item>No demuestra que la app sea dañina.</item>
+        <item>Asegúrate de confiar en el origen del archivo antes de instalarlo.</item>
+    </string-array>
+    <string name="context_default_sms">Es la app de SMS predeterminada que elegiste, así que el acceso a SMS coincide con su finalidad.</string>
+    <string name="context_system_app">Es una app del sistema integrada; esta capacidad suele formar parte de las funciones del sistema.</string>
+    <string name="concerns">Aspectos a revisar</string>
+    <string name="concerns_none">Esta revisión no encontró aspectos a revisar.</string>
+    <string name="concerns_disclaimer">Estos resultados no indican que una app sea segura o dañina. Revisa el nivel de evidencia y \"Aún no demostrado\".</string>
+    <string name="severity_strong">Indicador fuerte</string>
+    <string name="severity_attention">Requiere atención</string>
+    <string name="severity_info">Información</string>
+    <plurals name="severity_strong_count">
+        <item quantity="one">%1$d indicador fuerte</item>
+        <item quantity="many">%1$d indicadores fuertes</item>
+        <item quantity="other">%1$d indicadores fuertes</item>
+    </plurals>
+    <plurals name="severity_attention_count">
+        <item quantity="one">%1$d requiere atención</item>
+        <item quantity="many">%1$d requieren atención</item>
+        <item quantity="other">%1$d requieren atención</item>
+    </plurals>
+    <plurals name="severity_info_count">
+        <item quantity="one">%1$d nota</item>
+        <item quantity="many">%1$d notas</item>
+        <item quantity="other">%1$d notas</item>
+    </plurals>
+    <string name="risk_found">Qué se encontró</string>
+    <string name="risk_impact">Impacto para ti</string>
+    <string name="risk_context">Contexto</string>
+    <string name="risk_unproven">Aún no demostrado</string>
+    <string name="risk_action">Acción sugerida</string>
+    <string name="level_declared">T1 Declarado</string>
+    <string name="level_code">T2 En el código</string>
+    <string name="level_flow">T3 Flujo de datos</string>
+    <string name="level_observed">T4 Observado</string>
+    <string name="levels_explained">T1: escrito en el manifiesto. T2: función encontrada en el código. T3: flujo de datos indicado. T4: observado en este dispositivo.</string>
+    <string name="ev_permission">Solicita %1$s</string>
+    <string name="ev_component">Componente %1$s</string>
+    <string name="ev_config_retrieve">Configuración: puede leer el contenido de la pantalla de otras apps</string>
+    <string name="ev_config_gestures">Configuración: puede realizar toques y gestos</string>
+    <string name="ev_config_all_events">Configuración: recibe todo tipo de eventos de pantalla</string>
+    <string name="ev_accessibility_enabled">El servicio de accesibilidad está ACTIVADO</string>
+    <string name="ev_notification_enabled">El lector de notificaciones está ACTIVADO</string>
+    <string name="ev_admin_active">El administrador del dispositivo está ACTIVO</string>
+    <string name="ev_default_sms">Elegida como app de SMS predeterminada</string>
+    <string name="ev_granted">%1$s está concedido</string>
+    <string name="ev_overlay_allowed">Mostrar sobre otras apps está permitido</string>
+    <string name="ev_battery_exempt">Exenta de la optimización de batería</string>
+    <string name="ev_sideloaded">Instalada desde fuera de una tienda de apps</string>
+    <string name="ev_file">Archivo APK, no instalado</string>
+    <string name="ev_no_launcher">Ninguna actividad visible en la pantalla de inicio</string>
+    <string name="ev_debug_cert">Firmada con un certificado de depuración</string>
+    <string name="ev_new_cert">Certificado creado recientemente (hace %1$s días)</string>
+    <string name="ev_lure_label">Nombre de app engañoso: \"%1$s\"</string>
+    <string name="ev_cleartext">usesCleartextTraffic está activado</string>
+    <string name="ev_network">30 días: %1$s en uso, %2$s en segundo plano</string>
+    <string name="coverage">Cobertura de la revisión</string>
+    <plurals name="coverage_apks">
+        <item quantity="one">Manifiesto de %1$d APK revisado</item>
+        <item quantity="many">Manifiestos de %1$d APK revisados</item>
+        <item quantity="other">Manifiestos de %1$d APK revisados</item>
+    </plurals>
+    <string name="coverage_unreadable">No se pudo leer: %1$s</string>
+    <plurals name="coverage_configs">
+        <item quantity="one">No se pudo leer %1$d archivo de configuración</item>
+        <item quantity="many">No se pudieron leer %1$d archivos de configuración</item>
+        <item quantity="other">No se pudieron leer %1$d archivos de configuración</item>
+    </plurals>
+    <string name="coverage_device">Estado del dispositivo leído (servicios activados, permisos concedidos)</string>
+    <string name="coverage_file">El archivo no está instalado, así que el estado del dispositivo no está disponible</string>
+    <string name="coverage_usage_on">Uso de datos leído mediante el acceso a datos de uso</string>
+    <string name="coverage_usage_off">Uso de datos no leído porque el acceso a datos de uso no está permitido</string>
+    <string name="grant_usage_access">Permitir</string>
+    <string name="install_risk_title">Se encontró un indicador fuerte</string>
+    <string name="install_risk_body">La revisión encontró patrones que suelen usar las apps que roban datos:\n\n%1$s\n\n¿Instalar de todos modos?</string>
+    <string name="install_anyway">Instalar de todos modos</string>
+    <string name="risk_badge_ok">Ninguno</string>
+    <string name="risk_badge_label">aspectos</string>
+    <string name="old_score_title">Puntuación de configuración anterior</string>
+    <string name="active_on_device">Activo en este dispositivo</string>
+    <string name="active_on_device_note">Estos servicios pueden leer la pantalla o las notificaciones, o controlar el dispositivo. Asegúrate de reconocer todas las apps.</string>
+    <string name="active_accessibility">Servicios de accesibilidad</string>
+    <string name="active_notifications">Lectores de notificaciones</string>
+    <string name="active_admins">Administradores del dispositivo</string>
+    <string name="active_default_sms">App de SMS predeterminada</string>
+    <string name="usage_access">Acceso a datos de uso</string>
+    <string name="usage_access_on">Permitido: el uso de datos por app se muestra como evidencia observada</string>
+    <string name="usage_access_off">No permitido. Opcional: muestra el uso de datos por app (no su contenido ni su destino).</string>
+    <string name="risk_analysis">Análisis de riesgos</string>
+    <string-array name="risk_data_theft">
+        <item>Datos personales enviados a un destino oculto</item>
+        <item>El código propio de la app lee datos personales (como SMS, contactos, notificaciones o texto de la pantalla) y, en la misma ruta de código, envía datos a un bot de Telegram, un webhook de Discord o una dirección IP pública escrita en el código que envía. Las apps fraudulentas usan estos canales porque no necesitan un servidor con nombre que se pueda rastrear.</item>
+        <item>Las apps normales envían datos a sus propios servidores con nombre, no a bots ni webhooks. A veces se usan bots para informes de errores, pero no leen datos personales. Una IP directa solo es un indicador fuerte para un archivo o una app de origen no confiable; si no, requiere atención.</item>
+        <item></item>
+        <item>No instales este archivo. Si está instalado: desinstálalo, cambia las contraseñas de las cuentas cuyos códigos o mensajes pudo leer y vuelve a activar la verificación en dos pasos.</item>
+    </string-array>
+    <string-array name="risk_hidden_destination">
+        <item>Destino oculto en el código</item>
+        <item>El código contiene la dirección de un bot de Telegram, un webhook de Discord o una dirección IP pública sin nombre de dominio. Los datos enviados allí son difíciles de vincular a una empresa. Las direcciones locales (red doméstica, el propio dispositivo) no cuentan.</item>
+        <item>Algunas apps usan bots o webhooks para avisos, o llegan a sus propios servidores por IP. Es preocupante cuando se combina con acceso a datos personales.</item>
+        <item></item>
+        <item>Comprueba si la app necesita comunicarse con servicios de chat o direcciones IP directas para su finalidad. Prefiere apps de desarrolladores conocidos.</item>
+    </string-array>
+    <string-array name="risk_call_forwarding">
+        <item>Códigos de desvío de llamadas</item>
+        <item>El código contiene códigos telefónicos que desvían tus llamadas (por ejemplo, **21*) o envía solicitudes USSD. Quienes roban cuentas desvían las llamadas para que los códigos OTP por voz les lleguen a ellos y no a ti.</item>
+        <item>Las apps de teléfono, de operadoras y de gestión de llamadas pueden usar estos códigos de forma legítima.</item>
+        <item></item>
+        <item>Revisa los ajustes de desvío de llamadas (marca *#21#). Elimina los desvíos que no configuraste y desinstala la app si no la reconoces.</item>
+    </string-array>
+    <string-array name="risk_dynamic_code">
+        <item>Carga código adicional</item>
+        <item>La app puede cargar o ejecutar código que no forma parte de lo revisado: un DEX/APK oculto dentro del paquete, un packer con cifrado, un class loader o comandos de shell.</item>
+        <item>Las apps grandes usan carga dinámica para complementos y actualizaciones, y algunas empresas protegen su código con packers.</item>
+        <item></item>
+        <item>Considera incompleto el resultado de esta revisión para esta app. Ten cuidado si la app además procede de fuera de una tienda de apps.</item>
+    </string-array>
+    <string-array name="risk_clipboard">
+        <item>Lee el portapapeles</item>
+        <item>La app puede leer el texto que copias, que puede incluir contraseñas, códigos OTP o números de cuenta.</item>
+        <item>Las apps de descargas y de compartir enlaces suelen leer el portapapeles para recoger un enlace copiado. Desde Android 10 las apps solo pueden leerlo mientras están en pantalla, y Android 12+ muestra un aviso.</item>
+        <item></item>
+        <item>Evita copiar contraseñas o códigos OTP mientras esta app esté abierta.</item>
+    </string-array>
+    <string-array name="risk_web_login">
+        <item>Lee cookies de WebView</item>
+        <item>La app lee las cookies de su navegador integrado. Las cookies pueden mantener tu sesión iniciada, así que quien las tenga podría actuar como tú en ese sitio web.</item>
+        <item>Las apps que te permiten iniciar sesión en un sitio web dentro de la app (por ejemplo, para descargar tus propias publicaciones) necesitan cookies para esa sesión.</item>
+        <item></item>
+        <item>Inicia sesión en cuentas importantes solo en su app oficial o en el navegador. Cierra la sesión y cambia la contraseña si tienes dudas.</item>
+    </string-array>
+    <string-array name="risk_ad_sdks">
+        <item>SDK de publicidad y analíticas</item>
+        <item>Código de terceros que muestra anuncios o mide cómo usas la app. Estos SDK pueden recopilar identificadores del dispositivo y datos de uso.</item>
+        <item>Muy habitual en apps gratuitas; normalmente cubierto por la política de privacidad de la app.</item>
+        <item>Qué datos recopila realmente cada SDK no se ve en la revisión del código.</item>
+        <item>Consulta la sección Seguridad de los datos en Google Play y, si quieres, restablece tu ID de publicidad en Ajustes → Privacidad → Anuncios.</item>
+    </string-array>
+    <string-array name="risk_destinations">
+        <item>Direcciones en el código</item>
+        <item>Direcciones web escritas en el propio código de la app: adonde es probable que se conecte.</item>
+        <item>Todas las apps con conexión las tienen. Los dominios desconocidos no son sospechosos por sí mismos.</item>
+        <item>Solo con el código no se puede saber si se contacta con estas direcciones ni qué se envía.</item>
+        <item>Busca direcciones que no correspondan al desarrollador de la app y http sin cifrar.</item>
+    </string-array>
+    <string name="cap_sms_read">SMS</string>
+    <string name="cap_contacts">contactos</string>
+    <string name="cap_call_log">historial de llamadas</string>
+    <string name="cap_clipboard">el portapapeles</string>
+    <string name="cap_notification_read">notificaciones</string>
+    <string name="cap_screen_read">texto de pantalla</string>
+    <string name="cap_cookies">cookies de inicio de sesión</string>
+    <string name="cap_phone_id">número de teléfono o ID del dispositivo</string>
+    <string name="cap_accounts">cuentas</string>
+    <string name="cap_location">ubicación</string>
+    <string name="cap_network">internet</string>
+    <string name="cap_sms_send">SMS</string>
+    <string name="cap_telegram">un bot de Telegram</string>
+    <string name="cap_discord">un webhook de Discord</string>
+    <string name="ev_code_call">Llama a %1$s</string>
+    <string name="ev_code_string">Contiene el texto %1$s</string>
+    <string name="ev_flow">Lee %1$s y lo envía a %2$s</string>
+    <string name="ev_destination">Se conecta a %1$s</string>
+    <string name="ev_destination_cleartext">%1$s (http sin cifrar)</string>
+    <string name="ev_destination_ip">%1$s (dirección IP, sin nombre de dominio)</string>
+    <string name="ev_origin_app">código propio de la app</string>
+    <string name="ev_origin_library">biblioteca: %1$s</string>
+    <string name="ev_hidden_code">Archivo de código oculto: %1$s</string>
+    <string name="ev_packer">Packer de código: %1$s</string>
+    <string name="unproven_flow">Una ruta de código lee estos datos y los envía (T3). Aún no está demostrado que esta ruta se haya ejecutado en tu dispositivo; solo observar la app mientras se ejecuta podría mostrarlo.</string>
+    <string name="unproven_calls">El código llama a las funciones necesarias para esto (T2), pero no se encontró ninguna ruta que envíe los datos. No se puede descartar código que nunca se ejecuta ni código cargado después.</string>
+    <string name="unproven_none">Se revisó el propio código de la app y no llama a las funciones necesarias para esto. Las bibliotecas o el código cargado después aún podrían usarlas.</string>
+    <string name="unproven_gaps">Algunas partes de la app no se pudieron analizar (consulta Cobertura de la revisión), así que el resultado del código puede estar incompleto.</string>
+    <string name="evidence_strength">Evidencia más fuerte: %1$s</string>
+    <string name="strength_t1">solo escrito en el manifiesto</string>
+    <string name="strength_t2">el código hace estas llamadas</string>
+    <string name="strength_t3">una ruta de código lee datos y los envía</string>
+    <string name="strength_t4">observado en este dispositivo</string>
+    <string name="coverage_code">Código (DEX) analizado: %1$d archivos DEX, %2$d clases, %3$d en el código propio de la app</string>
+    <string name="coverage_code_failed">No se pudo analizar el código de la app (DEX)</string>
+    <string name="coverage_gap_hidden">Código oculto no analizado: %1$s</string>
+    <string name="coverage_gap_packer">El código está protegido por un packer (%1$s); el código real está cifrado</string>
+    <string name="coverage_gap_cross">La lógica de %1$s se ejecuta fuera de DEX y no se analiza</string>
+    <string name="coverage_gap_unreadable">No se pudo leer el código en %1$s</string>
+    <string name="coverage_gap_limit">El análisis del código se detuvo al alcanzar su límite de tiempo o tamaño; los resultados son parciales</string>
+    <string name="find_target_body">El SDK objetivo es inferior a API 31 (Android 12). Es posible que algunas protecciones más recientes no se apliquen.</string>
+    <string name="find_exported_body">Componentes exportados activados sin permiso de componente: %1$d. No se cuentan los puntos de entrada del launcher.</string>
+    <string name="format_explanation">Las apps independientes siempre se guardan como .apk. Las apps divididas usan el formato elegido arriba. Los nombres existentes reciben un sufijo numerado.</string>
+</resources>

@@ -27,7 +27,7 @@ export ANDROID_HOME=/path/to/sdk
 | `notif-webhook` | Pencuri OTP lewat pembaca notifikasi → webhook Discord (XOR) | Pembaca notifikasi, tujuan tersembunyi |
 | `bank-overlay` | Overlay palsu di atas aplikasi bank + aksesibilitas membaca layar | **Indikator kuat** Pengintaian layar (T3), overlay |
 | `clipboard-swap` | Penukar alamat kripto di clipboard, isi clipboard dikirim keluar | Membaca clipboard, tujuan tersembunyi |
-| `spyware-exfil` | Spyware: kontak, log panggilan, lokasi, mikrofon → server IP | **Indikator kuat** Data dikirim ke tujuan tersembunyi (IP C2) |
+| `spyware-exfil` | Spyware: kontak, log panggilan, lokasi, mikrofon → server IP | **Indikator kuat** Data dikirim ke tujuan tersembunyi (IP publik di kelas pengirim, berkas tidak tepercaya) |
 | `call-forward` | Pencurian lewat pengalihan panggilan (USSD `**21*`) + SMS | Kode pengalihan panggilan, Pencurian OTP |
 | `dropper` | Dropper: DEX tersembunyi di aset, dimuat dinamis, perintah shell | Memuat kode tambahan, kode tersembunyi |
 | `device-admin` | Admin perangkat mengunci/menghapus + ikon tersembunyi (modus ransomware) | Admin perangkat, ikon tersembunyi |

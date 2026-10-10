@@ -9,7 +9,7 @@ Implementasi source dan penerimaan perangkat dibedakan. Workbook asli tidak diub
 | T101 | Ganti applicationId, namespace & package Kotlin | Implementasi alpha | Namespace/package, authority per applicationId |
 | T102 | Ganti label & ikon launcher (adaptive + monochrome) | Implementasi alpha | Ikon adaptive dan monochrome |
 | T103 | Naikkan compileSdk/targetSdk ke 36 & upgrade dependensi | Implementasi alpha | API 36; dependensi versi tetap, bukan klaim selalu terbaru |
-| T104 | Bersihkan izin manifest yang tidak dipakai | Implementasi alpha | Izin sesuai inventaris, installer dan foreground; tanpa Internet |
+| T104 | Bersihkan izin manifest yang tidak dipakai | Implementasi alpha | Izin sesuai inventaris, installer dan foreground; `INTERNET` sejak alpha.10 hanya untuk cek hash VirusTotal opsional |
 | T106 | Pindahkan semua teks hardcoded ke strings.xml | Implementasi alpha | 219 string EN dan ID; label teknis tetap literal |
 | T707 | Splash Screen API & tema brand | Implementasi alpha | Splash API dan brand theme |
 | T201 | Perbaiki bug tombol ekstraksi tunggal | Implementasi alpha | Tombol tunggal menggunakan listOf(app), tidak mengubah seleksi |
