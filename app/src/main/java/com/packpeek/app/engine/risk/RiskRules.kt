@@ -400,9 +400,15 @@ object RiskRules {
                     (it == Capability.SMS_READ && RiskId.OTP_THEFT in alreadyCovered) ||
                         (it == Capability.SCREEN_READ && RiskId.SCREEN_SPYING in alreadyCovered)
                 }
-            val theft = flowsFrom(*theftSources.toTypedArray(), sinks = Capability.hiddenDestinations)
+            val theftHidden = flowsFrom(*theftSources.toTypedArray(), sinks = Capability.hiddenDestinations)
+            // Sending personal data to a hardcoded bare IP (no domain name) is a command-and-control
+            // signature: legitimate apps use named servers, not raw IPs, to upload personal data.
+            val ipExfil =
+                if (ipDestinations.isEmpty()) emptyList()
+                else flowsFrom(*theftSources.toTypedArray(), sinks = setOf(Capability.NETWORK))
+            val theft = theftHidden + ipExfil
             if (theft.isNotEmpty() && !system)
-                findings += finding(RiskId.DATA_THEFT, Severity.STRONG, theft + hiddenDestinations + untrusted)
+                findings += finding(RiskId.DATA_THEFT, Severity.STRONG, theft + hiddenDestinations + ipDestinations + untrusted)
             if (hiddenDestinations.isNotEmpty() || ipDestinations.isNotEmpty())
                 findings += finding(RiskId.HIDDEN_DESTINATION, severity(Severity.ATTENTION), hiddenDestinations + ipDestinations)
             if (forwarding.isNotEmpty())
