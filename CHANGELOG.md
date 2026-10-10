@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.0-alpha.4 — 2026-10-10
+
+Perombakan UI/UX. Perbandingan sebelum/sesudah: `docs/ui-redesign-before-after.png`.
+
+- **Tema:** semua peran warna Material 3 diturunkan dari aksen yang dipilih, sehingga tidak ada lagi tombol dan latar ungu bawaan yang bertabrakan dengan aksen. Bentuk sudut seragam; mode gelap ikut disesuaikan.
+- **Ikon:** ikon yang sesuai untuk navigasi dan tindakan (Aplikasi, Riwayat, Ringkasan, unduh, folder, pasang), disalin dari Material Icons agar ukuran aplikasi tetap kecil.
+- **Daftar aplikasi:** kolom cari berbentuk pil di atas, filter sebagai chip yang bisa digeser, dan baris aplikasi ringkas, sehingga sekitar 4 aplikasi terlihat sekaligus (sebelumnya sekitar 1,5 pada ukuran huruf besar). Mode pilih dengan ketuk ikon atau tekan lama, beserta bilah tindakan.
+- **Detail:** header dengan skor berwarna, tombol utama yang jelas, info yang dikelompokkan, izin dan komponen dengan label, serta temuan dengan ikon.
+- **Riwayat:** dikelompokkan per aplikasi dengan daftar versinya; tombol Pasang ulang di setiap versi, tindakan lain di menu.
+- **Ringkasan:** kotak statistik, grafik batang rapi, dan aplikasi terbesar dengan ikonnya.
+- **Pengaturan dan Tentang:** daftar bergaya Android dengan ikon, pilihan lewat dialog radio, dan sakelar.
+- **Dialog:** konfirmasi backup menampilkan ikon aplikasi, total ukuran, dan folder tujuan; hasil backup menampilkan status per aplikasi.
+- **Onboarding:** ilustrasi ikon, indikator halaman, dan tombol di bawah layar.
+- Splash tetap tampil sampai aplikasi siap; tidak ada lagi pesan "tidak ada aplikasi" yang berkedip saat memuat.
+
 ## 2.0.0-alpha.3 — 2026-10-10
 
 - **Pasang ulang dari Riwayat** dengan satu ketukan. Bila izin pemasangan sudah diberikan, dialog pemasangan Android langsung muncul.

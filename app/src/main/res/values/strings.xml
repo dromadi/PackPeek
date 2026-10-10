@@ -13,7 +13,6 @@
     <string name="start">Get started</string>
     <string name="starting">Preparing backup…</string>
     <string name="analyze_file">Inspect file</string>
-    <string name="refresh">Refresh</string>
     <string name="cancel">Cancel</string>
     <string name="cancelled">Cancelled</string>
     <string name="close">Close</string>
@@ -24,12 +23,9 @@
     <string name="choose_folder">Choose folder</string>
     <string name="open_folder">Open folder</string>
     <string name="confirm_backup">Confirm backup</string>
-    <string name="backup_count">Ready to back up: %1$d</string>
     <string name="confirm_each_time">Confirm before each backup</string>
     <string name="backup_running">Backing up apps</string>
     <string name="backup_cancelled">Backup cancelled</string>
-    <string name="backup_result">Backup result</string>
-    <string name="result_counts">Success: %1$d · Failed: %2$d · Cancelled: %3$d</string>
     <string name="icon_saved">512 × 512 PNG icon saved</string>
     <string name="backups">Backups</string>
     <string name="backup_folder">Backup folder</string>
@@ -49,7 +45,6 @@
     <string name="error_abi">No compatible CPU architecture was found in this backup.</string>
     <string name="error_unknown">The operation could not be completed. Check the files and folder, then try again.</string>
     <string name="action_unavailable">No app can perform this action, or access is unavailable.</string>
-    <string name="home_intro">Back up, inspect, and understand your apps.</string>
     <string name="search_apps">Search name or package</string>
     <string name="clear_search">Clear search</string>
     <string name="app_type">Type</string>
@@ -64,14 +59,12 @@
     <string name="size_asc">Smallest first</string>
     <string name="recently_updated">Recently updated</string>
     <string name="oldest_target">Oldest target SDK</string>
-    <string name="filters">Filters</string>
     <string name="source">Install source</string>
     <string name="any_source">Any source</string>
     <string name="play_store">Google Play</string>
     <string name="unknown_source">Unknown / sideload</string>
     <string name="other_store">Other installer</string>
     <string name="target_sdk">Target SDK</string>
-    <string name="min_sdk">Minimum SDK</string>
     <string name="any_sdk">Any SDK</string>
     <string name="sdk_28">SDK ≤ 28</string>
     <string name="sdk_30">SDK ≤ 30</string>
@@ -88,12 +81,8 @@
     <string name="unity">Unity</string>
     <string name="android_native">Android / undetected</string>
     <string name="reset_filters">Reset filters</string>
-    <string name="choose_backup_folder">Choose a backup folder</string>
-    <string name="app_count">Apps: %1$d</string>
     <string name="select_all">Select all results</string>
     <string name="select_app">Select %1$s</string>
-    <string name="clear_selection">Clear selection (%1$d)</string>
-    <string name="extract_selected">Extract selected</string>
     <string name="empty_apps">No accessible apps yet. Pull down to refresh.</string>
     <string name="no_matches">No matching apps. Change your search or filters.</string>
     <string name="install_backup">Install backup</string>
@@ -117,7 +106,6 @@
     <string name="installer">Installer package</string>
     <string name="last_update">Last updated</string>
     <string name="unknown">Unknown</string>
-    <string name="heuristic_score">Review score: %1$d / 100</string>
     <string name="audit_disclaimer">A weighted checklist of configuration signals, not a malware verdict. A higher score means more items to review. A low score does not prove an app is safe.</string>
     <string name="no_findings">No findings from the checks performed.</string>
     <string name="permission_explanation">Dangerous permissions can access sensitive capabilities. Grant status applies only to installed apps.</string>
@@ -127,14 +115,11 @@
     <string name="normal_permission">Normal / other</string>
     <string name="granted">Granted</string>
     <string name="not_granted">Not granted</string>
-    <string name="not_applicable">Not applicable to archive</string>
     <string name="component_explanation">Exported components may be called by other apps. Legitimate entry points can be exported; review their purpose and permissions.</string>
     <string name="exported">Exported</string>
     <string name="internal">Internal</string>
-    <string name="enabled">Enabled</string>
     <string name="disabled">Disabled</string>
     <string name="permission">Required permission</string>
-    <string name="none">None</string>
     <string name="signature_verification">Base APK signature</string>
     <string name="signature_valid">Cryptographic verification passed</string>
     <string name="signature_invalid">Verification failed</string>
@@ -178,9 +163,7 @@
     <string name="hide">Hide</string>
     <string name="hide_history">Hide this entry?</string>
     <string name="hide_history_body">The backup file stays in your folder. Only this history entry is hidden.</string>
-    <string name="device_snapshot">Your app landscape</string>
     <string name="apk_storage">APK file size</string>
-    <string name="type_counts">User: %1$d · System: %2$d · Split: %3$d</string>
     <string name="largest_apps">10 largest apps</string>
     <string name="technology_and_risk">Technology and review signals</string>
     <string name="overview_scan_note">Scan on demand for framework counts and configuration scores. Signature verification runs when app details open.</string>
@@ -253,4 +236,35 @@
     <string name="install_failed_blocked">Installation was blocked by the device or its policy.</string>
     <string name="install_failed_generic">Android did not complete the installation. Check the backup file and try again.</string>
     <string name="internal_storage">Internal storage</string>
+    <string name="no_folder_hint">Choose a folder for backups</string>
+    <string name="choose">Choose</string>
+    <string name="selected_count">%1$d selected</string>
+    <string name="clear_selection_short">Clear selection</string>
+    <string name="tag_split">Split</string>
+    <string name="tag_system">System</string>
+    <string name="backup_progress">App %1$d of %2$d · %3$d%%</string>
+    <string name="dont_ask_again">Don\'t ask again</string>
+    <string name="backup_done">Backup complete</string>
+    <string name="backup_partial">Backup finished with errors</string>
+    <string name="result_summary">%1$d of %2$d saved · %3$s</string>
+    <string name="review_title">Configuration review</string>
+    <string name="app_info">App info</string>
+    <string name="android_versions">Android versions</string>
+    <string name="sdk_range">Minimum API %1$d · Target API %2$d</string>
+    <string name="score_short">score</string>
+    <string name="history_empty_title">No backups yet</string>
+    <string name="history_empty_body">Extract an app from the Apps tab; its versions will be listed here.</string>
+    <string name="search_apps_short">Search apps</string>
+    <plurals name="version_count">
+        <item quantity="one">%1$d version</item>
+        <item quantity="other">%1$d versions</item>
+    </plurals>
+    <plurals name="app_count_short">
+        <item quantity="one">%1$d app</item>
+        <item quantity="other">%1$d apps</item>
+    </plurals>
+    <plurals name="backup_summary">
+        <item quantity="one">%1$d app · %2$s</item>
+        <item quantity="other">%1$d apps · %2$s</item>
+    </plurals>
 </resources>

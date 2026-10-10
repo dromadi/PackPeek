@@ -46,12 +46,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val technologies = tech.asStateFlow()
     val riskScores = MutableStateFlow<Map<String, Int>>(emptyMap())
     val checkingOverview = MutableStateFlow(false)
+    /** True once the first app scan finished (successfully or not). */
+    val loaded = MutableStateFlow(false)
     val filtered =
-        combine(apps, query, tech, settings) { a, q, t, s ->
-                filterApps(a, q, t, s?.favorites.orEmpty())
+        // null until the first scan has been filtered, so the UI never shows "no matches"
+        // while the app list is still loading.
+        combine(apps, query, tech, settings, loaded) { a, q, t, s, ready ->
+                if (ready) filterApps(a, q, t, s?.favorites.orEmpty()) else null
             }
             .flowOn(Dispatchers.Default)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
     val scanning = MutableStateFlow(false)
     val filtering = MutableStateFlow(false)
     val error = MutableStateFlow<ErrorCode?>(null)
@@ -181,6 +185,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 error.value = ErrorCode.SOURCE
             } finally {
                 scanning.value = false
+                loaded.value = true
             }
         }
     }
@@ -190,7 +195,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun selectAll() {
-        selected.value = filtered.value.map { it.packageName }.toSet()
+        selected.value = filtered.value.orEmpty().map { it.packageName }.toSet()
     }
 
     fun setQuery(value: AppQuery) {

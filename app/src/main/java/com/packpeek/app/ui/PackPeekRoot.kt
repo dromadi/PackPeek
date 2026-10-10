@@ -11,9 +11,10 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -28,44 +30,6 @@ import androidx.navigation.compose.*
 import com.packpeek.app.R
 import com.packpeek.app.data.Settings
 import com.packpeek.app.model.*
-
-@Composable
-fun PackPeekTheme(settings: Settings?, content: @Composable () -> Unit) {
-    val dark =
-        when (settings?.theme) {
-            "LIGHT" -> false
-            "DARK" -> true
-            else -> isSystemInDarkTheme()
-        }
-    val c = LocalContext.current
-    val accents =
-        mapOf(
-            "TEAL" to (0xFF006A5CL to 0xFF76E4C5L),
-            "BLUE" to (0xFF205EABL to 0xFFA6C8FFL),
-            "PURPLE" to (0xFF6840A3L to 0xFFD6B9FFL),
-            "ORANGE" to (0xFF904D00L to 0xFFFFBA73L),
-            "RED" to (0xFFA63440L to 0xFFFFB2B9L),
-            "GRAY" to (0xFF465C68L to 0xFFADC9D9L),
-        )
-    val pair = accents[settings?.accent] ?: accents.getValue("TEAL")
-    val scheme =
-        if (settings?.accent == "DYNAMIC" && Build.VERSION.SDK_INT >= 31) {
-            if (dark) dynamicDarkColorScheme(c) else dynamicLightColorScheme(c)
-        } else if (dark)
-            darkColorScheme(
-                primary = Color(pair.second),
-                onPrimary = Color(0xFF08251F),
-                background = Color(0xFF101619),
-                surface = Color(0xFF101619),
-            )
-        else
-            lightColorScheme(
-                primary = Color(pair.first),
-                background = Color(0xFFF7F9F8),
-                surface = Color(0xFFF7F9F8),
-            )
-    MaterialTheme(colorScheme = scheme, content = content)
-}
 
 @Composable
 fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
@@ -117,58 +81,49 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
         val installing by vm.installing.collectAsStateWithLifecycle()
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            stringResource(
-                                when (route) {
-                                    "apps" -> R.string.app_name
-                                    "history" -> R.string.history
-                                    "dashboard" -> R.string.overview
-                                    "settings" -> R.string.settings
-                                    "about" -> R.string.about
-                                    else -> R.string.app_details
-                                }
-                            )
-                        )
-                    },
-                    navigationIcon = {
-                        if (route !in listOf("apps", "history", "dashboard"))
-                            IconButton(onClick = { nav.popBackStack() }) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.ArrowBack,
-                                    stringResource(R.string.back),
+                if (route != "apps")
+                    TopAppBar(
+                        title = {
+                            Text(
+                                stringResource(
+                                    when (route) {
+                                        "history" -> R.string.history
+                                        "dashboard" -> R.string.overview
+                                        "settings" -> R.string.settings
+                                        "about" -> R.string.about
+                                        else -> R.string.app_details
+                                    }
                                 )
-                            }
-                    },
-                    actions = {
-                        if (route == "apps") {
-                            TextButton(
-                                onClick = { filePicker.launch(arrayOf("*/*")) },
-                                enabled = !importing && !installing,
-                            ) {
-                                Text(stringResource(R.string.analyze_file))
-                            }
-                            IconButton(onClick = vm::refresh) {
-                                Icon(Icons.Default.Refresh, stringResource(R.string.refresh))
-                            }
-                        }
-                        if (route != "settings")
-                            IconButton(
-                                onClick = { nav.navigate("settings") { launchSingleTop = true } }
-                            ) {
-                                Icon(Icons.Default.Settings, stringResource(R.string.settings))
-                            }
-                    },
-                )
+                            )
+                        },
+                        navigationIcon = {
+                            if (route !in listOf("history", "dashboard"))
+                                IconButton(onClick = { nav.popBackStack() }) {
+                                    Icon(
+                                        Icons.AutoMirrored.Rounded.ArrowBack,
+                                        stringResource(R.string.back),
+                                    )
+                                }
+                        },
+                        actions = {
+                            if (route in listOf("history", "dashboard"))
+                                IconButton(
+                                    onClick = {
+                                        nav.navigate("settings") { launchSingleTop = true }
+                                    }
+                                ) {
+                                    Icon(Icons.Rounded.Settings, stringResource(R.string.settings))
+                                }
+                        },
+                    )
             },
             bottomBar = {
                 if (route in listOf("apps", "history", "dashboard"))
                     NavigationBar {
                         listOf(
-                                Triple("apps", R.string.apps, Icons.Default.Home),
-                                Triple("history", R.string.history, Icons.Default.Check),
-                                Triple("dashboard", R.string.overview, Icons.Default.Info),
+                                Triple("apps", R.string.apps, PackIcons.Apps),
+                                Triple("history", R.string.history, PackIcons.History),
+                                Triple("dashboard", R.string.overview, PackIcons.Insights),
                             )
                             .forEach { (key, title, icon) ->
                                 NavigationBarItem(
@@ -188,25 +143,45 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
             },
         ) { padding ->
             Column(Modifier.padding(padding).fillMaxSize()) {
-                if (latest?.state in listOf("QUEUED", "RUNNING"))
-                    Surface(color = MaterialTheme.colorScheme.primaryContainer) {
-                        Column(Modifier.fillMaxWidth().padding(12.dp)) {
+                if (latest?.state in listOf("QUEUED", "RUNNING")) {
+                    val percent = work?.progress?.getInt("percent", 0) ?: 0
+                    val done = records.count { it.state in listOf("SUCCESS", "FAILED") }
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+                    ) {
+                        Column(Modifier.padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 12.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    work?.progress?.getString("label")
-                                        ?: stringResource(R.string.backup_running),
-                                    Modifier.weight(1f),
-                                )
+                                Icon(PackIcons.Download, null, Modifier.size(20.dp))
+                                Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                                    Text(
+                                        work?.progress?.getString("label")
+                                            ?: stringResource(R.string.backup_running),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        maxLines = 1,
+                                    )
+                                    Text(
+                                        stringResource(
+                                            R.string.backup_progress,
+                                            (done + 1).coerceAtMost(records.size.coerceAtLeast(1)),
+                                            records.size.coerceAtLeast(1),
+                                            percent,
+                                        ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
                                 TextButton(onClick = vm::cancelBackup) {
                                     Text(stringResource(R.string.cancel))
                                 }
                             }
                             LinearProgressIndicator(
-                                progress = { (work?.progress?.getInt("percent", 0) ?: 0) / 100f },
-                                modifier = Modifier.fillMaxWidth(),
+                                progress = { percent / 100f },
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp, end = 8.dp),
                             )
                         }
                     }
+                }
                 if (importing || installing) LinearProgressIndicator(Modifier.fillMaxWidth())
                 NavHost(
                     navController = nav,
@@ -219,6 +194,8 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                             ::backup,
                             { nav.navigate("detail") },
                             { folderPicker.launch(null) },
+                            { filePicker.launch(arrayOf("*/*")) },
+                            { nav.navigate("settings") { launchSingleTop = true } },
                         )
                     }
                     composable("detail") { DetailScreen(vm, ::backup) }
@@ -267,43 +244,90 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
         if (pending != null && current != null)
             AlertDialog(
                 onDismissRequest = { vm.confirmation.value = null },
+                icon = { Icon(PackIcons.Download, null) },
                 title = { Text(stringResource(R.string.confirm_backup)) },
                 text = {
                     Column {
-                        Text(stringResource(R.string.backup_count, pending.size))
-                        if (current.naming.split == SplitFormat.APK && pending.any { it.split })
-                            Text(
-                                stringResource(R.string.merged_apk_warning),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error,
-                            )
                         Text(
-                            folderName(c, current.folder),
-                            style = MaterialTheme.typography.bodySmall,
+                            pluralStringResource(
+                                R.plurals.backup_summary,
+                                pending.size,
+                                pending.size,
+                                sizeText(pending.sumOf { it.size }),
+                            ),
+                            style = MaterialTheme.typography.bodyLarge,
                         )
-                        LazyColumn(Modifier.heightIn(max = 300.dp)) {
+                        Row(
+                            Modifier.padding(top = 6.dp, bottom = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                PackIcons.Folder,
+                                null,
+                                Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                folderName(c, current.folder),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 6.dp),
+                            )
+                        }
+                        if (current.naming.split == SplitFormat.APK && pending.any { it.split })
+                            Surface(
+                                color = MaterialTheme.colorScheme.errorContainer,
+                                shape = MaterialTheme.shapes.small,
+                                modifier = Modifier.padding(bottom = 10.dp),
+                            ) {
+                                Text(
+                                    stringResource(R.string.merged_apk_warning),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.padding(10.dp),
+                                )
+                            }
+                        HorizontalDivider()
+                        LazyColumn(Modifier.heightIn(max = 260.dp)) {
                             items(pending) { app ->
-                                Column(Modifier.padding(vertical = 8.dp)) {
-                                    Text(app.label)
-                                    Text(
-                                        FileNames.format(app, current.naming),
-                                        style = MaterialTheme.typography.bodySmall,
-                                    )
-                                    Text(
-                                        sizeText(app.size),
-                                        style = MaterialTheme.typography.labelSmall,
-                                    )
+                                Row(
+                                    Modifier.padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    AppIcon(app, Modifier.size(36.dp))
+                                    Column(Modifier.padding(start = 12.dp)) {
+                                        Text(
+                                            FileNames.format(app, current.naming),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            maxLines = 2,
+                                        )
+                                        Text(
+                                            sizeText(app.size),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
                                 }
                             }
                         }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(current.confirm, { vm.flag("confirm", it) })
-                            Text(stringResource(R.string.confirm_each_time))
+                        HorizontalDivider()
+                        Row(
+                            Modifier.fillMaxWidth()
+                                .clickable { vm.flag("confirm", !current.confirm) }
+                                .padding(top = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Checkbox(!current.confirm, null)
+                            Text(
+                                stringResource(R.string.dont_ask_again),
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(start = 4.dp),
+                            )
                         }
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { vm.startBackup(pending) }) {
+                    Button(onClick = { vm.startBackup(pending) }) {
                         Text(stringResource(R.string.extract))
                     }
                 },
@@ -318,82 +342,127 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
             job != null &&
                 job.state in listOf("COMPLETED", "FAILED", "CANCELLED") &&
                 !job.dismissed
-        )
+        ) {
+            val succeeded = records.filter { it.state == "SUCCESS" }
+            val failed = records.count { it.state == "FAILED" }
             AlertDialog(
                 onDismissRequest = vm::dismissResult,
+                icon = {
+                    Icon(
+                        when {
+                            job.state == "CANCELLED" -> Icons.Rounded.Close
+                            failed > 0 -> Icons.Rounded.Warning
+                            else -> Icons.Rounded.CheckCircle
+                        },
+                        null,
+                    )
+                },
                 title = {
                     Text(
                         stringResource(
-                            if (job.state == "CANCELLED") R.string.backup_cancelled
-                            else R.string.backup_result
+                            when {
+                                job.state == "CANCELLED" -> R.string.backup_cancelled
+                                failed > 0 -> R.string.backup_partial
+                                else -> R.string.backup_done
+                            }
                         )
                     )
                 },
                 text = {
-                    LazyColumn(Modifier.heightIn(max = 340.dp)) {
-                        item {
-                            Text(
-                                stringResource(
-                                    R.string.result_counts,
-                                    records.count { it.state == "SUCCESS" },
-                                    records.count { it.state == "FAILED" },
-                                    records.count { it.state == "CANCELLED" },
-                                )
-                            )
-                            Text(
-                                sizeText(
-                                    records.filter { it.state == "SUCCESS" }.sumOf { it.bytes }
-                                )
+                    Column {
+                        Text(
+                            stringResource(
+                                R.string.result_summary,
+                                succeeded.size,
+                                records.size,
+                                sizeText(succeeded.sumOf { it.bytes }),
+                            ),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Row(
+                            Modifier.padding(top = 6.dp, bottom = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                PackIcons.Folder,
+                                null,
+                                Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Text(
                                 folderName(c, job.folder),
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 6.dp),
                             )
                         }
-                        items(records) { r ->
-                            Column(Modifier.padding(vertical = 6.dp)) {
-                                Text(r.label)
-                                Text(
-                                    if (r.state == "SUCCESS") r.fileName
-                                    else
-                                        stringResource(
-                                            if (r.state == "CANCELLED") R.string.cancelled
+                        HorizontalDivider()
+                        LazyColumn(Modifier.heightIn(max = 280.dp)) {
+                            items(records) { r ->
+                                val ok = r.state == "SUCCESS"
+                                Row(
+                                    Modifier.padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Icon(
+                                        when (r.state) {
+                                            "SUCCESS" -> Icons.Rounded.CheckCircle
+                                            "CANCELLED" -> Icons.Rounded.Close
+                                            else -> Icons.Rounded.Warning
+                                        },
+                                        null,
+                                        Modifier.size(20.dp),
+                                        tint =
+                                            if (ok) MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.error,
+                                    )
+                                    Column(Modifier.padding(start = 12.dp)) {
+                                        Text(r.label, style = MaterialTheme.typography.bodyMedium)
+                                        Text(
+                                            if (ok) r.fileName
                                             else
-                                                errorText(
-                                                    runCatching { ErrorCode.valueOf(r.error) }
-                                                        .getOrDefault(ErrorCode.UNKNOWN)
-                                                )
-                                        ),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
+                                                stringResource(
+                                                    if (r.state == "CANCELLED") R.string.cancelled
+                                                    else
+                                                        errorText(
+                                                            runCatching {
+                                                                    ErrorCode.valueOf(r.error)
+                                                                }
+                                                                .getOrDefault(ErrorCode.UNKNOWN)
+                                                        )
+                                                ),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        HorizontalDivider()
+                        Row(Modifier.padding(top = 4.dp)) {
+                            TextButton(onClick = { openFolder(c, job.folder) }) {
+                                Icon(PackIcons.Folder, null, Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(stringResource(R.string.open_folder))
+                            }
+                            TextButton(
+                                enabled = succeeded.isNotEmpty(),
+                                onClick = {
+                                    shareFiles(c, succeeded.map { Uri.parse(it.uri) })
+                                },
+                            ) {
+                                Icon(Icons.Rounded.Share, null, Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(stringResource(R.string.share))
                             }
                         }
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = vm::dismissResult) { Text(stringResource(R.string.done)) }
-                },
-                dismissButton = {
-                    Row {
-                        TextButton(onClick = { openFolder(c, job.folder) }) {
-                            Text(stringResource(R.string.open_folder))
-                        }
-                        TextButton(
-                            enabled = records.any { it.state == "SUCCESS" },
-                            onClick = {
-                                shareFiles(
-                                    c,
-                                    records
-                                        .filter { it.state == "SUCCESS" }
-                                        .map { Uri.parse(it.uri) },
-                                )
-                            },
-                        ) {
-                            Text(stringResource(R.string.share))
-                        }
-                    }
+                    Button(onClick = vm::dismissResult) { Text(stringResource(R.string.done)) }
                 },
             )
+        }
         val crash by vm.lastCrash.collectAsStateWithLifecycle()
         crash?.let { log ->
             AlertDialog(
@@ -461,40 +530,83 @@ private fun Onboarding(folder: () -> Unit, finish: () -> Unit, location: String)
             R.string.onboarding_two_body,
             R.string.onboarding_three_body,
         )
-    Column(
-        Modifier.fillMaxSize()
-            .safeDrawingPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(28.dp),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Spacer(Modifier.height(40.dp))
-        Text(stringResource(titles[step]), style = MaterialTheme.typography.displaySmall)
-        Spacer(Modifier.height(20.dp))
-        Text(stringResource(texts[step]), style = MaterialTheme.typography.bodyLarge)
-        Spacer(Modifier.height(28.dp))
-        Text(stringResource(R.string.privacy_local), style = MaterialTheme.typography.bodyMedium)
-        Spacer(Modifier.height(32.dp))
-        Text("${step+1} / 3", style = MaterialTheme.typography.labelLarge)
-        if (step == 2) {
-            OutlinedButton(onClick = folder, modifier = Modifier.fillMaxWidth()) { Text(location) }
-            Text(
-                stringResource(R.string.backup_disclaimer),
-                style = MaterialTheme.typography.bodySmall,
-            )
+    val icons = listOf(PackIcons.Inventory2, PackIcons.VerifiedUser, PackIcons.Folder)
+    Surface(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f),
+                )
+                if (step < 2) TextButton(onClick = finish) { Text(stringResource(R.string.skip)) }
+            }
+            Column(
+                Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Surface(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.size(96.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            icons[step],
+                            null,
+                            Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    }
+                }
+                Spacer(Modifier.height(32.dp))
+                Text(stringResource(titles[step]), style = MaterialTheme.typography.headlineMedium)
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    stringResource(texts[step]),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (step == 2) {
+                    Spacer(Modifier.height(24.dp))
+                    OutlinedButton(onClick = folder, modifier = Modifier.fillMaxWidth()) {
+                        Icon(PackIcons.Folder, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(location, maxLines = 1)
+                    }
+                    Text(
+                        stringResource(R.string.backup_disclaimer),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    stringResource(R.string.privacy_local),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    repeat(3) {
+                        Box(
+                            Modifier.size(width = if (it == step) 20.dp else 8.dp, height = 8.dp)
+                                .background(
+                                    if (it == step) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.outlineVariant,
+                                    CircleShape,
+                                )
+                        )
+                    }
+                }
+                if (step > 0) TextButton(onClick = { step-- }) { Text(stringResource(R.string.back)) }
+                Button(onClick = { if (step < 2) step++ else finish() }) {
+                    Text(stringResource(if (step == 2) R.string.start else R.string.next))
+                }
+            }
         }
-        Button(
-            onClick = { if (step < 2) step++ else finish() },
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(stringResource(if (step == 2) R.string.start else R.string.next))
-        }
-        if (step > 0) TextButton(onClick = { step-- }) { Text(stringResource(R.string.back)) }
-        if (step < 2) TextButton(onClick = finish) { Text(stringResource(R.string.skip)) }
     }
 }

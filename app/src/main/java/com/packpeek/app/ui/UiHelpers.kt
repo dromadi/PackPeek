@@ -150,24 +150,3 @@ fun AppIcon(app: AppRecord, modifier: Modifier = Modifier.size(48.dp)) {
             modifier.background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
         )
 }
-
-@Composable
-fun InfoRow(label: String, value: String, onClick: (() -> Unit)? = null) {
-    Surface(
-        onClick = onClick ?: {},
-        enabled = onClick != null,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(14.dp),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(Modifier.padding(14.dp)) {
-            Text(
-                label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(3.dp))
-            Text(value, style = MaterialTheme.typography.bodyMedium)
-        }
-    }
-}

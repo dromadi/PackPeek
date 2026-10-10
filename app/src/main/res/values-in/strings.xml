@@ -13,7 +13,6 @@
     <string name="start">Mulai</string>
     <string name="starting">Menyiapkan backup…</string>
     <string name="analyze_file">Periksa berkas</string>
-    <string name="refresh">Muat ulang</string>
     <string name="cancel">Batal</string>
     <string name="cancelled">Dibatalkan</string>
     <string name="close">Tutup</string>
@@ -24,12 +23,9 @@
     <string name="choose_folder">Pilih folder</string>
     <string name="open_folder">Buka folder</string>
     <string name="confirm_backup">Konfirmasi backup</string>
-    <string name="backup_count">%1$d aplikasi siap dicadangkan</string>
     <string name="confirm_each_time">Konfirmasi sebelum backup</string>
     <string name="backup_running">Mencadangkan aplikasi</string>
     <string name="backup_cancelled">Backup dibatalkan</string>
-    <string name="backup_result">Hasil backup</string>
-    <string name="result_counts">Berhasil: %1$d · Gagal: %2$d · Batal: %3$d</string>
     <string name="icon_saved">Ikon PNG 512 × 512 tersimpan</string>
     <string name="backups">Backup</string>
     <string name="backup_folder">Folder backup</string>
@@ -49,7 +45,6 @@
     <string name="error_abi">Arsitektur CPU backup tidak cocok dengan perangkat ini.</string>
     <string name="error_unknown">Operasi belum dapat diselesaikan. Periksa berkas dan folder, lalu coba lagi.</string>
     <string name="action_unavailable">Tidak ada aplikasi yang dapat menjalankan tindakan ini atau akses tidak tersedia.</string>
-    <string name="home_intro">Cadangkan, periksa, dan pahami aplikasimu.</string>
     <string name="search_apps">Cari nama atau paket</string>
     <string name="clear_search">Hapus pencarian</string>
     <string name="app_type">Jenis</string>
@@ -64,14 +59,12 @@
     <string name="size_asc">Terkecil dahulu</string>
     <string name="recently_updated">Baru diperbarui</string>
     <string name="oldest_target">Target SDK terlama</string>
-    <string name="filters">Filter</string>
     <string name="source">Sumber instalasi</string>
     <string name="any_source">Semua sumber</string>
     <string name="play_store">Google Play</string>
     <string name="unknown_source">Tidak diketahui / sideload</string>
     <string name="other_store">Pemasang lain</string>
     <string name="target_sdk">Target SDK</string>
-    <string name="min_sdk">SDK minimum</string>
     <string name="any_sdk">Semua SDK</string>
     <string name="sdk_28">SDK ≤ 28</string>
     <string name="sdk_30">SDK ≤ 30</string>
@@ -88,12 +81,8 @@
     <string name="unity">Unity</string>
     <string name="android_native">Android / tidak terdeteksi</string>
     <string name="reset_filters">Reset filter</string>
-    <string name="choose_backup_folder">Pilih folder backup</string>
-    <string name="app_count">%1$d aplikasi</string>
     <string name="select_all">Pilih semua hasil</string>
     <string name="select_app">Pilih %1$s</string>
-    <string name="clear_selection">Hapus pilihan (%1$d)</string>
-    <string name="extract_selected">Ekstrak pilihan</string>
     <string name="empty_apps">Belum ada aplikasi yang dapat dibaca. Tarik ke bawah untuk memuat ulang.</string>
     <string name="no_matches">Tidak ada aplikasi yang cocok. Ubah pencarian atau filter.</string>
     <string name="install_backup">Pasang backup</string>
@@ -117,7 +106,6 @@
     <string name="installer">Paket pemasang</string>
     <string name="last_update">Terakhir diperbarui</string>
     <string name="unknown">Tidak diketahui</string>
-    <string name="heuristic_score">Skor peninjauan: %1$d / 100</string>
     <string name="audit_disclaimer">Daftar sinyal konfigurasi berbobot, bukan vonis malware. Skor tinggi berarti lebih banyak hal perlu ditinjau. Skor rendah tidak membuktikan aplikasi aman.</string>
     <string name="no_findings">Tidak ada temuan dari pemeriksaan yang dilakukan.</string>
     <string name="permission_explanation">Izin berbahaya dapat mengakses kemampuan sensitif. Status pemberian izin hanya berlaku untuk aplikasi terpasang.</string>
@@ -127,14 +115,11 @@
     <string name="normal_permission">Normal / lainnya</string>
     <string name="granted">Diberikan</string>
     <string name="not_granted">Tidak diberikan</string>
-    <string name="not_applicable">Tidak berlaku untuk arsip</string>
     <string name="component_explanation">Komponen exported dapat dipanggil aplikasi lain. Titik masuk yang sah dapat diekspor; periksa tujuan dan izinnya.</string>
     <string name="exported">Exported</string>
     <string name="internal">Internal</string>
-    <string name="enabled">Aktif</string>
     <string name="disabled">Nonaktif</string>
     <string name="permission">Izin yang dibutuhkan</string>
-    <string name="none">Tidak ada</string>
     <string name="signature_verification">Tanda tangan APK dasar</string>
     <string name="signature_valid">Verifikasi kriptografis berhasil</string>
     <string name="signature_invalid">Verifikasi gagal</string>
@@ -178,9 +163,7 @@
     <string name="hide">Sembunyikan</string>
     <string name="hide_history">Sembunyikan entri ini?</string>
     <string name="hide_history_body">Berkas backup tetap di foldermu. Hanya entri riwayat ini yang disembunyikan.</string>
-    <string name="device_snapshot">Gambaran aplikasimu</string>
     <string name="apk_storage">Ukuran berkas APK</string>
-    <string name="type_counts">Pengguna: %1$d · Sistem: %2$d · Split: %3$d</string>
     <string name="largest_apps">10 aplikasi terbesar</string>
     <string name="technology_and_risk">Teknologi dan sinyal peninjauan</string>
     <string name="overview_scan_note">Pindai untuk mengisi jumlah framework dan skor konfigurasi. Verifikasi tanda tangan berjalan saat detail dibuka.</string>
@@ -253,4 +236,32 @@
     <string name="install_failed_blocked">Pemasangan diblokir oleh perangkat atau kebijakannya.</string>
     <string name="install_failed_generic">Android tidak menyelesaikan pemasangan. Periksa berkas backup lalu coba lagi.</string>
     <string name="internal_storage">Penyimpanan internal</string>
+    <string name="no_folder_hint">Pilih folder untuk backup</string>
+    <string name="choose">Pilih</string>
+    <string name="selected_count">%1$d dipilih</string>
+    <string name="clear_selection_short">Batalkan pilihan</string>
+    <string name="tag_split">Split</string>
+    <string name="tag_system">Sistem</string>
+    <string name="backup_progress">Aplikasi %1$d dari %2$d · %3$d%%</string>
+    <string name="dont_ask_again">Jangan tanya lagi</string>
+    <string name="backup_done">Backup selesai</string>
+    <string name="backup_partial">Backup selesai dengan galat</string>
+    <string name="result_summary">%1$d dari %2$d tersimpan · %3$s</string>
+    <string name="review_title">Tinjauan konfigurasi</string>
+    <string name="app_info">Info aplikasi</string>
+    <string name="android_versions">Versi Android</string>
+    <string name="sdk_range">API minimum %1$d · API target %2$d</string>
+    <string name="score_short">skor</string>
+    <string name="history_empty_title">Belum ada backup</string>
+    <string name="history_empty_body">Ekstrak aplikasi dari tab Aplikasi; versinya akan tercantum di sini.</string>
+    <string name="search_apps_short">Cari aplikasi</string>
+    <plurals name="version_count">
+        <item quantity="other">%1$d versi</item>
+    </plurals>
+    <plurals name="app_count_short">
+        <item quantity="other">%1$d aplikasi</item>
+    </plurals>
+    <plurals name="backup_summary">
+        <item quantity="other">%1$d aplikasi · %2$s</item>
+    </plurals>
 </resources>

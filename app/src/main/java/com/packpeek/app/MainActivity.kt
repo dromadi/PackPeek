@@ -18,7 +18,8 @@ class MainActivity : AppCompatActivity() {
     private val inbound = MutableStateFlow<Uri?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        // Keep the splash until settings load, instead of a blank screen with a spinner.
+        installSplashScreen().setKeepOnScreenCondition { viewModel.settings.value == null }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         if (savedInstanceState == null && intent?.action == Intent.ACTION_VIEW)

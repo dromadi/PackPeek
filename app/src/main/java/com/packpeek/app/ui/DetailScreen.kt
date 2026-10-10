@@ -12,6 +12,8 @@ import android.provider.Settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.packpeek.app.R
@@ -39,32 +42,52 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
     var tab by remember(app.basePath) { mutableIntStateOf(0) }
     var menu by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             AppIcon(app, Modifier.size(64.dp))
             Column(Modifier.weight(1f).padding(start = 16.dp)) {
-                Text(app.label, style = MaterialTheme.typography.headlineSmall)
-                Text(app.packageName, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    app.label,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    app.packageName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 Text(
                     "v${app.version} · ${sizeText(app.size)}",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            if (report != null) ScoreBadge(report.score)
         }
-        FlowRow(
-            Modifier.padding(horizontal = 16.dp),
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (!app.fromFile)
                 Button(
                     onClick = { backup(listOf(app)) },
                     enabled = latest?.state !in listOf("QUEUED", "RUNNING"),
+                    modifier = Modifier.weight(1f),
                 ) {
+                    Icon(PackIcons.Download, null, Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.extract))
                 }
             else
                 Button(
                     enabled = !installing && report != null && app.minSdk <= Build.VERSION.SDK_INT,
+                    modifier = Modifier.weight(1f),
                     onClick = {
                         if (
                             Build.VERSION.SDK_INT >= 26 &&
@@ -79,17 +102,22 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                         else vm.install()
                     },
                 ) {
+                    Icon(PackIcons.InstallMobile, null, Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.install_backup))
                 }
-            OutlinedButton(onClick = { vm.saveIcon(app) }) {
-                Text(stringResource(R.string.save_icon))
+            FilledTonalIconButton(onClick = { vm.saveIcon(app) }) {
+                Icon(PackIcons.Image, stringResource(R.string.save_icon))
             }
             Box {
-                TextButton(onClick = { menu = true }) { Text(stringResource(R.string.actions)) }
+                FilledTonalIconButton(onClick = { menu = true }) {
+                    Icon(Icons.Rounded.MoreVert, stringResource(R.string.actions))
+                }
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                     if (!app.fromFile) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.open_app)) },
+                            leadingIcon = { Icon(PackIcons.OpenInNew, null) },
                             onClick = {
                                 menu = false
                                 c.packageManager.getLaunchIntentForPackage(app.packageName)?.let {
@@ -99,6 +127,7 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.system_info)) },
+                            leadingIcon = { Icon(Icons.Rounded.Info, null) },
                             onClick = {
                                 menu = false
                                 c.launchSafe(
@@ -111,6 +140,7 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.uninstall)) },
+                            leadingIcon = { Icon(Icons.Rounded.Delete, null) },
                             onClick = {
                                 menu = false
                                 c.launchSafe(
@@ -124,6 +154,7 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                     }
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.open_store)) },
+                        leadingIcon = { Icon(Icons.Rounded.ShoppingCart, null) },
                         onClick = {
                             menu = false
                             c.launchSafe(
@@ -138,6 +169,7 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.copy_package)) },
+                        leadingIcon = { Icon(Icons.Rounded.Edit, null) },
                         onClick = {
                             menu = false
                             c.copyText(app.packageName)
@@ -154,7 +186,11 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                 R.string.certificates,
                 R.string.technology,
             )
-        ScrollableTabRow(selectedTabIndex = tab, edgePadding = 8.dp) {
+        ScrollableTabRow(
+            selectedTabIndex = tab,
+            edgePadding = 16.dp,
+            modifier = Modifier.padding(top = 12.dp),
+        ) {
             tabs.forEachIndexed { i, title ->
                 Tab(
                     selected = tab == i,
@@ -168,16 +204,23 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
             LazyColumn(
                 Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 state.error?.let { failure ->
                     item {
-                        Text(
-                            stringResource(errorText(failure)),
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                        TextButton(onClick = { vm.inspect(app) }) {
-                            Text(stringResource(R.string.retry))
+                        Surface(
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            shape = MaterialTheme.shapes.large,
+                        ) {
+                            Column(Modifier.padding(16.dp)) {
+                                Text(
+                                    stringResource(errorText(failure)),
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                )
+                                TextButton(onClick = { vm.inspect(app) }) {
+                                    Text(stringResource(R.string.retry))
+                                }
+                            }
                         }
                     }
                 }
@@ -187,266 +230,363 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit) {
                             item {
                                 Surface(
                                     color = MaterialTheme.colorScheme.errorContainer,
-                                    shape = MaterialTheme.shapes.medium,
+                                    shape = MaterialTheme.shapes.large,
                                 ) {
-                                    Column(Modifier.padding(14.dp)) {
-                                        Text(
-                                            stringResource(R.string.signer_changed_title),
-                                            style = MaterialTheme.typography.titleSmall,
-                                            color = MaterialTheme.colorScheme.onErrorContainer,
+                                    Row(Modifier.padding(16.dp)) {
+                                        Icon(
+                                            PackIcons.GppMaybe,
+                                            null,
+                                            tint = MaterialTheme.colorScheme.onErrorContainer,
                                         )
-                                        Text(
-                                            stringResource(
-                                                R.string.signer_changed_body,
-                                                previous.version,
-                                                DateFormat.getDateInstance(DateFormat.MEDIUM)
-                                                    .format(Date(previous.created)),
-                                            ),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onErrorContainer,
-                                        )
+                                        Column(Modifier.padding(start = 12.dp)) {
+                                            Text(
+                                                stringResource(R.string.signer_changed_title),
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                            )
+                                            Text(
+                                                stringResource(
+                                                    R.string.signer_changed_body,
+                                                    previous.version,
+                                                    DateFormat.getDateInstance(DateFormat.MEDIUM)
+                                                        .format(Date(previous.created)),
+                                                ),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                         item {
-                            InfoRow(stringResource(R.string.package_name), app.packageName) {
-                                c.copyText(app.packageName)
-                            }
-                        }
-                        item {
-                            InfoRow(
-                                stringResource(R.string.version),
-                                "${app.version} (${app.versionCode})",
-                            )
-                        }
-                        item {
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                Box(Modifier.weight(1f)) {
-                                    InfoRow(stringResource(R.string.min_sdk), app.minSdk.toString())
-                                }
-                                Box(Modifier.weight(1f)) {
-                                    InfoRow(
-                                        stringResource(R.string.target_sdk),
-                                        app.targetSdk.toString(),
+                            RowGroup(title = stringResource(R.string.app_info)) {
+                                InfoLine(
+                                    stringResource(R.string.package_name),
+                                    app.packageName,
+                                    onClick = { c.copyText(app.packageName) },
+                                )
+                                GroupDivider()
+                                InfoLine(
+                                    stringResource(R.string.version),
+                                    "${app.version} (${app.versionCode})",
+                                )
+                                GroupDivider()
+                                InfoLine(
+                                    stringResource(R.string.android_versions),
+                                    stringResource(
+                                        R.string.sdk_range,
+                                        app.minSdk,
+                                        app.targetSdk,
+                                    ),
+                                )
+                                GroupDivider()
+                                InfoLine(
+                                    stringResource(R.string.archive_format),
+                                    ".${FileNames.extension(app, settings?.naming ?: NamingConfig())} · " +
+                                        "${app.paths.size} APK · ${sizeText(app.size)}",
+                                )
+                                GroupDivider()
+                                InfoLine(
+                                    stringResource(R.string.source),
+                                    if (app.fromFile) stringResource(R.string.local_file)
+                                    else sourceName(app.source),
+                                )
+                                if (!app.fromFile) {
+                                    GroupDivider()
+                                    InfoLine(
+                                        stringResource(R.string.installer),
+                                        app.installer.ifBlank {
+                                            resources.getString(R.string.unknown)
+                                        },
                                     )
+                                    GroupDivider()
+                                    InfoLine(
+                                        stringResource(R.string.last_update),
+                                        DateFormat.getDateTimeInstance(
+                                                DateFormat.MEDIUM,
+                                                DateFormat.SHORT,
+                                            )
+                                            .format(Date(app.updated)),
+                                    )
+                                    GroupDivider()
+                                    InfoLine("UID", app.uid.toString())
                                 }
                             }
                         }
-                        item {
-                            InfoRow(
-                                stringResource(R.string.archive_format),
-                                ".${FileNames.extension(app, settings?.naming ?: NamingConfig())} · " +
-                                    "${app.paths.size} APK · ${sizeText(app.size)}",
-                            )
-                        }
-                        item {
-                            InfoRow(
-                                stringResource(R.string.source),
-                                if (app.fromFile) stringResource(R.string.local_file)
-                                else sourceName(app.source),
-                            )
-                        }
-                        if (!app.fromFile) {
+                        if (report != null)
                             item {
-                                InfoRow(
-                                    stringResource(R.string.installer),
-                                    app.installer.ifBlank { resources.getString(R.string.unknown) },
-                                )
-                            }
-                            item {
-                                InfoRow(
-                                    stringResource(R.string.last_update),
-                                    DateFormat.getDateTimeInstance().format(Date(app.updated)),
-                                )
-                            }
-                            item { InfoRow("UID", app.uid.toString()) }
-                        }
-                        if (report != null) {
-                            item {
-                                Card(
-                                    colors =
-                                        CardDefaults.cardColors(
-                                            containerColor =
-                                                MaterialTheme.colorScheme.secondaryContainer
+                                RowGroup(title = stringResource(R.string.review_title)) {
+                                    Text(
+                                        stringResource(R.string.audit_disclaimer),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(16.dp),
+                                    )
+                                    if (report.findings.isEmpty())
+                                        ActionRow(
+                                            stringResource(R.string.no_findings),
+                                            icon = Icons.Rounded.CheckCircle,
                                         )
-                                ) {
-                                    Column(Modifier.padding(18.dp)) {
-                                        Text(
-                                            stringResource(R.string.heuristic_score, report.score),
-                                            style = MaterialTheme.typography.headlineSmall,
-                                        )
-                                        Spacer(Modifier.height(8.dp))
-                                        Text(
-                                            stringResource(R.string.audit_disclaimer),
-                                            style = MaterialTheme.typography.bodySmall,
+                                    report.findings.forEach { f ->
+                                        GroupDivider()
+                                        ActionRow(
+                                            stringResource(findingTitle(f.code)),
+                                            stringResource(findingBody(f.code), f.count),
+                                            Icons.Rounded.Warning,
                                         )
                                     }
                                 }
                             }
-                            if (report.findings.isEmpty())
-                                item { Text(stringResource(R.string.no_findings)) }
-                            items(report.findings) { f ->
-                                InfoRow(
-                                    stringResource(findingTitle(f.code)),
-                                    stringResource(findingBody(f.code), f.count),
-                                )
-                            }
-                        }
                     }
                     1 -> {
                         item {
                             Text(
                                 stringResource(R.string.permission_explanation),
                                 style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         if (report?.permissions?.isEmpty() == true)
-                            item { Text(stringResource(R.string.no_permissions)) }
-                        items(report?.permissions.orEmpty()) { p ->
-                            InfoRow(
-                                p.name,
-                                buildString {
-                                    append(
-                                        resources.getString(
-                                            when (p.category) {
-                                                "DANGEROUS" -> R.string.dangerous_permission
-                                                "SIGNATURE" -> R.string.signature_permission
-                                                else -> R.string.normal_permission
-                                            }
-                                        )
-                                    )
-                                    append(" · ")
-                                    append(
-                                        resources.getString(
-                                            when (p.granted) {
-                                                true -> R.string.granted
-                                                false -> R.string.not_granted
-                                                else -> R.string.not_applicable
-                                            }
-                                        )
-                                    )
-                                    if (p.description.isNotBlank()) {
-                                        append("\n")
-                                        append(p.description)
-                                    }
-                                },
+                            item { EmptyState(PackIcons.Shield, stringResource(R.string.no_permissions)) }
+                        val permissions =
+                            report?.permissions.orEmpty().sortedWith(
+                                compareBy({ it.category != "DANGEROUS" }, { it.name })
                             )
-                        }
+                        if (permissions.isNotEmpty())
+                            item {
+                                RowGroup {
+                                    permissions.forEachIndexed { index, p ->
+                                        if (index > 0) GroupDivider()
+                                        PermissionLine(p)
+                                    }
+                                }
+                            }
                     }
                     2 -> {
                         item {
                             Text(
                                 stringResource(R.string.component_explanation),
                                 style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        items(report?.components.orEmpty()) { p ->
-                            InfoRow(
-                                p.name,
-                                "${p.kind} · ${stringResource(if(p.exported)R.string.exported else R.string.internal)} · ${stringResource(if(p.enabled)R.string.enabled else R.string.disabled)}\n${stringResource(R.string.permission)}: ${p.permission.ifBlank {resources.getString(R.string.none)}}",
-                            )
-                        }
+                        val components = report?.components.orEmpty()
+                        if (components.isNotEmpty())
+                            item {
+                                RowGroup {
+                                    components.forEachIndexed { index, p ->
+                                        if (index > 0) GroupDivider()
+                                        ComponentLine(p)
+                                    }
+                                }
+                            }
                     }
                     3 ->
                         if (report != null) {
                             item {
-                                InfoRow(
-                                    stringResource(R.string.signature_verification),
-                                    stringResource(
-                                        when (report.signatureValid) {
-                                            true -> R.string.signature_valid
-                                            false -> R.string.signature_invalid
-                                            else -> R.string.unknown
-                                        }
-                                    ),
-                                )
-                            }
-                            item {
-                                InfoRow(
-                                    stringResource(R.string.signature_schemes),
-                                    report.schemes.joinToString().ifBlank {
-                                        resources.getString(R.string.unknown)
-                                    },
-                                )
-                            }
-                            item {
-                                Text(
-                                    stringResource(R.string.signature_scope),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            }
-                            if (report.signerMatch != null)
-                                item {
-                                    InfoRow(
-                                        stringResource(R.string.installed_signer),
+                                RowGroup(title = stringResource(R.string.signature_verification)) {
+                                    InfoLine(
+                                        stringResource(R.string.signature_verification),
                                         stringResource(
-                                            if (report.signerMatch) R.string.signer_matches
-                                            else R.string.signer_differs
+                                            when (report.signatureValid) {
+                                                true -> R.string.signature_valid
+                                                false -> R.string.signature_invalid
+                                                else -> R.string.unknown
+                                            }
                                         ),
                                     )
-                                }
-                            items(report.certificates) { cert ->
-                                OutlinedCard {
-                                    Column(
-                                        Modifier.padding(14.dp),
-                                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                                    ) {
-                                        InfoRow(stringResource(R.string.subject), cert.subject)
-                                        InfoRow(stringResource(R.string.issuer), cert.issuer)
-                                        InfoRow(
-                                            stringResource(R.string.validity),
-                                            "${cert.validFrom}\n${cert.validTo}\n${stringResource(if(cert.expired)R.string.cert_expired else R.string.cert_current)}",
+                                    GroupDivider()
+                                    InfoLine(
+                                        stringResource(R.string.signature_schemes),
+                                        report.schemes.joinToString().ifBlank {
+                                            resources.getString(R.string.unknown)
+                                        },
+                                    )
+                                    if (report.signerMatch != null) {
+                                        GroupDivider()
+                                        InfoLine(
+                                            stringResource(R.string.installed_signer),
+                                            stringResource(
+                                                if (report.signerMatch) R.string.signer_matches
+                                                else R.string.signer_differs
+                                            ),
                                         )
-                                        InfoRow(stringResource(R.string.algorithm), cert.algorithm)
-                                        InfoRow(stringResource(R.string.serial), cert.serial)
-                                        InfoRow("SHA-256", cert.sha256) { c.copyText(cert.sha256) }
-                                        InfoRow("SHA-1", cert.sha1) { c.copyText(cert.sha1) }
-                                        InfoRow("MD5", cert.md5) { c.copyText(cert.md5) }
                                     }
+                                    Text(
+                                        stringResource(R.string.signature_scope),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(16.dp),
+                                    )
+                                }
+                            }
+                            items(report.certificates) { cert ->
+                                RowGroup(title = stringResource(R.string.certificates)) {
+                                    InfoLine(stringResource(R.string.subject), cert.subject)
+                                    GroupDivider()
+                                    InfoLine(stringResource(R.string.issuer), cert.issuer)
+                                    GroupDivider()
+                                    InfoLine(
+                                        stringResource(R.string.validity),
+                                        "${cert.validFrom} – ${cert.validTo}\n${stringResource(if (cert.expired) R.string.cert_expired else R.string.cert_current)}",
+                                    )
+                                    GroupDivider()
+                                    InfoLine(stringResource(R.string.algorithm), cert.algorithm)
+                                    GroupDivider()
+                                    InfoLine(stringResource(R.string.serial), cert.serial)
+                                    GroupDivider()
+                                    InfoLine("SHA-256", cert.sha256, { c.copyText(cert.sha256) })
+                                    GroupDivider()
+                                    InfoLine("SHA-1", cert.sha1, { c.copyText(cert.sha1) })
+                                    GroupDivider()
+                                    InfoLine("MD5", cert.md5, { c.copyText(cert.md5) })
                                 }
                             }
                         }
                     4 ->
                         if (report != null) {
                             item {
-                                InfoRow(
-                                    stringResource(R.string.framework),
-                                    report.frameworks.joinToString().ifBlank {
-                                        resources.getString(R.string.android_native)
-                                    },
-                                )
+                                RowGroup {
+                                    InfoLine(
+                                        stringResource(R.string.framework),
+                                        report.frameworks.joinToString().ifBlank {
+                                            resources.getString(R.string.android_native)
+                                        },
+                                    )
+                                    GroupDivider()
+                                    InfoLine(
+                                        stringResource(R.string.architectures),
+                                        report.abis.joinToString().ifBlank {
+                                            resources.getString(R.string.no_native_libs)
+                                        },
+                                    )
+                                    Text(
+                                        stringResource(R.string.tech_disclaimer),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(16.dp),
+                                    )
+                                }
                             }
-                            item {
-                                Text(
-                                    stringResource(R.string.tech_disclaimer),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
-                            }
-                            item {
-                                InfoRow(
-                                    stringResource(R.string.architectures),
-                                    report.abis.joinToString().ifBlank {
-                                        resources.getString(R.string.no_native_libs)
-                                    },
-                                )
-                            }
-                            item {
-                                Text(
-                                    stringResource(
-                                        R.string.native_libraries,
-                                        report.libraries.size,
-                                    ),
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                            }
-                            items(report.libraries) {
-                                Text(it, style = MaterialTheme.typography.bodySmall)
-                            }
+                            if (report.libraries.isNotEmpty())
+                                item {
+                                    RowGroup(
+                                        title =
+                                            stringResource(
+                                                R.string.native_libraries,
+                                                report.libraries.size,
+                                            )
+                                    ) {
+                                        report.libraries.forEachIndexed { index, lib ->
+                                            if (index > 0) GroupDivider()
+                                            Text(
+                                                lib,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                modifier =
+                                                    Modifier.padding(
+                                                        horizontal = 16.dp,
+                                                        vertical = 10.dp,
+                                                    ),
+                                            )
+                                        }
+                                    }
+                                }
                         }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ScoreBadge(score: Int) {
+    val (container, content) = scoreColors(score)
+    Surface(color = container, shape = MaterialTheme.shapes.medium) {
+        Column(
+            Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(score.toString(), style = MaterialTheme.typography.titleLarge, color = content)
+            Text(
+                stringResource(R.string.score_short),
+                style = MaterialTheme.typography.labelSmall,
+                color = content,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PermissionLine(p: PermissionRow) {
+    val resources = LocalResources.current
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Text(
+            p.name.substringAfterLast('.'),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Text(
+            p.name,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Tag(
+                resources.getString(
+                    when (p.category) {
+                        "DANGEROUS" -> R.string.dangerous_permission
+                        "SIGNATURE" -> R.string.signature_permission
+                        else -> R.string.normal_permission
+                    }
+                ),
+                if (p.category == "DANGEROUS") MaterialTheme.colorScheme.errorContainer
+                else MaterialTheme.colorScheme.secondaryContainer,
+            )
+            if (p.granted != null)
+                Tag(
+                    resources.getString(if (p.granted) R.string.granted else R.string.not_granted),
+                    MaterialTheme.colorScheme.surfaceContainerHighest,
+                )
+        }
+        if (p.description.isNotBlank())
+            Text(
+                p.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+    }
+}
+
+@Composable
+private fun ComponentLine(p: ComponentRow) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Text(p.name.substringAfterLast('.'), style = MaterialTheme.typography.bodyLarge)
+        Text(
+            p.name,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Tag(p.kind.lowercase().replaceFirstChar { it.uppercase() })
+            Tag(
+                stringResource(if (p.exported) R.string.exported else R.string.internal),
+                if (p.exported && p.permission.isBlank()) MaterialTheme.colorScheme.errorContainer
+                else MaterialTheme.colorScheme.surfaceContainerHighest,
+            )
+            if (!p.enabled)
+                Tag(
+                    stringResource(R.string.disabled),
+                    MaterialTheme.colorScheme.surfaceContainerHighest,
+                )
+        }
+        if (p.permission.isNotBlank())
+            Text(
+                "${stringResource(R.string.permission)}: ${p.permission}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 6.dp),
+            )
     }
 }
 
