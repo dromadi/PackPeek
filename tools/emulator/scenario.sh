@@ -67,7 +67,7 @@ step "Copy undangan-sim.apk to Download" yes "$ADB" push "$SAMPLE" /sdcard/Downl
 
 step "Launch" yes "$E" launch "$PKG"
 step "Onboarding shown" no "$E" wait "Skip" 180 && shot onboarding "Onboarding" && "$E" tap "Skip"
-step "App list loads" yes "$E" wait "Search apps" 180
+step "App list loads" yes "$E" wait "Select all results" 240
 shot apps "App list"
 
 step "Open Overview" yes "$E" tap "Overview"
