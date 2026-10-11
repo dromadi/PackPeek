@@ -36,6 +36,17 @@ export ANDROID_HOME=/path/to/sdk
 
 Setiap baris di atas dikunci oleh `ScamSamplesTest` (JVM), jadi perubahan pada mesin analisis yang memecah salah satu deteksi langsung ketahuan.
 
+### Fixture pelacakan nilai (bukan modus penipuan)
+
+| APK | Isi | Yang dikunci tes |
+|---|---|---|
+| `control-overload` | `a(String)` membaca clipboard, `a(int)` mengirim angka | Overload tidak digabung, jadi tidak ada jalur clipboard |
+| `control-unlinked` | Membaca cookie lalu mengirim request tanpa cookie | "Jalur kode yang sama", **bukan** nilai terlacak |
+| `joined-pieces` | Alamat bot dipecah lalu digabung dengan `+`, plus potongan yang tidak digabung | Hanya gabungan yang sungguh dibuat kode yang dilaporkan |
+| `coroutine-cookie` (Kotlin) | Cookie lewat lambda `launch`, disimpan di continuation (`L$0`), dikembalikan fungsi `suspend`, plus pembanding yang hanya memakai cookie untuk keputusan | Tiga jalur coroutine terlacak; pembanding tidak (`CoroutineTrackingTest`) |
+
+Fixture Kotlin dibangun dengan `./build-kotlin.sh` (memakai compiler Kotlin dari cache Gradle proyek ini), karena bentuk coroutine hanya realistis bila dikompilasi oleh Kotlin sungguhan.
+
 ## Cara menguji di HP
 
 1. Bangun APK (atau unduh dari pengembang).

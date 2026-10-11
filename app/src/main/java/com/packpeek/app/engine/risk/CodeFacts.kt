@@ -144,6 +144,8 @@ data class CodeChain(
     val toSink: List<ChainStep>,
     /** Public IP literal in the class that sends, for network chains. */
     val ipHost: String? = null,
+    /** The value read at the start was traced into the sending call (through calls, lambdas, coroutines). */
+    val traced: Boolean = false,
 )
 
 enum class Decoding { BASE64, JOINED, CHAR_ARRAY, XOR, REVERSED }
