@@ -395,11 +395,14 @@ fun evidenceText(res: Resources, e: Evidence): String =
                     val parts = e.detail.split('|')
                     val (source, sink) =
                         parts[0].split('>').map { runCatching { Capability.valueOf(it) }.getOrDefault(Capability.NETWORK) }
-                    res.getString(
-                        if (parts.getOrNull(3) == "v") R.string.ev_flow_traced else R.string.ev_flow,
-                        capabilityName(res, source),
-                        capabilityName(res, sink),
-                    ) + if (parts.size >= 3) "\n${parts[1]} → ${parts[2]}" else ""
+                    val hosts = RiskRules.destinations(e)
+                    when {
+                        hosts.isNotEmpty() ->
+                            res.getString(R.string.ev_flow_traced_to, capabilityName(res, source), capabilityName(res, sink), hosts.joinToString(", "))
+                        parts.getOrNull(3) == "v" ->
+                            res.getString(R.string.ev_flow_traced, capabilityName(res, source), capabilityName(res, sink))
+                        else -> res.getString(R.string.ev_flow, capabilityName(res, source), capabilityName(res, sink))
+                    } + if (parts.size >= 3) "\n${parts[1]} → ${parts[2]}" else ""
                 }
                 EvidenceKind.DESTINATION -> {
                     val parts = e.detail.split('|')

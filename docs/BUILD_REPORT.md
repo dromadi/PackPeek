@@ -1,21 +1,21 @@
-# Hasil verifikasi — 2.0.0-alpha.14 (2026-10-11)
+# Hasil verifikasi — 2.0.0-alpha.15 (2026-10-11)
 
 | Pemeriksaan | Hasil |
 |---|---|
 | assembleDebug | Lulus |
-| testDebugUnitTest | 126 tes, 0 gagal, 0 error (JVM, termasuk render layar Robolectric dan 14 APK uji: 8 modus penipuan, 4 pembanding, 2 fixture termasuk coroutine Kotlin) |
+| testDebugUnitTest | 131 tes, 0 gagal, 0 error (JVM, termasuk render layar Robolectric dan 15 APK uji: 8 modus penipuan, 4 pembanding, 3 fixture termasuk 2 Kotlin) |
 | lintDebug | 0 error, 71 peringatan |
 | assembleRelease + R8 | Lulus; keluaran unsigned, bukan APK produksi siap pasang |
 | apksigner verify APK debug | Lulus |
 | zipalign 16 KiB APK debug | Lulus |
-| Identitas | com.packpeek.app.debug, 2.0.0-alpha.14-debug (versionCode 20014) |
+| Identitas | com.packpeek.app.debug, 2.0.0-alpha.15-debug (versionCode 20015) |
 | SDK | minimum 24, target 36 |
 | Izin Internet | **Ada** sejak alpha.10, hanya untuk cek hash VirusTotal opsional (kunci milik pengguna; hanya SHA-256 yang dikirim) |
 | Uji emulator | GitHub API 36, run 13 (alpha.13): 18 dari 18 langkah lulus. Langkahnya: daftar aplikasi, ringkasan dan pemeriksaan semua aplikasi, buka berkas lewat pemilih sistem, analisis, analisis mendalam, laporan PDF sampai lembar bagikan, pasang `control-clean.apk` sampai prompt sistem dan dialog hasil, aplikasi benar-benar terpasang, tanpa crash. Hasil di branch `emulator-results` |
 | HP fisik | Belum diuji oleh pengembang |
 
-Ukuran APK debug: 17,552,476 byte. SHA-256:
-`917506275f23ea87e140a89cfbae4a705b59fcc0efb8448fcfd475d28b9be09c`
+Ukuran APK debug: 17,554,484 byte. SHA-256:
+`61e4df5b0a915dc931bf7882684284e68366fabbb7236f617e6a8878802d4794`
 
 Perintah yang dijalankan:
 ```bash

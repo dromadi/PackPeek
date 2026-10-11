@@ -525,4 +525,6 @@
         <item>Verifique se o app precisa disso para sua função. Tenha cuidado se ele também pedir acesso root ou vier de fora de uma loja de apps.</item>
     </string-array>
     <string name="strength_t3_traced">um valor rastreado da leitura até o envio</string>
+    <string name="ev_flow_traced_to">O valor de %1$s foi rastreado até a chamada que envia para %2$s, endereço: %3$s</string>
+    <string name="chain_destination">Enviado para: %1$s</string>
 </resources>

@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.0-alpha.15 — 2026-10-11
+
+**Alamat tujuan untuk nilai yang terlacak.** Bila nilai data pribadi terlacak sampai ke panggilan pengiriman, PackPeek kini juga menyebut **ke alamat mana** pengiriman itu, misalnya "Nilai cookie login dilacak sampai ke panggilan yang mengirim ke internet, alamat: i.instagram.com".
+
+- Alamat diambil dari URL yang tertulis di kode dan diikuti seperti nilai data:
+  - lewat `Request.Builder().url(...)`, penggabungan teks, field (alamat dasar klien API), dan nilai kembali fungsi;
+  - lewat parameter fungsi pembantu seperti `get(url, cookie)`;
+  - lewat coroutine.
+- Setiap pengiriman dirangkum per fungsi (parameter yang ikut, sumber data, alamat), lalu dirangkum naik ke pemanggilnya. Dengan begitu nilai dan alamat yang datang dari jalur berbeda tetap bertemu di pengiriman yang sama.
+- Alamat tempat data dibaca tidak dianggap tujuan. Contohnya `getCookie("https://www.instagram.com")` membaca cookie, bukan mengirim ke Instagram.
+- Panggilan ke kelas Android/Java tidak lagi dianggap pemanggilan metode aplikasi.
+- `HttpURLConnection.getResponseCode`/`getInputStream`/`connect` dikenali sebagai pengiriman, karena request baru terkirim setelah header seperti Cookie dipasang.
+- Alamat tampil di bukti temuan, di jejak data analisis mendalam ("Dikirim ke: …"), dan di laporan.
+- Fixture baru `destination-cookie` (Kotlin). Tes: 131. Waktu pindai sekitar 1,3× alpha.14.
+
 ## 2.0.0-alpha.14 — 2026-10-11
 
 **Pelacakan nilai menembus coroutine Kotlin.** Aplikasi modern, seperti InSaver, mengoper data lewat coroutine. Sebelumnya nilai hilang di setiap perpindahan, sehingga hasilnya "nilainya belum dilacak".

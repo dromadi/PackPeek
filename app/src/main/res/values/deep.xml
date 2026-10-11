@@ -81,4 +81,6 @@
     <string name="report_lookup">VirusTotal</string>
     <string name="report_footer">Made with PackPeek on the device itself; the app was not run.</string>
     <string name="report_share_quick">Share evidence report (PDF)</string>
+    <string name="ev_flow_traced_to">Value of %1$s traced into the call that sends to %2$s, address: %3$s</string>
+    <string name="chain_destination">Sent to: %1$s</string>
 </resources>

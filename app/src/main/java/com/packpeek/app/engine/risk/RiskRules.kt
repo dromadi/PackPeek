@@ -9,10 +9,19 @@ import java.util.Locale
  */
 object RiskRules {
     /** Flow evidence: "SOURCE>SINK|source api|sink api|v" where v marks a traced value. */
+    /**
+     * Flow evidence: "SOURCE>SINK|source api|sink api|v|host,host" where v marks a traced value and
+     * the hosts are where it goes (empty when not known).
+     */
     fun flowDetail(flow: CodeFlow) =
-        "${flow.source}>${flow.sink}|${flow.sourceApi}|${flow.sinkApi}|${if (flow.traced) "v" else "p"}"
+        "${flow.source}>${flow.sink}|${flow.sourceApi}|${flow.sinkApi}|${if (flow.traced) "v" else "p"}|" +
+            flow.destinations.joinToString(",")
 
-    fun isTraced(e: Evidence) = e.kind == EvidenceKind.FLOW && e.detail.endsWith("|v")
+    fun isTraced(e: Evidence) = e.kind == EvidenceKind.FLOW && e.detail.split('|').getOrNull(3) == "v"
+
+    /** Hosts a traced value goes to, from flow evidence. */
+    fun destinations(e: Evidence): List<String> =
+        if (!isTraced(e)) emptyList() else e.detail.split('|').getOrNull(4).orEmpty().split(',').filter { it.isNotBlank() }
 
     const val INTERNET = "android.permission.INTERNET"
     const val SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED"

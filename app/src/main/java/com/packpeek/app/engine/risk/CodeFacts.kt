@@ -72,6 +72,8 @@ data class CodeFlow(
      * calls into the sending call's arguments. False: reading and sending only share a code path.
      */
     val traced: Boolean = false,
+    /** For a traced send: hosts of URL constants that travel into the same send call. */
+    val destinations: List<String> = emptyList(),
 )
 
 /** A host found in a URL string in the app's own code. */
@@ -146,6 +148,8 @@ data class CodeChain(
     val ipHost: String? = null,
     /** The value read at the start was traced into the sending call (through calls, lambdas, coroutines). */
     val traced: Boolean = false,
+    /** Hosts of URL constants that travel into the same send as the traced value. */
+    val destinations: List<String> = emptyList(),
 )
 
 enum class Decoding { BASE64, JOINED, CHAR_ARRAY, XOR, REVERSED }

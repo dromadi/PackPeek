@@ -513,4 +513,6 @@
         <item>जाँचें कि ऐप को अपने काम के लिए इसकी ज़रूरत है या नहीं। सावधान रहें अगर यह रूट एक्सेस भी माँगता है या ऐप स्टोर के बाहर से आया है।</item>
     </string-array>
     <string name="strength_t3_traced">पढ़ने से भेजने तक ट्रैक किया गया मान</string>
+    <string name="ev_flow_traced_to">%1$s का मान %2$s को भेजने वाली कॉल तक ट्रैक किया गया, पता: %3$s</string>
+    <string name="chain_destination">भेजा जाता है: %1$s</string>
 </resources>

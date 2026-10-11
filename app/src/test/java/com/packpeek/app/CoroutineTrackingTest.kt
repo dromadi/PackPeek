@@ -14,12 +14,12 @@ import org.junit.Test
 class CoroutineTrackingTest {
     private val apk = File(requireNotNull(javaClass.getResource("/samples/coroutine-cookie.apk")).toURI())
     private val traced by lazy {
-        var out: Map<String, Map<Capability, Set<Capability>>> = emptyMap()
+        var out: Map<String, Map<Capability, Map<Capability, Set<String>>>> = emptyMap()
         DexScanner.scan(listOf(apk), DexScanner.DEEP_TIME_LIMIT_MS, deep = true) { out = it }
         out
     }
 
-    private fun cookieSent(method: String) = traced[method]?.get(NETWORK)?.contains(COOKIES) == true
+    private fun cookieSent(method: String) = traced[method]?.get(NETWORK)?.containsKey(COOKIES) == true
 
     @Test
     fun capturedByALaunchedLambda() {

@@ -80,4 +80,6 @@
     <string name="report_lookup">VirusTotal</string>
     <string name="report_footer">Dibuat dengan PackPeek langsung di perangkat; aplikasinya tidak dijalankan.</string>
     <string name="report_share_quick">Bagikan laporan bukti (PDF)</string>
+    <string name="ev_flow_traced_to">Nilai %1$s dilacak sampai ke panggilan yang mengirim ke %2$s, alamat: %3$s</string>
+    <string name="chain_destination">Dikirim ke: %1$s</string>
 </resources>
