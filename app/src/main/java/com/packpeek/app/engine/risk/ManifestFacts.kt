@@ -116,7 +116,8 @@ object ManifestScanner {
                             component.kind.startsWith("activity") &&
                                 component.enabled &&
                                 component.filters.any { f ->
-                                    f.categories.any { it in launcherCategories }
+                                    "android.intent.action.MAIN" in f.actions &&
+                                        f.categories.any { it in launcherCategories }
                                 }
                         )
                             launcher = true

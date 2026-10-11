@@ -13,46 +13,94 @@ import kotlinx.coroutines.*
 
 /** Reads the base manifest of APK and APK-set streams; SAF files have no random access. */
 object StreamManifest {
-    private const val MAX_ENTRIES = 10000
     private const val MAX_MANIFEST = 2 * 1024 * 1024
 
-    fun read(input: InputStream): Map<String, String>? = read(input, nested = false)
+    /** Limits are shared by outer and nested ZIPs, including entries skipped before the manifest. */
+    fun read(
+        input: InputStream,
+        maxInflatedBytes: Long = 512L * 1024 * 1024,
+        maxEntries: Int = 10_000,
+        active: () -> Boolean = { true },
+    ): Map<String, String>? = read(input, nested = false, Budget(maxInflatedBytes, maxEntries, active))
 
-    private fun read(input: InputStream, nested: Boolean): Map<String, String>? {
-        // Not closed here: a nested stream would close the outer archive.
-        val zip = ZipInputStream(input)
-        var count = 0
-        while (true) {
-            val entry = zip.nextEntry ?: return null
-            if (++count > MAX_ENTRIES) return null
-            if (entry.isDirectory) continue
-            if (entry.name == "AndroidManifest.xml") return ManifestRoot.decode(bounded(zip))
-            if (!nested && entry.name.endsWith(".apk", true)) {
-                // Sets hold one base APK; config and feature splits carry a split name.
-                val manifest = runCatching { read(zip, nested = true) }.getOrNull()
-                if (manifest != null && manifest["split"].isNullOrBlank()) return manifest
+    private class Budget(var bytesLeft: Long, var entriesLeft: Int, val active: () -> Boolean) {
+        private val start = System.nanoTime()
+
+        init {
+            require(bytesLeft >= 0 && entriesLeft >= 0)
+        }
+
+        fun check() {
+            if (!active()) throw InterruptedIOException("cancelled")
+            if (System.nanoTime() - start > 20_000_000_000L) throw InterruptedIOException("time limit")
+        }
+
+        fun read(input: InputStream, buffer: ByteArray, off: Int = 0, len: Int = buffer.size): Int {
+            check()
+            // At the boundary probe one byte for EOF, never inflate a whole extra buffer.
+            val length = if (bytesLeft < len) bytesLeft.toInt() + 1 else len
+            val n = input.read(buffer, off, length)
+            if (n > 0) {
+                bytesLeft -= n
+                if (bytesLeft < 0) throw InterruptedIOException("inflated read limit")
             }
+            return n
         }
     }
 
-    private fun bounded(input: InputStream): ByteArray {
-        val out = ByteArrayOutputStream()
-        val buffer = ByteArray(8192)
-        while (true) {
-            val n = input.read(buffer)
-            if (n < 0) break
-            require(out.size() + n <= MAX_MANIFEST)
-            out.write(buffer, 0, n)
+    private fun read(input: InputStream, nested: Boolean, budget: Budget): Map<String, String>? {
+        // Release each inflater without closing the containing ZIP or caller-owned SAF stream.
+        val borrowed = object : FilterInputStream(input) { override fun close() {} }
+        ZipInputStream(borrowed).use { zip ->
+            val buffer = ByteArray(8192)
+            while (true) {
+                budget.check()
+                val entry = zip.nextEntry ?: return null
+                if (--budget.entriesLeft < 0) throw InterruptedIOException("entry limit")
+                if (!entry.isDirectory && entry.name == "AndroidManifest.xml") {
+                    val out = ByteArrayOutputStream()
+                    while (true) {
+                        val n = budget.read(zip, buffer)
+                        if (n < 0) break
+                        require(out.size() + n <= MAX_MANIFEST)
+                        out.write(buffer, 0, n)
+                    }
+                    return ManifestRoot.decode(out.toByteArray())
+                }
+                if (!nested && !entry.isDirectory && entry.name.endsWith(".apk", true)) {
+                    // Count outer decompression as well as inner APK decompression.
+                    val counted = object : InputStream() {
+                        override fun read(): Int {
+                            val one = ByteArray(1)
+                            return if (read(one, 0, 1) < 0) -1 else one[0].toInt() and 255
+                        }
+                        override fun read(b: ByteArray, off: Int, len: Int): Int {
+                            if (len == 0) return 0
+                            return budget.read(zip, b, off, len)
+                        }
+                    }
+                    val manifest = try {
+                        read(counted, nested = true, budget)
+                    } catch (e: InterruptedIOException) {
+                        throw e // Cancellation and shared limits must not be swallowed as a bad split.
+                    } catch (_: Exception) {
+                        null
+                    }
+                    if (manifest != null && manifest["split"].isNullOrBlank()) return manifest
+                }
+                // nextEntry() otherwise drains the entry internally, bypassing our inflated limit.
+                while (budget.read(zip, buffer) >= 0) Unit
+            }
         }
-        return out.toByteArray()
+        return null
     }
 }
 
 /**
  * Caps what one archive may cost while looking for its manifest: raw bytes read and time, and stops
  * as soon as [active] turns false. ZipInputStream inflates every skipped entry, so a huge set or a
- * zip bomb would otherwise stall the scan; the clock is checked on every read, which also bounds
- * inflating (each raw read can only expand so far).
+ * zip bomb would otherwise stall the scan. StreamManifest separately bounds inflated bytes and
+ * checks cancellation while draining entries, including data already buffered by the inflater.
  */
 class LimitedInput(
     input: InputStream,
@@ -127,7 +175,7 @@ class BackupIndexer(private val context: Context) {
                                                 System.currentTimeMillis() + MAX_MILLIS_PER_FILE,
                                                 job::isActive,
                                             )
-                                        StreamManifest.read(limited.buffered())
+                                        StreamManifest.read(limited.buffered(), active = job::isActive)
                                     }
                                 }
                                 .also { ensureActive() }

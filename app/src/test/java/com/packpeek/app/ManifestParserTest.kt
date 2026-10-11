@@ -233,6 +233,29 @@ class ManifestParserTest {
     }
 
     @Test
+    fun launcherNeedsMainAndCategoryInTheSameFilter() {
+        fun child(tag: String, value: String) = Element(tag, listOf(str("name", NAME, value)))
+        fun filter(vararg children: Element) = Element("intent-filter", emptyList(), children.toList())
+        val main = child("action", "android.intent.action.MAIN")
+        val category = child("category", "android.intent.category.LAUNCHER")
+        val cases = listOf(
+            listOf(filter(category)) to false,
+            listOf(filter(main), filter(category)) to false,
+            listOf(filter(main, category)) to true,
+            listOf(filter(main, child("category", "android.intent.category.LEANBACK_LAUNCHER"))) to true,
+        )
+        for (kind in listOf("activity", "activity-alias")) {
+            for ((filters, expected) in cases) {
+                val activity = Element(kind, listOf(str("name", NAME, ".Main")), filters)
+                val bytes = compile(Element("manifest", listOf(str("package", null, "t.app")),
+                    listOf(Element("application", emptyList(), listOf(activity)))))
+                assertEquals(expected, com.packpeek.app.engine.ManifestRoot.parse(bytes).launchers.contains("t.app.Main"))
+                assertEquals(expected, ManifestScanner.scan(listOf(apk(bytes))).hasLauncher)
+            }
+        }
+    }
+
+    @Test
     fun launcherHiddenAtRuntimeIsObserved() {
         val manifest =
             Element(

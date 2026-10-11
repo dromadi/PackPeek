@@ -52,6 +52,59 @@ class BackupIndexTest {
     }
 
     @Test
+    fun skippedEntriesUseInflatedBudgetEvenWithTinyCompressedInput() {
+        val archive = zip("padding.bin" to ByteArray(1024 * 1024), "AndroidManifest.xml" to manifest)
+        assertTrue(archive.size < 16_384)
+        assertThrows(java.io.InterruptedIOException::class.java) {
+            StreamManifest.read(archive.inputStream(), maxInflatedBytes = 32_768)
+        }
+    }
+
+    @Test
+    fun nestedLimitsAreNotSwallowedAndLaterBaseCannotBypassThem() {
+        val oversized = zip("padding.bin" to ByteArray(1024 * 1024))
+        val base = zip("AndroidManifest.xml" to manifest)
+        val archive = zip("config.apk" to oversized, "base.apk" to base)
+        assertThrows(java.io.InterruptedIOException::class.java) {
+            StreamManifest.read(archive.inputStream(), maxInflatedBytes = 32_768)
+        }
+        assertThrows(java.io.InterruptedIOException::class.java) {
+            StreamManifest.read(archive.inputStream(), maxEntries = 2)
+        }
+    }
+
+    @Test
+    fun entryBudgetIsSharedAcrossNestedArchives() {
+        val emptyApk = zip("resource.bin" to ByteArray(1))
+        val base = zip("AndroidManifest.xml" to manifest)
+        val archive = zip("one.apk" to emptyApk, "two.apk" to emptyApk, "base.apk" to base)
+        assertThrows(java.io.InterruptedIOException::class.java) {
+            StreamManifest.read(archive.inputStream(), maxEntries = 5)
+        }
+        assertEquals("io.github.omniextract.claude", StreamManifest.read(archive.inputStream(), maxEntries = 6)?.get("package"))
+    }
+
+    @Test
+    fun cancellationIsCheckedWhileInflatingBufferedData() {
+        val archive = zip("padding.bin" to ByteArray(1024 * 1024))
+        var checks = 0
+        assertThrows(java.io.InterruptedIOException::class.java) {
+            StreamManifest.read(archive.inputStream(), active = { ++checks < 5 })
+        }
+        assertEquals(5, checks)
+    }
+
+    @Test
+    fun exactInflatedBudgetStillReadsManifestAndLeavesCallerStreamOpen() {
+        var closed = false
+        val input = object : java.io.ByteArrayInputStream(zip("AndroidManifest.xml" to manifest)) {
+            override fun close() { closed = true }
+        }
+        assertNotNull(StreamManifest.read(input, maxInflatedBytes = manifest.size.toLong()))
+        assertFalse(closed)
+    }
+
+    @Test
     fun statusComparesVersionCodes() {
         assertEquals(BackupStatus.NOT_INSTALLED, backupStatus(5, null))
         assertEquals(BackupStatus.NEWER, backupStatus(6, 5))

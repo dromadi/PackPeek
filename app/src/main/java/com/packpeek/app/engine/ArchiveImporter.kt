@@ -185,7 +185,7 @@ object ManifestRoot {
 
     fun read(apk: File): Map<String, String> = parseFile(apk).root
 
-    /** Fully qualified names of activities and aliases with a launcher category. */
+    /** Fully qualified names of activities and aliases with MAIN and a launcher category in the same intent filter. */
     fun launcherActivities(apk: File): Set<String> = parseFile(apk).launchers
 
     fun decode(bytes: ByteArray): Map<String, String> = parse(bytes).root
@@ -224,6 +224,7 @@ object ManifestRoot {
                 .filter { it.name == "activity" || it.name == "activity-alias" }
                 .filter { activity ->
                     activity.child("intent-filter").any { filter ->
+                        filter.child("action").any { it["name"]?.asString() == "android.intent.action.MAIN" } &&
                         filter.child("category").any {
                             it["name"]?.asString() in launcherCategories
                         }
