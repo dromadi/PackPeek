@@ -240,8 +240,13 @@ object RiskRules {
                 )
         val sendSms = declaredWithGrant(listOf("android.permission.SEND_SMS"))
         // OTP theft: SMS access plus a way out plus at least one sign that it is meant to be hidden
-        // or that code actually sends SMS content somewhere.
-        val smsOut = flowsFrom(Capability.SMS_READ)
+        // or that code actually sends SMS content somewhere. Store apps often read their own login
+        // code from an SMS and send it to their server to verify it, so for them only a path to a
+        // bot or webhook address counts; concealment and forwarding count for every app.
+        val outsideStore = untrusted.any { it.stateKey == StateKey.SIDELOADED || it.stateKey == StateKey.FILE_NOT_INSTALLED }
+        val smsOut =
+            if (outsideStore) flowsFrom(Capability.SMS_READ)
+            else flowsFrom(Capability.SMS_READ, sinks = Capability.hiddenDestinations)
         val otpSigns = concealment + smsOut + hiddenDestinations + forwarding
         if (
             smsDeclared.isNotEmpty() &&

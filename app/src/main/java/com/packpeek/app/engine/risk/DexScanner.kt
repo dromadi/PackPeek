@@ -519,6 +519,7 @@ object DexScanner {
     private const val PARAM_SLOTS = 5
     private const val PARAMS = ((1 shl PARAM_SLOTS) - 1) shl PARAM_SHIFT
     private const val MAX_CALLS = 400
+    private val DEX_NAME = Regex("""classes\d*\.dex""")
 
     private fun paramBit(slot: Int) = 1 shl (PARAM_SHIFT + slot.coerceIn(0, PARAM_SLOTS - 1))
 
@@ -529,6 +530,23 @@ object DexScanner {
     private class State(val deadline: Long, val deep: Boolean = false, val trackDeadline: Long = deadline, val track: Boolean = true) {
         /** Value tracking was skipped or stopped somewhere to keep the scan within its limit. */
         var trackingCut = false
+        var progress: ((ScanProgress) -> Unit)? = null
+        var dexTotal = 1
+        var dexDone = 0
+        private var shown = -1
+
+        /** Reports [part] of the current step: reading DEX file [dexDone], or resolving flows. */
+        fun report(part: Float, resolving: Boolean = false) {
+            val listener = progress ?: return
+            val reading = if (track) 0.85f else 1f
+            val fraction =
+                if (resolving) reading + (1 - reading) * part
+                else reading * ((dexDone + part.coerceIn(0f, 1f)) / dexTotal).coerceAtMost(1f)
+            val percent = (fraction * 100).toInt()
+            if (percent <= shown) return
+            shown = percent
+            listener(ScanProgress(fraction, (dexDone + 1).coerceAtMost(dexTotal), dexTotal, resolving))
+        }
         private var trackChecks = 0
         private var lastLive = 0L
 
@@ -623,24 +641,32 @@ object DexScanner {
          * many apps, where only the findings and their levels matter; those do not depend on it.
          */
         track: Boolean = true,
+        progress: ((ScanProgress) -> Unit)? = null,
         tracedBy: ((Map<String, Map<Capability, Map<Capability, Set<String>>>>) -> Unit)? = null,
     ): CodeFacts {
         val started = System.currentTimeMillis()
         // Value tracking gets part of the time: the plain scan (capabilities, SDKs, addresses,
         // code paths) must always finish, even for very large apps on a slow phone.
         val state = State(started + timeLimitMs, deep, trackDeadline = started + timeLimitMs * 6 / 10, track = track)
+        state.progress = progress
+        state.dexTotal =
+            apks.sumOf { apk -> runCatching { ZipFile(apk).use { z -> z.entries().asSequence().count { DEX_NAME.matches(it.name) } } }.getOrDefault(0) }
+                .coerceAtLeast(1)
+        state.report(0f)
         apks.forEach { apk ->
             runCatching {
                     ZipFile(apk).use { zip ->
                         val entries = zip.entries().asSequence().toList()
                         inspectPackaging(zip, entries, apk.name, state)
                         entries
-                            .filter { Regex("""classes\d*\.dex""").matches(it.name) }
+                            .filter { DEX_NAME.matches(it.name) }
                             .sortedBy { it.name.length * 100 + (it.name.filter(Char::isDigit).toIntOrNull() ?: 0) }
                             .forEach { entry ->
                                 if (state.stopped) return@forEach
+                                state.report(0f)
                                 if (entry.size > MAX_DEX_BYTES) {
                                     state.gaps += CodeGap(GapKind.LIMIT, "${apk.name}!${entry.name}")
+                                    state.dexDone++
                                     return@forEach
                                 }
                                 val bytes = zip.getInputStream(entry).use { it.readBytes() }
@@ -652,6 +678,7 @@ object DexScanner {
                                 } catch (e: Exception) {
                                     state.gaps += CodeGap(GapKind.UNREADABLE, "${apk.name}!${entry.name}")
                                 }
+                                state.dexDone++
                             }
                     }
                 }
@@ -668,6 +695,7 @@ object DexScanner {
                 emptyMap()
             }
         if (state.trackingCut) state.gaps += CodeGap(GapKind.TRACKING, "")
+        state.report(1f, resolving = track)
         tracedBy?.invoke(
             traced.entries.associate { (k, map) ->
                 (state.names[k] ?: k) to
@@ -1139,6 +1167,7 @@ object DexScanner {
 
         var steps = 0
         rounds@ for (round in 0 until 12) {
+            state.report(round / 12f, resolving = true)
             changed = false
             for ((k, m) in methods) {
                 if (++steps and 255 == 0 && (System.currentTimeMillis() > until || state.memoryTight(0.8))) {
@@ -1543,6 +1572,7 @@ object DexScanner {
 
         fun scan() {
             for (c in 0 until classCount) {
+                if (c and 127 == 0) state.report(c.toFloat() / classCount)
                 if (System.currentTimeMillis() > state.deadline) {
                     state.stopped = true
                     return

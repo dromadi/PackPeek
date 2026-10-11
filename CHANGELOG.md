@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.0-alpha.19 — 2026-10-11
+
+**Pemeriksaan semua aplikasi bisa dilanjutkan, hasil tersimpan, progres per aplikasi, diagram hasil, dan salah deteksi OTP diperbaiki.**
+
+- **Hasil pemeriksaan tersimpan di HP.** Hasil setiap aplikasi disimpan begitu selesai diperiksa, ke berkas kecil di penyimpanan internal PackPeek; tidak ada yang keluar dari HP. Bila PackPeek ditutup atau dimatikan sistem, pemeriksaan **dijeda**, bukan diulang dari awal. Kartu Ringkasan menulis "Dijeda: 120 dari 258 aplikasi sudah diperiksa…" dengan tombol Lanjutkan. Aplikasi yang diperbarui sejak diperiksa akan diperiksa lagi. Setelah PackPeek diperbarui, semua hasil diperiksa ulang karena aturannya bisa berubah.
+- **Progres saat memeriksa satu aplikasi:** persentase dan langkahnya, yaitu membaca manifest dan sertifikat, membaca kode (berkas 3 dari 8), lalu menelusuri aliran data. Analisis mendalam juga menampilkannya.
+- **Diagram donat "Hasil pemeriksaan"** di Ringkasan: indikator kuat, perlu perhatian, tanpa temuan penting, dan belum diperiksa, masing-masing dengan jumlah di legenda. Pembaca layar membacakan keempat angkanya.
+- **Salah deteksi "Pola pencurian OTP" diperbaiki.** Getcontact, Meta AI, dan Perplexity dari Play Store ditandai indikator kuat hanya karena ada jalur kode dari baca-SMS ke internet. Banyak aplikasi resmi membaca SMS untuk mengisi otomatis kode login mereka sendiri dan mengirimnya ke server mereka untuk verifikasi. Kini jalur seperti itu hanya dihitung sebagai tanda pencurian OTP untuk aplikasi dari luar toko resmi atau berkas APK. Tanda yang lebih tegas tetap berlaku untuk semua sumber: kiriman ke Telegram atau webhook, ikon tersembunyi, dan penerusan panggilan. Akses SMS-nya tetap dilaporkan sebagai "perlu perhatian", lengkap dengan jalur kodenya.
+- Tes: 150. Tes baru mencakup penyimpanan hasil (versi aplikasi, versi PackPeek, baris rusak), progres yang hanya bergerak maju sampai 100%, kalibrasi OTP, dan render diagram.
+
 ## 2.0.0-alpha.18 — 2026-10-11
 
 **Perbaikan dari uji di HP: Ringkasan lambat, tampilan statistik, dan layar pengenalan.**

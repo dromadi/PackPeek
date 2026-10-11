@@ -16,13 +16,16 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.*
+import com.packpeek.app.BuildConfig
 import com.packpeek.app.PackPeekApp
 import com.packpeek.app.data.*
 import com.packpeek.app.engine.*
 import com.packpeek.app.engine.HashLookup
 import com.packpeek.app.engine.risk.ActiveServices
 import com.packpeek.app.engine.risk.CodeFacts
-import com.packpeek.app.engine.risk.RiskFinding
+import com.packpeek.app.engine.risk.EvidenceLevel
+import com.packpeek.app.engine.risk.RiskId
+import com.packpeek.app.engine.risk.ScanProgress
 import com.packpeek.app.engine.risk.RiskReport
 import com.packpeek.app.engine.risk.Severity
 import com.packpeek.app.engine.risk.codeAnalyzed
@@ -47,21 +50,37 @@ data class DeepState(
     val lookup: HashLookup? = null,
 )
 
-/** What the overview needs from one app's evidence check. */
+/** What the overview needs from one app's evidence check; small enough to save on the device. */
 data class RiskBrief(
     val strong: Int,
     val attention: Int,
-    val top: RiskFinding?,
+    /** The most important finding that is not just information, and its strongest evidence. */
+    val topId: RiskId?,
+    val topLevel: EvidenceLevel?,
     val codeAnalyzed: Boolean,
 ) {
+    fun saved(app: AppRecord) =
+        SavedCheck(app.versionCode, app.updated, strong, attention, topId?.name, topLevel?.name, codeAnalyzed)
+
     companion object {
-        fun of(report: RiskReport) =
-            RiskBrief(
+        fun of(report: RiskReport): RiskBrief {
+            val top = report.findings.firstOrNull { it.severity != Severity.INFO }
+            return RiskBrief(
                 report.count(Severity.STRONG),
                 report.count(Severity.ATTENTION),
-                report.findings.firstOrNull { it.severity != Severity.INFO },
+                top?.id,
+                top?.strongestLevel,
                 report.coverage.codeAnalyzed,
             )
+        }
+
+        /** A saved result, if it still applies: same app version, and rules this build knows. */
+        fun of(saved: SavedCheck, app: AppRecord): RiskBrief? {
+            if (saved.versionCode != app.versionCode || saved.updated != app.updated) return null
+            val id = saved.topId?.let { name -> RiskId.entries.firstOrNull { it.name == name } ?: return null }
+            val level = saved.topLevel?.let { name -> EvidenceLevel.entries.firstOrNull { it.name == name } ?: return null }
+            return RiskBrief(saved.strong, saved.attention, id, level, saved.codeAnalyzed)
+        }
     }
 }
 
@@ -98,6 +117,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val technologies = tech.asStateFlow()
     /** Evidence check results per installed app, from the overview check or opened details. */
     val riskBriefs = MutableStateFlow<Map<String, RiskBrief>>(emptyMap())
+    /** Progress of the code scan behind the app currently in details. */
+    val analysisProgress = MutableStateFlow<ScanProgress?>(null)
+    /** Progress of the deep analysis. */
+    val deepProgress = MutableStateFlow<ScanProgress?>(null)
+    private val checkStore = CheckStore(File(owner.filesDir, "checks.tsv"), BuildConfig.VERSION_CODE)
+    private var checksRestored = false
+    private var saveJob: Job? = null
     /** App being checked by the overview check, for its progress line. */
     val checkingApp = MutableStateFlow<String?>(null)
     /** Signer and CPU architectures per package, read for the overview groups. */
@@ -258,6 +284,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 riskBriefs.value = riskBriefs.value.filterKeys { it in unchanged }
                 extras.value = extras.value.filterKeys { it in unchanged }
                 _apps.value = result
+                if (!checksRestored) {
+                    checksRestored = true
+                    // Results of an earlier check, for apps not changed since: a check of all apps
+                    // goes on where it stopped instead of starting over.
+                    val saved = withContext(Dispatchers.IO) { checkStore.load() }
+                    val restored = result.mapNotNull { app -> saved[app.packageName]?.let { RiskBrief.of(it, app) }?.let { app.packageName to it } }
+                    riskBriefs.value = restored.toMap() + riskBriefs.value
+                }
                 selected.value = selected.value intersect result.map { it.packageName }.toSet()
                 error.value = null
             } catch (e: CancellationException) {
@@ -309,6 +343,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         else filtering.value = false
     }
 
+    /** Saves the check results shortly after the last change, so closing the app loses at most one. */
+    private fun saveChecks() {
+        saveJob?.cancel()
+        saveJob = viewModelScope.launch {
+            delay(300)
+            val byPackage = _apps.value.associateBy { it.packageName }
+            val checks = riskBriefs.value.mapNotNull { (pkg, brief) -> byPackage[pkg]?.let { pkg to brief.saved(it) } }.toMap()
+            withContext(NonCancellable + Dispatchers.IO) { runCatching { checkStore.save(checks) } }
+        }
+    }
+
     /**
      * Runs the evidence check (manifest, code, device state) on every user app not checked yet,
      * plus the technology detection. System apps are skipped: their findings stay informational.
@@ -316,7 +361,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun scanOverview(again: Boolean = false) {
         if (checkingOverview.value) return
         checkingOverview.value = true
-        if (again) riskBriefs.value = emptyMap()
+        if (again) {
+            riskBriefs.value = emptyMap()
+            saveChecks()
+        }
         overviewJob = viewModelScope.launch {
             try {
                 val queue = apps.value.filter { !it.system && it.packageName !in riskBriefs.value }.iterator()
@@ -330,6 +378,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             try {
                                 val report = owner.risk.quick(app)
                                 riskBriefs.value = riskBriefs.value + (app.packageName to RiskBrief.of(report))
+                                saveChecks()
                                 if (app.packageName !in tech.value)
                                     tech.value = tech.value + (app.packageName to owner.audit.technology(app).frameworks)
                             } catch (e: CancellationException) {
@@ -500,6 +549,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun inspect(app: AppRecord) {
         auditJob?.cancel()
+        analysisProgress.value = null
         detail.value = DetailState(app = app, loading = true)
         auditJob = viewModelScope.launch {
             try {
@@ -518,7 +568,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 detail.value = DetailState(app, report, loading = true, signerChangedSince = changed)
                 val risk =
                     try {
-                        owner.risk.analyze(app, report)
+                        owner.risk.analyze(app, report) { analysisProgress.value = it }
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
@@ -526,7 +576,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 detail.value = DetailState(app, report, signerChangedSince = changed, risk = risk)
                 if (!app.fromFile) {
-                    if (risk != null) riskBriefs.value = riskBriefs.value + (app.packageName to RiskBrief.of(risk))
+                    if (risk != null) {
+                        riskBriefs.value = riskBriefs.value + (app.packageName to RiskBrief.of(risk))
+                        saveChecks()
+                    }
                     tech.value = tech.value + (app.packageName to report.frameworks)
                 }
             } catch (e: CancellationException) {
@@ -549,7 +602,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         deep.value = DeepState(app = app, running = true)
         deepJob = viewModelScope.launch {
             try {
-                val (report, code) = owner.risk.deep(app, detail.value.report)
+                deepProgress.value = null
+                val (report, code) = owner.risk.deep(app, detail.value.report) { deepProgress.value = it }
                 deep.value = DeepState(app = app, report = report, code = code, failed = code?.deep == null)
             } catch (e: CancellationException) {
                 throw e

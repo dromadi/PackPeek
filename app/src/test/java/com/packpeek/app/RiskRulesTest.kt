@@ -311,6 +311,25 @@ class RiskRulesTest {
         assertEquals(CodeState.NOT_FOUND, report.findings.single { it.id == RiskId.CONTACTS_CALLS }.code)
     }
 
+    /**
+     * Like a store app that fills in its own login code: SMS read, then sent to its server. Not
+     * OTP theft from the store; the same code installed from outside a store is.
+     */
+    @Test
+    fun ownLoginCodeFromAStoreIsNotOtpTheft() {
+        val sms = facts(listOf(internet, receiveSms, "android.permission.READ_SMS"), listOf(receiver("test.app.Otp", RiskRules.SMS_RECEIVED)))
+        val flow = code(flows = listOf(CodeFlow(Capability.SMS_READ, Capability.NETWORK, "test.app.Login.verify", "SmsMessage.getMessageBody", "OkHttpClient.newCall")))
+        val store = RiskRules.evaluate(sms, context(source = "PLAY"), DeviceState(), flow)
+        assertTrue(store.findings.none { it.id == RiskId.OTP_THEFT })
+        assertEquals(0, store.count(Severity.STRONG))
+        assertTrue(store.findings.single { it.id == RiskId.SMS }.evidence.any { it.kind == EvidenceKind.FLOW })
+        val side = RiskRules.evaluate(sms, context(source = "SIDE"), DeviceState(), flow)
+        assertEquals(Severity.STRONG, side.findings.single { it.id == RiskId.OTP_THEFT }.severity)
+        // A bot address is a sign wherever the app came from.
+        val bot = code(flows = listOf(CodeFlow(Capability.SMS_READ, Capability.TELEGRAM, "test.app.Login.verify", "SmsMessage.getMessageBody", "api.telegram.org")))
+        assertEquals(Severity.STRONG, RiskRules.evaluate(sms, context(source = "PLAY"), DeviceState(), bot).findings.single { it.id == RiskId.OTP_THEFT }.severity)
+    }
+
     /** Like Google's API Demos: an SMS demo installed with adb, with clean, fully analysed code. */
     @Test
     fun sideloadingAloneIsNotOtpTheftWhenCodeIsClean() {

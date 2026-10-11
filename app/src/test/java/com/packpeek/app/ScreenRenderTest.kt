@@ -93,7 +93,7 @@ class ScreenRenderTest {
         RowGroup(title = "Needs review") {
             ReviewLine(apps[2], RiskBrief.of(undanganReport)) {}
             GroupDivider()
-            ReviewLine(apps[1], RiskBrief(0, 2, undanganReport.findings.first { it.id == RiskId.SMS }, true)) {}
+            ReviewLine(apps[1], RiskBrief(0, 2, RiskId.SMS, EvidenceLevel.CODE, true)) {}
         }
         ActiveSection(ActiveServices(setOf("sim.undangan"), emptySet(), emptySet(), "com.android.phone"), apps.associateBy { it.packageName }) {}
         StatsRow(apps)
@@ -183,4 +183,21 @@ class ScreenRenderTest {
     @Test @Config(qualifiers = "in-w411dp-h2400dp-xhdpi", fontScale = 1.15f) fun introThree() = intro(2)
 
     @Test @Config(qualifiers = "in-w411dp-h2400dp-xhdpi", fontScale = 1.15f) fun introOneDark() = intro(0, dark = true)
+
+    @Test
+    @Config(qualifiers = "in-w411dp-h2400dp-xhdpi", fontScale = 1.15f)
+    fun checkResultsIndonesian() =
+        render("results-id") {
+            SecurityCard(total = 258, checked = 120, strong = 1, attention = 9, checking = false, current = null, start = {}, again = {}, cancel = {})
+            ResultChart(strong = 1, attention = 9, clear = 110, unchecked = 138)
+            AnalysisProgress(ScanProgress(0.45f, 3, 8, false))
+            AnalysisProgress(null)
+        }
+
+    @Test
+    fun checkResultsDark() =
+        render("results-dark", dark = true) {
+            ResultChart(strong = 3, attention = 20, clear = 235, unchecked = 0)
+            AnalysisProgress(ScanProgress(0.92f, 8, 8, true))
+        }
 }

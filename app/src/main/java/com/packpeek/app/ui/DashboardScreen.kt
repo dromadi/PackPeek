@@ -1,5 +1,6 @@
 package com.packpeek.app.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -17,7 +18,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
@@ -86,6 +90,14 @@ fun DashboardScreen(vm: MainViewModel, inspect: (AppRecord) -> Unit, showGroup: 
                 cancel = vm::cancelOverview,
             )
         }
+        val checkedUser = userApps.count { it.packageName in briefs }
+        if (checkedUser > 0)
+            item {
+                val user = userApps.mapNotNull { briefs[it.packageName] }
+                val strong = user.count { it.strong > 0 }
+                val attention = user.count { it.strong == 0 && it.attention > 0 }
+                ResultChart(strong, attention, user.size - strong - attention, userApps.size - user.size)
+            }
         if (review.isNotEmpty())
             item {
                 var all by rememberSaveable { mutableStateOf(false) }
@@ -180,6 +192,7 @@ internal fun SecurityCard(
                 when {
                     checking -> current.orEmpty()
                     !done -> stringResource(R.string.security_check_body)
+                    checked < total -> stringResource(R.string.security_paused, checked, total)
                     else -> stringResource(R.string.security_checked, checked, total)
                 },
                 style = MaterialTheme.typography.bodyMedium,
@@ -214,7 +227,7 @@ internal fun SecurityCard(
 
 @Composable
 internal fun ReviewLine(app: AppRecord, brief: RiskBrief, onClick: () -> Unit) {
-    val top = brief.top
+    val top = brief.topId
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -224,7 +237,7 @@ internal fun ReviewLine(app: AppRecord, brief: RiskBrief, onClick: () -> Unit) {
             Text(app.label, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (top != null)
                 Text(
-                    stringArrayResource(riskTexts(top.id))[0],
+                    stringArrayResource(riskTexts(top))[0],
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 2,
@@ -243,7 +256,7 @@ internal fun ReviewLine(app: AppRecord, brief: RiskBrief, onClick: () -> Unit) {
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                         )
                     }
-                    Tag(top.strongestLevel.tag, MaterialTheme.colorScheme.surfaceContainerHighest)
+                    brief.topLevel?.let { Tag(it.tag, MaterialTheme.colorScheme.surfaceContainerHighest) }
                 }
         }
         Text(
@@ -315,6 +328,70 @@ internal fun ActiveSection(
                 app?.label ?: pkg,
                 onClick = app?.let { { inspect(it) } },
             )
+        }
+    }
+}
+
+/**
+ * The outcome of the check of all user apps as a donut: part-to-whole of four states in a fixed
+ * order, each also named and counted in the legend so no state is told by color alone.
+ */
+@Composable
+internal fun ResultChart(strong: Int, attention: Int, clear: Int, unchecked: Int) {
+    val scheme = MaterialTheme.colorScheme
+    val parts =
+        listOf(
+            Triple(scheme.error, stringResource(R.string.severity_strong), strong),
+            Triple(scheme.tertiary, stringResource(R.string.severity_attention), attention),
+            Triple(scheme.primary, stringResource(R.string.chart_clear), clear),
+            Triple(scheme.outlineVariant, stringResource(R.string.chart_unchecked), unchecked),
+        )
+    val total = parts.sumOf { it.third }
+    val checked = total - unchecked
+    val description = stringResource(R.string.chart_description, strong, attention, clear, unchecked)
+    RowGroup(title = stringResource(R.string.chart_title)) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(132.dp).semantics { contentDescription = description }, contentAlignment = Alignment.Center) {
+                val surface = scheme.surfaceContainerLow
+                Canvas(Modifier.fillMaxSize()) {
+                    val width = 18.dp.toPx()
+                    val inset = width / 2
+                    val arcSize = Size(size.width - width, size.height - width)
+                    // Segments start at 12 o'clock; a thin gap in the surface color separates them.
+                    val gap = if (parts.count { it.third > 0 } > 1) 2f else 0f
+                    var start = -90f
+                    parts.forEach { (color, _, count) ->
+                        if (count == 0 || total == 0) return@forEach
+                        val sweep = 360f * count / total
+                        drawArc(color, start + gap / 2, (sweep - gap).coerceAtLeast(0.5f), false, Offset(inset, inset), arcSize, style = Stroke(width))
+                        start += sweep
+                    }
+                    if (total == 0) drawArc(surface, 0f, 360f, false, Offset(inset, inset), arcSize, style = Stroke(width))
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(checked.toString(), style = MaterialTheme.typography.headlineSmall)
+                    Text(
+                        stringResource(R.string.chart_center),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = scheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Column(Modifier.weight(1f).padding(start = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                parts.forEach { (color, label, count) ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(12.dp).clip(CircleShape).background(color))
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                        )
+                        Text(count.toString(), style = MaterialTheme.typography.labelLarge)
+                    }
+                }
+            }
         }
     }
 }

@@ -41,6 +41,7 @@ import java.util.Date
 @Composable
 fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit, deepAnalysis: () -> Unit) {
     val state by vm.detail.collectAsStateWithLifecycle()
+    val progress by vm.analysisProgress.collectAsStateWithLifecycle()
     val settings by vm.settings.collectAsStateWithLifecycle()
     val app = state.app ?: return
     val c = LocalContext.current
@@ -284,6 +285,7 @@ fun DetailScreen(vm: MainViewModel, backup: (List<AppRecord>) -> Unit, deepAnaly
                 }
                 when (tab) {
                     0 -> {
+                        if (state.risk == null && state.loading && state.error == null) item { AnalysisProgress(progress) }
                         state.risk?.let { risk ->
                             item {
                                 SectionTitle(stringResource(R.string.concerns))

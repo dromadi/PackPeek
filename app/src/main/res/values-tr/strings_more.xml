@@ -519,4 +519,14 @@
     <string name="ev_flow_traced_to_any">%1$s değeri, gönderen bir çağrıya kadar izlendi: %2$s. Bu çağrı birkaç adrese hizmet ediyor; değer şunlardan birine gidiyor: %3$s</string>
     <string name="chain_destination_any">Şunlardan birine gönderilir: %1$s</string>
     <string name="more_hosts">ve diğerleri</string>
+    <string name="analysis_progress_title">Uygulama kontrol ediliyor</string>
+    <string name="analysis_stage_manifest">Manifest ve sertifika okunuyor</string>
+    <string name="analysis_stage_code">Kod okunuyor: dosya %1$d / %2$d</string>
+    <string name="analysis_stage_resolving">Veriler kodda izleniyor</string>
+    <string name="security_paused">Duraklatıldı: %2$d uygulamadan %1$d tanesi kontrol edildi. Sonuçlar kaydedildi, istediğin zaman devam edebilirsin.</string>
+    <string name="chart_title">Kontrol sonuçları</string>
+    <string name="chart_clear">Önemli bulgu yok</string>
+    <string name="chart_unchecked">Henüz kontrol edilmedi</string>
+    <string name="chart_center">kontrol edildi</string>
+    <string name="chart_description">%1$d güçlü belirti, %2$d dikkat gerektiriyor, %3$d önemli bulgu yok, %4$d henüz kontrol edilmedi</string>
 </resources>

@@ -543,4 +543,14 @@
     <string name="ev_flow_traced_to_any">Значение «%1$s» отслежено до вызова, который отправляет в %2$s. Этот вызов обслуживает несколько адресов; значение уходит на один из: %3$s</string>
     <string name="chain_destination_any">Отправляется на один из: %1$s</string>
     <string name="more_hosts">и другие</string>
+    <string name="analysis_progress_title">Проверка приложения</string>
+    <string name="analysis_stage_manifest">Чтение манифеста и сертификата</string>
+    <string name="analysis_stage_code">Чтение кода: файл %1$d из %2$d</string>
+    <string name="analysis_stage_resolving">Отслеживание данных в коде</string>
+    <string name="security_paused">Пауза: проверено %1$d из %2$d приложений. Результаты сохранены, продолжить можно в любой момент.</string>
+    <string name="chart_title">Результаты проверки</string>
+    <string name="chart_clear">Без важных находок</string>
+    <string name="chart_unchecked">Ещё не проверено</string>
+    <string name="chart_center">проверено</string>
+    <string name="chart_description">%1$d с сильными признаками, %2$d требуют внимания, %3$d без важных находок, %4$d ещё не проверено</string>
 </resources>

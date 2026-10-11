@@ -47,21 +47,22 @@ fun offersDeepAnalysis(report: RiskReport): Boolean =
 @Composable
 fun DeepScreen(vm: MainViewModel, openSettings: () -> Unit) {
     val state by vm.deep.collectAsStateWithLifecycle()
+    val progress by vm.deepProgress.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { vm.analyzeDeep() }
     val app = state.app ?: return
-    DeepContent(state, app, vm::lookUpHash, openSettings)
+    DeepContent(state, app, vm::lookUpHash, openSettings, progress)
 }
 
 /** Stateless body, also rendered by the JVM screen tests. */
 @Composable
-fun DeepContent(state: DeepState, app: AppRecord, lookUp: () -> Unit, openSettings: () -> Unit) {
+fun DeepContent(state: DeepState, app: AppRecord, lookUp: () -> Unit, openSettings: () -> Unit, progress: ScanProgress? = null) {
     val report = state.report
     val deep = state.code?.deep
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item { DeepHeader(app, state) }
+        item { DeepHeader(app, state, progress) }
         if (report == null || deep == null) return@LazyColumn
         item {
             RiskSummary(report)
@@ -82,7 +83,7 @@ fun DeepContent(state: DeepState, app: AppRecord, lookUp: () -> Unit, openSettin
 }
 
 @Composable
-private fun DeepHeader(app: AppRecord, state: DeepState) {
+private fun DeepHeader(app: AppRecord, state: DeepState, progress: ScanProgress?) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         AppIcon(app, Modifier.size(48.dp))
         Column(Modifier.weight(1f).padding(start = 12.dp)) {
@@ -106,7 +107,10 @@ private fun DeepHeader(app: AppRecord, state: DeepState) {
             )
         }
     }
-    if (state.running) LinearProgressIndicator(Modifier.fillMaxWidth().padding(top = 12.dp))
+    if (state.running) {
+        Spacer(Modifier.height(12.dp))
+        AnalysisProgress(progress)
+    }
 }
 
 @Composable

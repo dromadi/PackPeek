@@ -531,4 +531,14 @@
     <string name="ev_flow_traced_to_any">El valor de %1$s se rastreó hasta una llamada que envía a %2$s. Esa llamada sirve a varias direcciones; el valor va a una de: %3$s</string>
     <string name="chain_destination_any">Enviado a una de: %1$s</string>
     <string name="more_hosts">y más</string>
+    <string name="analysis_progress_title">Revisando esta app</string>
+    <string name="analysis_stage_manifest">Leyendo el manifiesto y el certificado</string>
+    <string name="analysis_stage_code">Leyendo código: archivo %1$d de %2$d</string>
+    <string name="analysis_stage_resolving">Siguiendo los datos por el código</string>
+    <string name="security_paused">En pausa: %1$d de %2$d apps revisadas. Los resultados se guardan; puedes continuar cuando quieras.</string>
+    <string name="chart_title">Resultados de la revisión</string>
+    <string name="chart_clear">Sin hallazgos importantes</string>
+    <string name="chart_unchecked">Sin revisar</string>
+    <string name="chart_center">revisadas</string>
+    <string name="chart_description">%1$d con indicadores fuertes, %2$d requieren atención, %3$d sin hallazgos importantes, %4$d sin revisar</string>
 </resources>

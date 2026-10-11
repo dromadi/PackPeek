@@ -320,4 +320,14 @@
     <string name="ev_flow_traced">Nilai %1$s dilacak sampai ke panggilan yang mengirim ke %2$s</string>
     <string name="unproven_flow_untraced">Membaca data ini dan mengirim terjadi di jalur kode yang sama (T3), tetapi nilai yang dibaca belum terlacak sampai ke yang dikirim, jadi keduanya bisa saja tidak berhubungan. Hanya pengamatan saat aplikasi berjalan yang bisa menunjukkan apa yang dikirim.</string>
     <string name="strength_t3_traced">nilai terlacak dari pembacaan sampai pengiriman</string>
+    <string name="analysis_progress_title">Memeriksa aplikasi</string>
+    <string name="analysis_stage_manifest">Membaca manifest dan sertifikat</string>
+    <string name="analysis_stage_code">Membaca kode: berkas %1$d dari %2$d</string>
+    <string name="analysis_stage_resolving">Menelusuri aliran data di kode</string>
+    <string name="security_paused">Dijeda: %1$d dari %2$d aplikasi sudah diperiksa. Hasilnya tersimpan, jadi bisa dilanjutkan kapan saja.</string>
+    <string name="chart_title">Hasil pemeriksaan</string>
+    <string name="chart_clear">Tanpa temuan penting</string>
+    <string name="chart_unchecked">Belum diperiksa</string>
+    <string name="chart_center">diperiksa</string>
+    <string name="chart_description">%1$d dengan indikator kuat, %2$d perlu perhatian, %3$d tanpa temuan penting, %4$d belum diperiksa</string>
 </resources>

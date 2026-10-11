@@ -335,4 +335,14 @@
     <string name="ev_flow_traced">Value of %1$s traced into the call that sends to %2$s</string>
     <string name="unproven_flow_untraced">Reading this data and sending happen in the same code path (T3), but the value read was not traced into what is sent, so the two may be unrelated. Only watching the app while it runs could show what is sent.</string>
     <string name="strength_t3_traced">a value traced from reading to sending</string>
+    <string name="analysis_progress_title">Checking this app</string>
+    <string name="analysis_stage_manifest">Reading the manifest and certificate</string>
+    <string name="analysis_stage_code">Reading code: file %1$d of %2$d</string>
+    <string name="analysis_stage_resolving">Following data through the code</string>
+    <string name="security_paused">Paused: %1$d of %2$d apps checked. Results are saved, so you can continue any time.</string>
+    <string name="chart_title">Check results</string>
+    <string name="chart_clear">No notable findings</string>
+    <string name="chart_unchecked">Not checked yet</string>
+    <string name="chart_center">checked</string>
+    <string name="chart_description">%1$d with strong indicators, %2$d need attention, %3$d without notable findings, %4$d not checked yet</string>
 </resources>

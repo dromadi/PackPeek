@@ -518,3 +518,38 @@ private fun CoverageLine(done: Boolean, text: String) {
         )
     }
 }
+
+/** What a running code scan is doing, for the progress line under its bar. */
+@Composable
+fun progressStage(progress: ScanProgress?): String =
+    when {
+        progress == null -> stringResource(R.string.analysis_stage_manifest)
+        progress.resolving -> stringResource(R.string.analysis_stage_resolving)
+        else -> stringResource(R.string.analysis_stage_code, progress.dexFile, progress.dexFiles)
+    }
+
+/** The check of one app while it runs: how far it is, and which step it is on. */
+@Composable
+fun AnalysisProgress(progress: ScanProgress?) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = MaterialTheme.shapes.large) {
+        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.analysis_progress_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                if (progress != null)
+                    Text(
+                        "${(progress.fraction * 100).toInt()}%",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+            }
+            Text(
+                progressStage(progress),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+            if (progress == null) LinearProgressIndicator(Modifier.fillMaxWidth().padding(top = 12.dp))
+            else LinearProgressIndicator(progress = { progress.fraction }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
+        }
+    }
+}

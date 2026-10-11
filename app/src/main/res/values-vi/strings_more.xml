@@ -507,4 +507,14 @@
     <string name="ev_flow_traced_to_any">Giá trị %1$s được lần theo tới một lệnh gọi gửi tới %2$s. Lệnh gọi đó dùng cho nhiều địa chỉ; giá trị đi tới một trong: %3$s</string>
     <string name="chain_destination_any">Gửi tới một trong: %1$s</string>
     <string name="more_hosts">và các địa chỉ khác</string>
+    <string name="analysis_progress_title">Đang kiểm tra ứng dụng</string>
+    <string name="analysis_stage_manifest">Đang đọc manifest và chứng chỉ</string>
+    <string name="analysis_stage_code">Đang đọc mã: tệp %1$d / %2$d</string>
+    <string name="analysis_stage_resolving">Đang lần theo dữ liệu trong mã</string>
+    <string name="security_paused">Đã tạm dừng: đã kiểm tra %1$d / %2$d ứng dụng. Kết quả đã được lưu, có thể tiếp tục bất cứ lúc nào.</string>
+    <string name="chart_title">Kết quả kiểm tra</string>
+    <string name="chart_clear">Không có phát hiện đáng chú ý</string>
+    <string name="chart_unchecked">Chưa kiểm tra</string>
+    <string name="chart_center">đã kiểm tra</string>
+    <string name="chart_description">%1$d có dấu hiệu mạnh, %2$d cần chú ý, %3$d không có phát hiện đáng chú ý, %4$d chưa kiểm tra</string>
 </resources>

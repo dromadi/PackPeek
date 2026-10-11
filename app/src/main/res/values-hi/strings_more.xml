@@ -519,4 +519,14 @@
     <string name="ev_flow_traced_to_any">%1$s का मान %2$s को भेजने वाली कॉल तक ट्रैक किया गया। वह कॉल कई पतों के लिए इस्तेमाल होती है; मान इनमें से किसी एक पर जाता है: %3$s</string>
     <string name="chain_destination_any">इनमें से किसी एक पर भेजा जाता है: %1$s</string>
     <string name="more_hosts">और अन्य</string>
+    <string name="analysis_progress_title">ऐप की जाँच हो रही है</string>
+    <string name="analysis_stage_manifest">मैनिफ़ेस्ट और सर्टिफ़िकेट पढ़ा जा रहा है</string>
+    <string name="analysis_stage_code">कोड पढ़ा जा रहा है: फ़ाइल %1$d / %2$d</string>
+    <string name="analysis_stage_resolving">कोड में डेटा का रास्ता खोजा जा रहा है</string>
+    <string name="security_paused">रुका हुआ: %2$d में से %1$d ऐप जाँचे गए। नतीजे सहेजे गए हैं, कभी भी जारी रखें।</string>
+    <string name="chart_title">जाँच के नतीजे</string>
+    <string name="chart_clear">कोई ख़ास नतीजा नहीं</string>
+    <string name="chart_unchecked">अभी जाँचा नहीं गया</string>
+    <string name="chart_center">जाँचे गए</string>
+    <string name="chart_description">%1$d में मज़बूत संकेत, %2$d पर ध्यान ज़रूरी, %3$d में कोई ख़ास नतीजा नहीं, %4$d अभी जाँचे नहीं गए</string>
 </resources>

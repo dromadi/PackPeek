@@ -192,3 +192,9 @@ data class DeepFacts(
     val bytes: Long,
     val millis: Long,
 )
+
+/**
+ * How far a code scan is: the share of the work done (0–1), the DEX file being read and how many
+ * there are, and whether the scan is resolving which values reach which send (the last step).
+ */
+data class ScanProgress(val fraction: Float, val dexFile: Int, val dexFiles: Int, val resolving: Boolean)
