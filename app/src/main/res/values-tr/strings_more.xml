@@ -473,11 +473,11 @@
     <string name="cap_discord">bir Discord webhook\'u</string>
     <string name="ev_code_call">Çağırır: %1$s</string>
     <string name="ev_code_string">İçerdiği metin: %1$s</string>
-    <string name="ev_flow">%1$s okur ve aynı kod yolunda gönderir: %2$s (değer izlenmedi)</string>
-    <string name="ev_destination">Bağlandığı adres: %1$s</string>
+    <string name="ev_flow">Aynı kod yolu, %1$s okuma ve %2$s hedefine gönderme işlemlerini içerir (değer izlenmedi)</string>
+    <string name="ev_destination">Kodda bulunan URL: %1$s</string>
     <string name="ev_destination_cleartext">%1$s (şifresiz http)</string>
     <string name="ev_destination_ip">%1$s (IP adresi, alan adı yok)</string>
-    <string name="ev_origin_app">uygulamanın kendi kodu</string>
+    <string name="ev_origin_app">tanınan SDK’ların dışındaki kod</string>
     <string name="ev_origin_library">kitaplık: %1$s</string>
     <string name="ev_hidden_code">Gizli kod dosyası: %1$s</string>
     <string name="ev_packer">Kod paketleyici: %1$s</string>
@@ -490,7 +490,7 @@
     <string name="strength_t2">kod bu çağrıları yapıyor</string>
     <string name="strength_t3">okuma ve gönderme aynı kod yolunda</string>
     <string name="strength_t4">bu cihazda gözlemlendi</string>
-    <string name="coverage_code">Kod (DEX) analiz edildi: %1$d DEX dosyası, %2$d sınıf, bunların %3$d tanesi uygulamanın kendi kodunda</string>
+    <string name="coverage_code">Analiz edilen kod (DEX): %1$d DEX dosyası, %2$d sınıf, tanınan SDK’ların dışında %3$d sınıf</string>
     <string name="coverage_code_failed">Uygulama kodu (DEX) analiz edilemedi</string>
     <string name="coverage_gap_hidden">Gizli kod analiz edilmedi: %1$s</string>
     <string name="coverage_gap_packer">Kod bir paketleyiciyle korunuyor (%1$s); gerçek kod şifreli</string>

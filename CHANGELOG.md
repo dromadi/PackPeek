@@ -6,7 +6,8 @@
 - Require MAIN and a launcher category in the same intent filter in both manifest readers.
 - Validate string-pool boundaries/terminators and bound decoded allocations.
 - Correlate install results with a session ID retained in the PendingIntent, reject unidentified/stale results, and measure waiting with a monotonic clock.
-- Label static URLs and unrecognized code origins conservatively in English/Indonesian reports.
+- Label static URLs, unrecognized code origins and untraced flows conservatively in all eight supported languages.
+- Make the ZIP-bomb regression deterministic with an explicit inflated-byte cap and a valid-manifest control; test expired deadlines without timing a busy loop.
 - Add regression coverage and CI for unit tests, lint, debug and R8 release builds. CI results are recorded on the PR; no new release or production-signing claim.
 
 ## 2.0.0-alpha.20 — 2026-10-11

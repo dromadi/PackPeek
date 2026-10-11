@@ -461,11 +461,11 @@
     <string name="cap_discord">webhook Discord</string>
     <string name="ev_code_call">Gọi %1$s</string>
     <string name="ev_code_string">Chứa văn bản %1$s</string>
-    <string name="ev_flow">Đọc %1$s và gửi tới %2$s trong cùng một đường mã (giá trị chưa được lần theo)</string>
-    <string name="ev_destination">Kết nối tới %1$s</string>
+    <string name="ev_flow">Cùng một đường mã có thao tác đọc %1$s và gửi tới %2$s (giá trị chưa được lần theo)</string>
+    <string name="ev_destination">URL được tìm thấy trong mã: %1$s</string>
     <string name="ev_destination_cleartext">%1$s (http không mã hóa)</string>
     <string name="ev_destination_ip">%1$s (địa chỉ IP, không có tên miền)</string>
-    <string name="ev_origin_app">mã riêng của ứng dụng</string>
+    <string name="ev_origin_app">mã nằm ngoài các SDK được nhận diện</string>
     <string name="ev_origin_library">thư viện: %1$s</string>
     <string name="ev_hidden_code">Tệp mã ẩn: %1$s</string>
     <string name="ev_packer">Packer mã: %1$s</string>
@@ -478,7 +478,7 @@
     <string name="strength_t2">mã thực hiện các lệnh gọi này</string>
     <string name="strength_t3">đọc và gửi trong cùng một đường mã</string>
     <string name="strength_t4">quan sát được trên thiết bị này</string>
-    <string name="coverage_code">Đã phân tích mã (DEX): %1$d tệp DEX, %2$d lớp, %3$d trong mã riêng của ứng dụng</string>
+    <string name="coverage_code">Đã phân tích mã (DEX): %1$d tệp DEX, %2$d lớp, %3$d nằm ngoài các SDK được nhận diện</string>
     <string name="coverage_code_failed">Không phân tích được mã ứng dụng (DEX)</string>
     <string name="coverage_gap_hidden">Chưa phân tích mã ẩn: %1$s</string>
     <string name="coverage_gap_packer">Mã được bảo vệ bằng packer (%1$s); mã thật đã bị mã hóa</string>
