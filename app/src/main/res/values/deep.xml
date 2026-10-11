@@ -83,4 +83,7 @@
     <string name="report_share_quick">Share evidence report (PDF)</string>
     <string name="ev_flow_traced_to">Value of %1$s traced into the call that sends to %2$s, address: %3$s</string>
     <string name="chain_destination">Sent to: %1$s</string>
+    <string name="ev_flow_traced_to_any">Value of %1$s traced into a call that sends to %2$s. That call serves several addresses; the value goes to one of: %3$s</string>
+    <string name="chain_destination_any">Sent to one of: %1$s</string>
+    <string name="more_hosts">and more</string>
 </resources>

@@ -82,4 +82,7 @@
     <string name="report_share_quick">Bagikan laporan bukti (PDF)</string>
     <string name="ev_flow_traced_to">Nilai %1$s dilacak sampai ke panggilan yang mengirim ke %2$s, alamat: %3$s</string>
     <string name="chain_destination">Dikirim ke: %1$s</string>
+    <string name="ev_flow_traced_to_any">Nilai %1$s dilacak sampai ke panggilan yang mengirim ke %2$s. Panggilan itu dipakai untuk beberapa alamat; nilainya pergi ke salah satu dari: %3$s</string>
+    <string name="chain_destination_any">Dikirim ke salah satu dari: %1$s</string>
+    <string name="more_hosts">dan lainnya</string>
 </resources>

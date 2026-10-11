@@ -397,8 +397,10 @@ fun evidenceText(res: Resources, e: Evidence): String =
                         parts[0].split('>').map { runCatching { Capability.valueOf(it) }.getOrDefault(Capability.NETWORK) }
                     val hosts = RiskRules.destinations(e)
                     when {
+                        hosts.size == 1 ->
+                            res.getString(R.string.ev_flow_traced_to, capabilityName(res, source), capabilityName(res, sink), hosts.single())
                         hosts.isNotEmpty() ->
-                            res.getString(R.string.ev_flow_traced_to, capabilityName(res, source), capabilityName(res, sink), hosts.joinToString(", "))
+                            res.getString(R.string.ev_flow_traced_to_any, capabilityName(res, source), capabilityName(res, sink), hostList(res, hosts))
                         parts.getOrNull(3) == "v" ->
                             res.getString(R.string.ev_flow_traced, capabilityName(res, source), capabilityName(res, sink))
                         else -> res.getString(R.string.ev_flow, capabilityName(res, source), capabilityName(res, sink))
@@ -416,6 +418,20 @@ fun evidenceText(res: Resources, e: Evidence): String =
                 else -> e.detail
             }
     }
+
+/**
+ * Several destinations mean the send serves several addresses and the value goes to one of them;
+ * a list cut short ends in "and more".
+ */
+fun hostList(res: Resources, hosts: List<String>): String =
+    if (hosts.lastOrNull() == DexScanner.MORE_HOSTS)
+        hosts.dropLast(1).joinToString(", ") + " " + res.getString(R.string.more_hosts)
+    else hosts.joinToString(", ")
+
+/** "Sent to: host", or "Sent to one of: a, b, …" when the send serves several addresses. */
+fun destinationText(res: Resources, hosts: List<String>): String =
+    if (hosts.size == 1) res.getString(R.string.chain_destination, hosts.single())
+    else res.getString(R.string.chain_destination_any, hostList(res, hosts))
 
 @Composable
 fun evidenceText(e: Evidence): String = evidenceText(LocalResources.current, e)

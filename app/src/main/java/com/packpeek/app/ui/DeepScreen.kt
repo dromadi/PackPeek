@@ -175,7 +175,7 @@ private fun ChainsSection(chains: List<CodeChain>) {
                     }
                     Text(
                         stringResource(R.string.chain_read, chain.sourceApi) + "\n" + stringResource(R.string.chain_send, chain.sinkApi) +
-                            (if (chain.destinations.isEmpty()) "" else "\n" + stringResource(R.string.chain_destination, chain.destinations.joinToString(", "))),
+                            (if (chain.destinations.isEmpty()) "" else "\n" + destinationText(LocalResources.current, chain.destinations)),
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = 8.dp),
                     )

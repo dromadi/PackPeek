@@ -515,4 +515,7 @@
     <string name="strength_t3_traced">okumadan göndermeye kadar izlenen bir değer</string>
     <string name="ev_flow_traced_to">%1$s değeri, gönderen çağrıya kadar izlendi: %2$s, adres: %3$s</string>
     <string name="chain_destination">Gönderildiği yer: %1$s</string>
+    <string name="ev_flow_traced_to_any">%1$s değeri, gönderen bir çağrıya kadar izlendi: %2$s. Bu çağrı birkaç adrese hizmet ediyor; değer şunlardan birine gidiyor: %3$s</string>
+    <string name="chain_destination_any">Şunlardan birine gönderilir: %1$s</string>
+    <string name="more_hosts">ve diğerleri</string>
 </resources>

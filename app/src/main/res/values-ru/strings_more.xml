@@ -539,4 +539,7 @@
     <string name="strength_t3_traced">значение отслежено от чтения до отправки</string>
     <string name="ev_flow_traced_to">Значение «%1$s» отслежено до вызова, который отправляет в %2$s, адрес: %3$s</string>
     <string name="chain_destination">Отправляется на: %1$s</string>
+    <string name="ev_flow_traced_to_any">Значение «%1$s» отслежено до вызова, который отправляет в %2$s. Этот вызов обслуживает несколько адресов; значение уходит на один из: %3$s</string>
+    <string name="chain_destination_any">Отправляется на один из: %1$s</string>
+    <string name="more_hosts">и другие</string>
 </resources>

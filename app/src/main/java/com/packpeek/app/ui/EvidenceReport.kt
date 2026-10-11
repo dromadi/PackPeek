@@ -76,7 +76,7 @@ object EvidenceReport {
                         line("  ${capabilityName(res, c.source)} → ${capabilityName(res, c.sink)}")
                         line("    ${(c.toSource + c.toSink.drop(1)).distinct().joinToString(" → ") { shortMethod(it.method) }}")
                         line("    ${c.sourceApi} → ${c.sinkApi}")
-                        if (c.destinations.isNotEmpty()) line("    " + res.getString(R.string.chain_destination, c.destinations.joinToString(", ")))
+                        if (c.destinations.isNotEmpty()) line("    " + destinationText(res, c.destinations))
                     }
                 }
                 if (deep.decoded.isNotEmpty()) {

@@ -515,4 +515,7 @@
     <string name="strength_t3_traced">पढ़ने से भेजने तक ट्रैक किया गया मान</string>
     <string name="ev_flow_traced_to">%1$s का मान %2$s को भेजने वाली कॉल तक ट्रैक किया गया, पता: %3$s</string>
     <string name="chain_destination">भेजा जाता है: %1$s</string>
+    <string name="ev_flow_traced_to_any">%1$s का मान %2$s को भेजने वाली कॉल तक ट्रैक किया गया। वह कॉल कई पतों के लिए इस्तेमाल होती है; मान इनमें से किसी एक पर जाता है: %3$s</string>
+    <string name="chain_destination_any">इनमें से किसी एक पर भेजा जाता है: %1$s</string>
+    <string name="more_hosts">और अन्य</string>
 </resources>

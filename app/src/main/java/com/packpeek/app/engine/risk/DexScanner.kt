@@ -865,13 +865,19 @@ object DexScanner {
         val viaNetwork =
             if (sink in Capability.hiddenDestinations) reached[NETWORK.bit]?.takeIf { it.sources and source.bit != 0 } else null
         val hit = direct ?: viaNetwork ?: return false to emptyList()
-        return true to hit.hosts[source.bit].orEmpty().sorted().take(MAX_HOSTS)
+        // One more host than is shown is kept, so a capped list says that there are more.
+        val hosts = hit.hosts[source.bit].orEmpty().sorted()
+        return true to (if (hosts.size > SHOWN_HOSTS) hosts.take(SHOWN_HOSTS) + MORE_HOSTS else hosts)
     }
 
     /** Summary of sends a method makes: sources and hosts already known, and its parameters involved. */
     private class Acc(var sources: Int = 0, val hosts: MutableSet<String> = HashSet())
 
-    private const val MAX_HOSTS = 8
+    private const val MAX_HOSTS = 9
+    private const val SHOWN_HOSTS = 8
+
+    /** Last entry of a destination list that was cut short. */
+    const val MORE_HOSTS = "…"
     private const val MAX_SUMMARIES = 32
 
     /**

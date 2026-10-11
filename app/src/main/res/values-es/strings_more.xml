@@ -527,4 +527,7 @@
     <string name="strength_t3_traced">un valor rastreado desde la lectura hasta el envío</string>
     <string name="ev_flow_traced_to">El valor de %1$s se rastreó hasta la llamada que envía a %2$s, dirección: %3$s</string>
     <string name="chain_destination">Enviado a: %1$s</string>
+    <string name="ev_flow_traced_to_any">El valor de %1$s se rastreó hasta una llamada que envía a %2$s. Esa llamada sirve a varias direcciones; el valor va a una de: %3$s</string>
+    <string name="chain_destination_any">Enviado a una de: %1$s</string>
+    <string name="more_hosts">y más</string>
 </resources>

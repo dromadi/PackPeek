@@ -503,4 +503,7 @@
     <string name="strength_t3_traced">một giá trị được lần theo từ lúc đọc tới lúc gửi</string>
     <string name="ev_flow_traced_to">Giá trị %1$s được lần theo tới lệnh gọi gửi tới %2$s, địa chỉ: %3$s</string>
     <string name="chain_destination">Gửi tới: %1$s</string>
+    <string name="ev_flow_traced_to_any">Giá trị %1$s được lần theo tới một lệnh gọi gửi tới %2$s. Lệnh gọi đó dùng cho nhiều địa chỉ; giá trị đi tới một trong: %3$s</string>
+    <string name="chain_destination_any">Gửi tới một trong: %1$s</string>
+    <string name="more_hosts">và các địa chỉ khác</string>
 </resources>
