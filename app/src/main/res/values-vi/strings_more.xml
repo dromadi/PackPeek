@@ -500,4 +500,5 @@
         <item></item>
         <item>Kiểm tra xem ứng dụng có thật sự cần điều này cho chức năng của nó không. Hãy thận trọng nếu nó còn xin quyền root hoặc đến từ ngoài cửa hàng ứng dụng.</item>
     </string-array>
+    <string name="strength_t3_traced">một giá trị được lần theo từ lúc đọc tới lúc gửi</string>
 </resources>

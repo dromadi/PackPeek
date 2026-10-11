@@ -333,4 +333,5 @@
     <string name="coverage_gap_limit">Code analysis stopped at its time or size limit; results are partial</string>
     <string name="ev_flow_traced">Value of %1$s traced into the call that sends to %2$s</string>
     <string name="unproven_flow_untraced">Reading this data and sending happen in the same code path (T3), but the value read was not traced into what is sent, so the two may be unrelated. Only watching the app while it runs could show what is sent.</string>
+    <string name="strength_t3_traced">a value traced from reading to sending</string>
 </resources>

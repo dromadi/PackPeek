@@ -512,4 +512,5 @@
         <item></item>
         <item>Uygulamanın işlevi için buna gerçekten ihtiyaç duyup duymadığını kontrol edin. Root erişimi de istiyorsa veya bir uygulama mağazası dışından geldiyse dikkatli olun.</item>
     </string-array>
+    <string name="strength_t3_traced">okumadan göndermeye kadar izlenen bir değer</string>
 </resources>

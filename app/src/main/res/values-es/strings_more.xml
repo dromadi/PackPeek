@@ -524,4 +524,5 @@
         <item></item>
         <item>Comprueba si la app lo necesita para su función. Ten cuidado si además pide acceso root o viene de fuera de una tienda de apps.</item>
     </string-array>
+    <string name="strength_t3_traced">un valor rastreado desde la lectura hasta el envío</string>
 </resources>

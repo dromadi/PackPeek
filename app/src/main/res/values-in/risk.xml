@@ -318,4 +318,5 @@
     <string name="coverage_gap_limit">Analisis kode berhenti di batas waktu atau ukuran; hasilnya sebagian</string>
     <string name="ev_flow_traced">Nilai %1$s dilacak sampai ke panggilan yang mengirim ke %2$s</string>
     <string name="unproven_flow_untraced">Membaca data ini dan mengirim terjadi di jalur kode yang sama (T3), tetapi nilai yang dibaca belum terlacak sampai ke yang dikirim, jadi keduanya bisa saja tidak berhubungan. Hanya pengamatan saat aplikasi berjalan yang bisa menunjukkan apa yang dikirim.</string>
+    <string name="strength_t3_traced">nilai terlacak dari pembacaan sampai pengiriman</string>
 </resources>

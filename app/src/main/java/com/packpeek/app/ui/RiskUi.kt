@@ -84,18 +84,19 @@ fun capabilityName(res: Resources, capability: Capability): String =
 fun capabilityName(capability: Capability): String = capabilityName(LocalResources.current, capability)
 
 
-fun strengthText(res: Resources, level: EvidenceLevel): String =
+fun strengthText(res: Resources, level: EvidenceLevel, traced: Boolean = false): String =
     res.getString(
         when (level) {
             EvidenceLevel.DECLARED -> R.string.strength_t1
             EvidenceLevel.CODE -> R.string.strength_t2
-            EvidenceLevel.FLOW -> R.string.strength_t3
+            EvidenceLevel.FLOW -> if (traced) R.string.strength_t3_traced else R.string.strength_t3
             EvidenceLevel.OBSERVED -> R.string.strength_t4
         }
     )
 
 @Composable
-fun strengthText(level: EvidenceLevel): String = strengthText(LocalResources.current, level)
+fun strengthText(level: EvidenceLevel, traced: Boolean = false): String =
+    strengthText(LocalResources.current, level, traced)
 
 
 @Composable
@@ -240,7 +241,7 @@ fun FindingCard(finding: RiskFinding, codeGaps: Boolean = false) {
             }
             if (finding.severity == Severity.STRONG)
                 Text(
-                    stringResource(R.string.evidence_strength, strengthText(finding.strongestLevel)),
+                    stringResource(R.string.evidence_strength, strengthText(finding.strongestLevel, finding.evidence.any(RiskRules::isTraced))),
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.padding(top = 6.dp),
                 )

@@ -11,7 +11,7 @@
 | Identitas | com.packpeek.app.debug, 2.0.0-alpha.13-debug (versionCode 20013) |
 | SDK | minimum 24, target 36 |
 | Izin Internet | **Ada** sejak alpha.10, hanya untuk cek hash VirusTotal opsional (kunci milik pengguna; hanya SHA-256 yang dikirim) |
-| Uji emulator | GitHub API 36 (run 12): buka berkas lewat pemilih, analisis, pemasangan sampai dialog hasil dan aplikasi terpasang — lulus. Analisis mendalam & laporan PDF diuji ulang di alpha.13. Hasil di branch `emulator-results` |
+| Uji emulator | GitHub API 36, run 13 (alpha.13): 18 dari 18 langkah lulus. Langkahnya: daftar aplikasi, ringkasan dan pemeriksaan semua aplikasi, buka berkas lewat pemilih sistem, analisis, analisis mendalam, laporan PDF sampai lembar bagikan, pasang `control-clean.apk` sampai prompt sistem dan dialog hasil, aplikasi benar-benar terpasang, tanpa crash. Hasil di branch `emulator-results` |
 | HP fisik | Belum diuji oleh pengembang |
 
 Ukuran APK debug: 17,535,072 byte. SHA-256:
