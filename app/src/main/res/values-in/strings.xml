@@ -31,12 +31,6 @@
     <string name="backup_folder">Folder backup</string>
     <string name="privacy_local">Daftar aplikasi dan analisis tetap di perangkat ini. Tanpa iklan, analitik, atau akun. Izin Internet hanya dipakai untuk cek VirusTotal opsional yang kamu aktifkan dengan kunci sendiri; yang dikirim hanya sidik jari SHA-256 aplikasi, bukan berkasnya.</string>
     <string name="backup_disclaimer">Backup berisi APK instalasi, bukan data aplikasi, akun, atau progres permainan.</string>
-    <string name="onboarding_one">Simpan salinannya.\nKenali aplikasimu.</string>
-    <string name="onboarding_one_body">Ekstrak satu aplikasi atau pilih beberapa untuk dicadangkan sekaligus.</string>
-    <string name="onboarding_two">Periksa isinya\nsebelum memasang.</string>
-    <string name="onboarding_two_body">Lihat izin, komponen, sertifikat, dan teknologi. Periksa APK dan APKS lokal tanpa memasangnya.</string>
-    <string name="onboarding_three">Pilih tempat\nmenyimpan salinan.</string>
-    <string name="onboarding_three_body">Pilih folder melalui Android. Aplikasi tunggal disimpan sebagai APK; aplikasi split sebagai APKS. Kamu bisa membagikannya dari Riwayat.</string>
     <string name="error_folder">Folder tidak tersedia atau izinnya dicabut. Pilih kembali folder backup yang dapat ditulisi.</string>
     <string name="error_storage">Penyimpanan tujuan penuh. Kosongkan ruang lalu coba lagi.</string>
     <string name="error_source">Berkas sumber tidak tersedia atau berubah. Muat ulang daftar aplikasi atau pilih berkas lagi.</string>
@@ -359,4 +353,19 @@
     <string name="delete_backup_title">Hapus backup?</string>
     <string name="delete_backup_body">%1$s akan dihapus dari folder backup. Tindakan ini tidak bisa dibatalkan.</string>
     <string name="ready_target_min">• Menargetkan API %1$d; versi Android ini menolak aplikasi baru di bawah API %2$d.</string>
+    <string name="intro_1_title">Kenali semua aplikasi di HP-mu</string>
+    <string name="intro_1_body">Lihat asal pemasangan, versi, ukuran, dan penanda tangan setiap aplikasi.</string>
+    <string name="intro_1_point_1">Aplikasi sistem dan pengguna dalam satu daftar</string>
+    <string name="intro_1_point_2">Izin, komponen, sertifikat, dan teknologi</string>
+    <string name="intro_1_point_3">Cadangkan aplikasi sebagai berkas APK atau APKS</string>
+    <string name="intro_2_title">Cek APK sebelum terlambat</string>
+    <string name="intro_2_body">PackPeek membaca kode aplikasi tanpa menjalankannya dan mencari pola yang sering dipakai penipu.</string>
+    <string name="intro_2_point_1">Mencuri SMS dan kode OTP, mengirim data ke Telegram</string>
+    <string name="intro_2_point_2">Layar palsu di atas aplikasi bank</string>
+    <string name="intro_2_point_3">Bukti bertingkat dan laporan PDF yang bisa dibagikan</string>
+    <string name="intro_3_title">Semua tetap di HP-mu</string>
+    <string name="intro_3_body">Analisis berjalan di perangkat ini, dan aplikasi yang diperiksa tidak pernah dijalankan.</string>
+    <string name="intro_3_point_1">Tanpa iklan, analitik, atau akun</string>
+    <string name="intro_3_point_2">Internet hanya untuk cek VirusTotal opsional; yang dikirim hanya sidik jari SHA-256 aplikasi</string>
+    <string name="intro_folder_hint">Tempat menyimpan salinan APK. Bisa diubah nanti di Pengaturan.</string>
 </resources>

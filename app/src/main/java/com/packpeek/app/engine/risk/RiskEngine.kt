@@ -18,10 +18,16 @@ import kotlinx.coroutines.withContext
 class RiskEngine(private val device: DeviceStateReader, private val apps: AppRepository) {
     suspend fun analyze(app: AppRecord, audit: AuditReport?): RiskReport = run(app, audit, deep = false).first
 
+    /**
+     * The check for many apps at once (overview): same findings and levels, without value
+     * tracking, which only adds "traced" marks and addresses shown in an app's own report.
+     */
+    suspend fun quick(app: AppRecord): RiskReport = run(app, null, deep = false, track = false).first
+
     /** The deep analysis: findings re-evaluated with deep code evidence, plus the deep facts. */
     suspend fun deep(app: AppRecord, audit: AuditReport?): Pair<RiskReport, CodeFacts?> = run(app, audit, deep = true)
 
-    private suspend fun run(app: AppRecord, audit: AuditReport?, deep: Boolean): Pair<RiskReport, CodeFacts?> =
+    private suspend fun run(app: AppRecord, audit: AuditReport?, deep: Boolean, track: Boolean = true): Pair<RiskReport, CodeFacts?> =
         withContext(Dispatchers.IO) {
             val files = app.paths.map(::File)
             val facts = ManifestScanner.scan(files, Build.VERSION.SDK_INT)
@@ -30,7 +36,7 @@ class RiskEngine(private val device: DeviceStateReader, private val apps: AppRep
             val code =
                 runCatching {
                         if (deep) DexScanner.scan(files, DexScanner.DEEP_TIME_LIMIT_MS, deep = true)
-                        else DexScanner.scan(files)
+                        else DexScanner.scan(files, track = track)
                     }
                     .getOrNull()
             ensureActive()

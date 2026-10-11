@@ -1,22 +1,24 @@
-# Hasil verifikasi — 2.0.0-alpha.17 (2026-10-11)
+# Hasil verifikasi — 2.0.0-alpha.18 (2026-10-11)
 
 | Pemeriksaan | Hasil |
 |---|---|
 | assembleDebug | Lulus |
-| testDebugUnitTest | 135 tes, 0 gagal, 0 error (JVM, termasuk render layar Robolectric dan 16 APK uji: 8 modus penipuan, 4 pembanding, 4 fixture termasuk 3 Kotlin) |
+| testDebugUnitTest | 142 tes, 0 gagal, 0 error (JVM, termasuk render layar Robolectric dan 16 APK uji: 8 modus penipuan, 4 pembanding, 4 fixture termasuk 3 Kotlin) |
 | lintDebug | 0 error, 71 peringatan |
 | assembleRelease + R8 | Lulus; keluaran unsigned, bukan APK produksi siap pasang |
 | apksigner verify APK debug | Lulus |
 | zipalign 16 KiB APK debug | Lulus |
-| Identitas | com.packpeek.app.debug, 2.0.0-alpha.17-debug (versionCode 20017) |
+| Identitas | com.packpeek.app.debug, 2.0.0-alpha.18-debug (versionCode 20018) |
 | SDK | minimum 24, target 36 |
 | Izin Internet | **Ada** sejak alpha.10, hanya untuk cek hash VirusTotal opsional (kunci milik pengguna; hanya SHA-256 yang dikirim) |
 | Uji emulator | GitHub API 36, run 13 (alpha.13): 18 dari 18 langkah lulus. Langkahnya: daftar aplikasi, ringkasan dan pemeriksaan semua aplikasi, buka berkas lewat pemilih sistem, analisis, analisis mendalam, laporan PDF sampai lembar bagikan, pasang `control-clean.apk` sampai prompt sistem dan dialog hasil, aplikasi benar-benar terpasang, tanpa crash. Hasil di branch `emulator-results` |
-| HP fisik | Belum diuji oleh pengembang |
+| HP fisik | Diuji pemilik (alpha.17 debug dan rilis); laporan Ringkasan lambat dan masukan tampilan diperbaiki di alpha.18 |
 | Uji beban (alpha.17) | APK PackPeek, semua 22.587 kelas dianggap kode aplikasi, heap 512 MB: selesai 28 dtk (biasa, batas 30) dan 18 dtk (mendalam, batas 90), tanpa kehabisan memori; pelacakan terpotong dilaporkan sebagai celah cakupan |
 
-Ukuran APK debug: 17,576,276 byte. SHA-256:
-`dc2d9443e4df688409139cf10d7af255657b81d58f6f7c9d0439d41afb12a832`
+Ukuran APK debug: 17,601,784 byte. SHA-256:
+`a31894e797cbe4871d205d83834ec3fff281b5f4555ba7f27ce899f9aecd5de3`
+
+APK rilis (R8, ditandatangani kunci uji, bukan kunci produksi): 3,635,145 byte. Sudah dicoba pemilik di HP fisik pada alpha.17.
 
 Perintah yang dijalankan:
 ```bash

@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -317,33 +319,44 @@ internal fun ActiveSection(
     }
 }
 
+/** The device in four numbers: a 2 × 2 grid of tiles that stays readable with large fonts. */
 @Composable
 internal fun StatsRow(apps: List<AppRecord>) {
-    Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, shape = MaterialTheme.shapes.large) {
-        Row(Modifier.fillMaxWidth().padding(vertical = 14.dp)) {
-            listOf(
-                    apps.size.toString() to R.string.apps,
-                    apps.count { !it.system }.toString() to R.string.user_apps,
-                    apps.count { it.split }.toString() to R.string.split_apps,
-                    sizeText(apps.sumOf { it.size }) to R.string.apk_storage,
-                )
-                .forEach { (value, label) ->
-                    Column(Modifier.weight(1f).padding(horizontal = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            value,
-                            style = MaterialTheme.typography.titleMedium,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                        )
-                        Text(
-                            stringResource(label),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
+    val tiles =
+        listOf(
+            Triple(PackIcons.Apps, apps.size.toString(), R.string.apps),
+            Triple(Icons.Rounded.Person, apps.count { !it.system }.toString(), R.string.user_apps),
+            Triple(PackIcons.Layers, apps.count { it.split }.toString(), R.string.split_apps),
+            Triple(PackIcons.Inventory2, sizeText(apps.sumOf { it.size }), R.string.apk_storage),
+        )
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        tiles.chunked(2).forEach { row ->
+            Row(Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { (icon, value, label) -> StatTile(icon, value, stringResource(label), Modifier.weight(1f).fillMaxHeight()) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatTile(icon: ImageVector, value: String, label: String, modifier: Modifier) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = MaterialTheme.shapes.large, modifier = modifier) {
+        Column(Modifier.padding(16.dp)) {
+            Box(
+                Modifier.size(36.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(icon, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+            Spacer(Modifier.height(12.dp))
+            Text(value, style = MaterialTheme.typography.headlineSmall, maxLines = 1)
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }

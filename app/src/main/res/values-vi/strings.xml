@@ -31,12 +31,6 @@
     <string name="backup_folder">Thư mục sao lưu</string>
     <string name="privacy_local">Danh sách ứng dụng và kết quả phân tích chỉ nằm trên thiết bị này. Không quảng cáo, không phân tích, không cần tài khoản. Quyền Internet chỉ dùng cho bước kiểm tra VirusTotal tùy chọn mà bạn bật bằng khóa của mình; chỉ gửi dấu vân tay SHA-256 của ứng dụng, không bao giờ gửi tệp.</string>
     <string name="backup_disclaimer">Bản sao lưu chứa APK cài đặt, không chứa dữ liệu ứng dụng, tài khoản hay tiến trình trò chơi.</string>
-    <string name="onboarding_one">Giữ một bản sao.\nHiểu ứng dụng của bạn.</string>
-    <string name="onboarding_one_body">Trích xuất một ứng dụng hoặc chọn nhiều ứng dụng để sao lưu cùng lúc.</string>
-    <string name="onboarding_two">Xem bên trong\ntrước khi cài.</string>
-    <string name="onboarding_two_body">Xem quyền, thành phần, chứng chỉ và công nghệ. Kiểm tra tệp APK và APKS cục bộ mà không cần cài đặt.</string>
-    <string name="onboarding_three">Chọn nơi lưu\ncác bản sao.</string>
-    <string name="onboarding_three_body">Chọn một thư mục qua Android. Ứng dụng đơn lẻ được lưu dạng APK; ứng dụng chia nhỏ được lưu thành gói APKS. Bạn có thể chia sẻ chúng từ Lịch sử.</string>
     <string name="error_folder">Thư mục không khả dụng hoặc quyền đã bị thu hồi. Hãy chọn lại một thư mục sao lưu có thể ghi.</string>
     <string name="error_storage">Nơi lưu đã hết dung lượng. Hãy giải phóng dung lượng rồi thử lại.</string>
     <string name="error_source">Tệp nguồn không khả dụng hoặc đã thay đổi. Hãy làm mới danh sách ứng dụng hoặc chọn lại tệp.</string>
@@ -260,4 +254,19 @@
     <string name="delete">Xóa</string>
     <string name="delete_backup_title">Xóa bản sao lưu?</string>
     <string name="delete_backup_body">%1$s sẽ bị xóa khỏi thư mục sao lưu. Không thể hoàn tác.</string>
+    <string name="intro_1_title">Hiểu rõ mọi ứng dụng trên điện thoại</string>
+    <string name="intro_1_body">Xem mỗi ứng dụng đến từ đâu, phiên bản, dung lượng và ai đã ký nó.</string>
+    <string name="intro_1_point_1">Ứng dụng hệ thống và người dùng trong một danh sách</string>
+    <string name="intro_1_point_2">Quyền, thành phần, chứng chỉ và công nghệ</string>
+    <string name="intro_1_point_3">Sao lưu ứng dụng dưới dạng tệp APK hoặc APKS</string>
+    <string name="intro_2_title">Kiểm tra APK trước khi quá muộn</string>
+    <string name="intro_2_body">PackPeek đọc mã của ứng dụng mà không chạy nó và tìm các kiểu thủ đoạn lừa đảo thường gặp.</string>
+    <string name="intro_2_point_1">Đánh cắp SMS và mã OTP, gửi dữ liệu đến Telegram</string>
+    <string name="intro_2_point_2">Màn hình giả đè lên ứng dụng ngân hàng</string>
+    <string name="intro_2_point_3">Bằng chứng theo cấp độ và báo cáo PDF để chia sẻ</string>
+    <string name="intro_3_title">Mọi thứ ở lại trên điện thoại</string>
+    <string name="intro_3_body">Việc phân tích chạy trên thiết bị này, và các ứng dụng được kiểm tra không bao giờ được khởi chạy.</string>
+    <string name="intro_3_point_1">Không quảng cáo, phân tích hay tài khoản</string>
+    <string name="intro_3_point_2">Internet chỉ dùng cho kiểm tra VirusTotal tùy chọn, chỉ gửi dấu vân tay SHA-256 của ứng dụng</string>
+    <string name="intro_folder_hint">Nơi lưu các bản sao APK. Bạn có thể đổi sau trong Cài đặt.</string>
 </resources>

@@ -31,12 +31,6 @@
     <string name="backup_folder">Папка резервных копий</string>
     <string name="privacy_local">Список приложений и результаты анализа остаются на этом устройстве. Без рекламы, аналитики и аккаунта. Разрешение на Интернет используется только для необязательной проверки в VirusTotal, которую вы включаете своим ключом; отправляется только отпечаток SHA-256 приложения, но не сам файл.</string>
     <string name="backup_disclaimer">Резервные копии содержат установочные APK, а не данные приложений, аккаунты или прогресс в играх.</string>
-    <string name="onboarding_one">Сохраните копию.\nЗнайте свои приложения.</string>
-    <string name="onboarding_one_body">Извлеките одно приложение или выберите несколько, чтобы скопировать их вместе.</string>
-    <string name="onboarding_two">Загляните внутрь\nдо установки.</string>
-    <string name="onboarding_two_body">Изучайте разрешения, компоненты, сертификаты и технологии. Проверяйте локальные APK и APKS без установки.</string>
-    <string name="onboarding_three">Выберите, куда\nсохранять копии.</string>
-    <string name="onboarding_three_body">Выберите папку через Android. Обычные приложения сохраняются как APK, разделённые — как пакеты APKS. Поделиться ими можно из истории.</string>
     <string name="error_folder">Папка недоступна или доступ к ней отозван. Снова выберите папку для резервных копий с правом записи.</string>
     <string name="error_storage">В месте назначения закончилось свободное место. Освободите место и повторите попытку.</string>
     <string name="error_source">Исходный файл недоступен или изменился. Обновите список приложений или выберите файл заново.</string>
@@ -260,4 +254,19 @@
     <string name="delete">Удалить</string>
     <string name="delete_backup_title">Удалить копию?</string>
     <string name="delete_backup_body">%1$s будет удалён из папки резервных копий. Это действие нельзя отменить.</string>
+    <string name="intro_1_title">Знайте каждое приложение на телефоне</string>
+    <string name="intro_1_body">Откуда установлено приложение, его версия, размер и кем оно подписано.</string>
+    <string name="intro_1_point_1">Системные и пользовательские приложения в одном списке</string>
+    <string name="intro_1_point_2">Разрешения, компоненты, сертификат и технологии</string>
+    <string name="intro_1_point_3">Резервные копии в виде файлов APK или APKS</string>
+    <string name="intro_2_title">Проверьте APK, пока не поздно</string>
+    <string name="intro_2_body">PackPeek читает код приложения, не запуская его, и ищет приёмы, которыми часто пользуются мошенники.</string>
+    <string name="intro_2_point_1">Кража SMS и кодов OTP, отправка данных в Telegram</string>
+    <string name="intro_2_point_2">Поддельные экраны поверх банковских приложений</string>
+    <string name="intro_2_point_3">Доказательства по уровням и PDF-отчёт, которым можно поделиться</string>
+    <string name="intro_3_title">Всё остаётся на телефоне</string>
+    <string name="intro_3_body">Анализ выполняется на этом устройстве, а проверяемые приложения никогда не запускаются.</string>
+    <string name="intro_3_point_1">Без рекламы, аналитики и аккаунта</string>
+    <string name="intro_3_point_2">Интернет нужен только для необязательной проверки VirusTotal, куда отправляется лишь отпечаток SHA-256 приложения</string>
+    <string name="intro_folder_hint">Куда сохраняются копии APK. Это можно изменить позже в настройках.</string>
 </resources>

@@ -31,12 +31,6 @@
     <string name="backup_folder">Pasta de backup</string>
     <string name="privacy_local">Sua lista de apps e as análises ficam neste dispositivo. Sem anúncios, análises de uso ou conta. A permissão de Internet só é usada na verificação opcional no VirusTotal, que você ativa com sua própria chave; ela envia apenas a impressão digital SHA-256 do app, nunca o arquivo.</string>
     <string name="backup_disclaimer">Os backups contêm os APKs de instalação, não dados de apps, contas ou progresso de jogos.</string>
-    <string name="onboarding_one">Guarde uma cópia.\nConheça seus apps.</string>
-    <string name="onboarding_one_body">Extraia um app ou selecione vários para fazer backup juntos.</string>
-    <string name="onboarding_two">Veja por dentro\nantes de instalar.</string>
-    <string name="onboarding_two_body">Explore permissões, componentes, certificados e tecnologia. Analise arquivos APK e APKS locais sem instalá-los.</string>
-    <string name="onboarding_three">Escolha para onde\nvão suas cópias.</string>
-    <string name="onboarding_three_body">Escolha uma pasta pelo Android. Apps independentes ficam como APK; apps divididos são salvos como pacotes APKS. Você pode compartilhá-los pelo Histórico.</string>
     <string name="error_folder">A pasta não está disponível ou a permissão foi revogada. Escolha novamente uma pasta de backup gravável.</string>
     <string name="error_storage">O destino ficou sem espaço. Libere espaço e tente novamente.</string>
     <string name="error_source">O arquivo de origem não está disponível ou mudou. Atualize a lista de apps ou selecione o arquivo novamente.</string>
@@ -260,4 +254,19 @@
     <string name="delete">Excluir</string>
     <string name="delete_backup_title">Excluir backup?</string>
     <string name="delete_backup_body">%1$s será excluído da pasta de backup. Esta ação não pode ser desfeita.</string>
+    <string name="intro_1_title">Conheça cada app do seu celular</string>
+    <string name="intro_1_body">Veja de onde veio cada app, a versão, o tamanho e quem o assinou.</string>
+    <string name="intro_1_point_1">Apps do sistema e do usuário em uma só lista</string>
+    <string name="intro_1_point_2">Permissões, componentes, certificado e tecnologia</string>
+    <string name="intro_1_point_3">Backup dos apps como arquivos APK ou APKS</string>
+    <string name="intro_2_title">Verifique um APK antes que seja tarde</string>
+    <string name="intro_2_body">O PackPeek lê o código do app sem executá-lo e procura padrões comuns em golpes.</string>
+    <string name="intro_2_point_1">Roubo de SMS e códigos OTP, envio de dados ao Telegram</string>
+    <string name="intro_2_point_2">Telas falsas sobre apps de banco</string>
+    <string name="intro_2_point_3">Evidências por nível e um relatório em PDF para compartilhar</string>
+    <string name="intro_3_title">Tudo fica no seu celular</string>
+    <string name="intro_3_body">A análise roda neste aparelho, e os apps verificados nunca são abertos.</string>
+    <string name="intro_3_point_1">Sem anúncios, análises ou conta</string>
+    <string name="intro_3_point_2">A internet só é usada na verificação opcional do VirusTotal, que envia apenas a impressão digital SHA-256 do app</string>
+    <string name="intro_folder_hint">Onde as cópias APK são salvas. Você pode mudar depois em Configurações.</string>
 </resources>

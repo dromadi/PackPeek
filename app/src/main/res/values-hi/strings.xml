@@ -31,12 +31,6 @@
     <string name="backup_folder">बैकअप फ़ोल्डर</string>
     <string name="privacy_local">आपकी ऐप सूची और विश्लेषण इसी डिवाइस पर रहते हैं। कोई विज्ञापन, एनालिटिक्स या खाता नहीं। इंटरनेट अनुमति केवल वैकल्पिक VirusTotal जाँच के लिए है, जिसे आप अपनी कुंजी से चालू करते हैं; इसमें केवल ऐप का SHA-256 फ़िंगरप्रिंट भेजा जाता है, फ़ाइल कभी नहीं।</string>
     <string name="backup_disclaimer">बैकअप में इंस्टॉलेशन APK होते हैं, ऐप डेटा, खाते या गेम की प्रगति नहीं।</string>
-    <string name="onboarding_one">एक कॉपी रखें।\nअपने ऐप्स जानें।</string>
-    <string name="onboarding_one_body">एक ऐप निकालें या कई ऐप्स चुनकर एक साथ बैकअप लें।</string>
-    <string name="onboarding_two">इंस्टॉल करने से पहले\nअंदर देखें।</string>
-    <string name="onboarding_two_body">अनुमतियाँ, कंपोनेंट, सर्टिफ़िकेट और तकनीक देखें। लोकल APK और APKS फ़ाइलों को बिना इंस्टॉल किए जाँचें।</string>
-    <string name="onboarding_three">चुनें कि आपकी\nकॉपियाँ कहाँ जाएँ।</string>
-    <string name="onboarding_three_body">Android के ज़रिए एक फ़ोल्डर चुनें। सामान्य ऐप्स APK के रूप में और split ऐप्स APKS बंडल के रूप में सेव होते हैं। आप इन्हें इतिहास से शेयर कर सकते हैं।</string>
     <string name="error_folder">फ़ोल्डर उपलब्ध नहीं है या उसकी अनुमति हटा दी गई है। लिखने योग्य बैकअप फ़ोल्डर फिर से चुनें।</string>
     <string name="error_storage">गंतव्य में जगह खत्म हो गई। कुछ जगह खाली करके फिर से कोशिश करें।</string>
     <string name="error_source">स्रोत फ़ाइल उपलब्ध नहीं है या बदल गई है। ऐप सूची रीफ़्रेश करें या फ़ाइल फिर से चुनें।</string>
@@ -260,4 +254,19 @@
     <string name="delete">मिटाएँ</string>
     <string name="delete_backup_title">बैकअप मिटाएँ?</string>
     <string name="delete_backup_body">%1$s बैकअप फ़ोल्डर से मिटा दी जाएगी। इसे वापस नहीं लाया जा सकता।</string>
+    <string name="intro_1_title">अपने फ़ोन के हर ऐप को जानें</string>
+    <string name="intro_1_body">देखें कि हर ऐप कहाँ से आया, उसका वर्ज़न, आकार और किसने उसे साइन किया।</string>
+    <string name="intro_1_point_1">सिस्टम और उपयोगकर्ता ऐप एक ही सूची में</string>
+    <string name="intro_1_point_2">अनुमतियाँ, कंपोनेंट, सर्टिफ़िकेट और तकनीक</string>
+    <string name="intro_1_point_3">ऐप का APK या APKS फ़ाइल के रूप में बैकअप</string>
+    <string name="intro_2_title">देर होने से पहले APK जाँचें</string>
+    <string name="intro_2_body">PackPeek ऐप को चलाए बिना उसका कोड पढ़ता है और ठगों के आम तरीकों को खोजता है।</string>
+    <string name="intro_2_point_1">SMS और OTP कोड चुराना, डेटा Telegram पर भेजना</string>
+    <string name="intro_2_point_2">बैंकिंग ऐप के ऊपर नकली स्क्रीन</string>
+    <string name="intro_2_point_3">स्तरवार सबूत और साझा करने योग्य PDF रिपोर्ट</string>
+    <string name="intro_3_title">सब कुछ आपके फ़ोन में ही रहता है</string>
+    <string name="intro_3_body">विश्लेषण इसी डिवाइस पर होता है, और जाँचे गए ऐप कभी चलाए नहीं जाते।</string>
+    <string name="intro_3_point_1">कोई विज्ञापन, एनालिटिक्स या खाता नहीं</string>
+    <string name="intro_3_point_2">इंटरनेट सिर्फ़ वैकल्पिक VirusTotal जाँच के लिए है, जिसमें केवल ऐप का SHA-256 फ़िंगरप्रिंट भेजा जाता है</string>
+    <string name="intro_folder_hint">जहाँ APK कॉपी सहेजी जाती हैं। इसे बाद में सेटिंग में बदल सकते हैं।</string>
 </resources>

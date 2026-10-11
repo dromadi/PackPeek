@@ -31,12 +31,6 @@
     <string name="backup_folder">Yedek klasörü</string>
     <string name="privacy_local">Uygulama listeniz ve analizler bu cihazda kalır. Reklam, analiz veya hesap yok. İnternet izni yalnızca kendi anahtarınızla açtığınız isteğe bağlı VirusTotal kontrolü için kullanılır; dosya değil, yalnızca uygulamanın SHA-256 parmak izi gönderilir.</string>
     <string name="backup_disclaimer">Yedekler kurulum APK\'larını içerir; uygulama verilerini, hesapları veya oyun ilerlemesini içermez.</string>
-    <string name="onboarding_one">Bir kopya saklayın.\nUygulamalarınızı tanıyın.</string>
-    <string name="onboarding_one_body">Tek bir uygulamayı çıkarın veya birkaçını seçip birlikte yedekleyin.</string>
-    <string name="onboarding_two">Kurmadan önce\niçine bakın.</string>
-    <string name="onboarding_two_body">İzinleri, bileşenleri, sertifikaları ve teknolojiyi inceleyin. Yerel APK ve APKS dosyalarını kurmadan inceleyin.</string>
-    <string name="onboarding_three">Kopyalarınızın nereye\ngideceğini seçin.</string>
-    <string name="onboarding_three_body">Android üzerinden bir klasör seçin. Tek parça uygulamalar APK olarak, bölünmüş uygulamalar APKS paketi olarak kaydedilir. Bunları Geçmiş\'ten paylaşabilirsiniz.</string>
     <string name="error_folder">Klasör kullanılamıyor veya izni geri alındı. Yazılabilir bir yedek klasörünü yeniden seçin.</string>
     <string name="error_storage">Hedefte yer kalmadı. Biraz yer açıp tekrar deneyin.</string>
     <string name="error_source">Kaynak dosya kullanılamıyor veya değişti. Uygulama listesini yenileyin veya dosyayı yeniden seçin.</string>
@@ -260,4 +254,19 @@
     <string name="delete">Sil</string>
     <string name="delete_backup_title">Yedek silinsin mi?</string>
     <string name="delete_backup_body">%1$s yedek klasöründen silinecek. Bu işlem geri alınamaz.</string>
+    <string name="intro_1_title">Telefonundaki her uygulamayı tanı</string>
+    <string name="intro_1_body">Her uygulamanın nereden geldiğini, sürümünü, boyutunu ve kimin imzaladığını gör.</string>
+    <string name="intro_1_point_1">Sistem ve kullanıcı uygulamaları tek listede</string>
+    <string name="intro_1_point_2">İzinler, bileşenler, sertifika ve teknoloji</string>
+    <string name="intro_1_point_3">Uygulamaları APK veya APKS dosyası olarak yedekle</string>
+    <string name="intro_2_title">Geç olmadan APK\'yı kontrol et</string>
+    <string name="intro_2_body">PackPeek uygulamanın kodunu çalıştırmadan okur ve dolandırıcıların sık kullandığı kalıpları arar.</string>
+    <string name="intro_2_point_1">SMS ve OTP kodlarını çalma, verileri Telegram\'a gönderme</string>
+    <string name="intro_2_point_2">Banka uygulamalarının üstünde sahte ekranlar</string>
+    <string name="intro_2_point_3">Seviyeli kanıt ve paylaşılabilir PDF rapor</string>
+    <string name="intro_3_title">Her şey telefonunda kalır</string>
+    <string name="intro_3_body">Analiz bu cihazda yapılır ve kontrol edilen uygulamalar hiç çalıştırılmaz.</string>
+    <string name="intro_3_point_1">Reklam, analiz veya hesap yok</string>
+    <string name="intro_3_point_2">İnternet yalnızca isteğe bağlı VirusTotal kontrolü için kullanılır; yalnızca uygulamanın SHA-256 parmak izi gönderilir</string>
+    <string name="intro_folder_hint">APK kopyalarının kaydedildiği yer. Daha sonra Ayarlar\'dan değiştirebilirsin.</string>
 </resources>

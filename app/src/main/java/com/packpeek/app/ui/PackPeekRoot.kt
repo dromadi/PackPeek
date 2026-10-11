@@ -10,6 +10,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -770,93 +779,169 @@ fun installFailureText(failure: InstallFailure): Int =
         InstallFailure.UNKNOWN -> R.string.install_fail_unknown
     }
 
+/** One introduction page: what PackPeek does for the user, shown with an illustration. */
+private class IntroPage(
+    val hero: ImageVector,
+    val around: List<ImageVector>,
+    val title: Int,
+    val body: Int,
+    val points: List<Pair<ImageVector, Int>>,
+)
+
+private val introPages =
+    listOf(
+        IntroPage(
+            PackIcons.Apps,
+            listOf(PackIcons.Android, PackIcons.Policy, PackIcons.Inventory2),
+            R.string.intro_1_title,
+            R.string.intro_1_body,
+            listOf(
+                PackIcons.Apps to R.string.intro_1_point_1,
+                PackIcons.Policy to R.string.intro_1_point_2,
+                PackIcons.Inventory2 to R.string.intro_1_point_3,
+            ),
+        ),
+        IntroPage(
+            PackIcons.GppMaybe,
+            listOf(Icons.Rounded.Email, Icons.AutoMirrored.Rounded.Send, PackIcons.Layers),
+            R.string.intro_2_title,
+            R.string.intro_2_body,
+            listOf(
+                Icons.Rounded.Email to R.string.intro_2_point_1,
+                PackIcons.Layers to R.string.intro_2_point_2,
+                Icons.Rounded.Share to R.string.intro_2_point_3,
+            ),
+        ),
+        IntroPage(
+            Icons.Rounded.Lock,
+            listOf(PackIcons.Shield, PackIcons.Language, PackIcons.Folder),
+            R.string.intro_3_title,
+            R.string.intro_3_body,
+            listOf(
+                PackIcons.Shield to R.string.intro_3_point_1,
+                PackIcons.Language to R.string.intro_3_point_2,
+            ),
+        ),
+    )
+
 @Composable
-private fun Onboarding(folder: () -> Unit, finish: () -> Unit, location: String) {
-    var step by rememberSaveable { mutableIntStateOf(0) }
-    val titles = listOf(R.string.onboarding_one, R.string.onboarding_two, R.string.onboarding_three)
-    val texts =
-        listOf(
-            R.string.onboarding_one_body,
-            R.string.onboarding_two_body,
-            R.string.onboarding_three_body,
-        )
-    val icons = listOf(PackIcons.Inventory2, PackIcons.VerifiedUser, PackIcons.Folder)
+internal fun Onboarding(folder: () -> Unit, finish: () -> Unit, location: String, firstStep: Int = 0) {
+    val pager = rememberPagerState(initialPage = firstStep) { introPages.size }
+    val scope = rememberCoroutineScope()
+    val last = pager.currentPage == introPages.lastIndex
     Surface(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+            Row(Modifier.padding(start = 24.dp, end = 12.dp, top = 8.dp).heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     stringResource(R.string.app_name),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.weight(1f),
                 )
-                if (step < 2) TextButton(onClick = finish) { Text(stringResource(R.string.skip)) }
+                if (!last) TextButton(onClick = finish) { Text(stringResource(R.string.skip)) }
             }
-            Column(
-                Modifier.weight(1f).verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Surface(
-                    shape = MaterialTheme.shapes.extraLarge,
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier.size(96.dp),
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            icons[step],
-                            null,
-                            Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                    }
-                }
-                Spacer(Modifier.height(32.dp))
-                Text(stringResource(titles[step]), style = MaterialTheme.typography.headlineMedium)
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    stringResource(texts[step]),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                if (step == 2) {
-                    Spacer(Modifier.height(24.dp))
-                    OutlinedButton(onClick = folder, modifier = Modifier.fillMaxWidth()) {
-                        Icon(PackIcons.Folder, null, Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text(location, maxLines = 1)
-                    }
+            HorizontalPager(pager, Modifier.weight(1f), verticalAlignment = Alignment.Top) { index ->
+                val page = introPages[index]
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp)) {
+                    IntroHero(page.hero, page.around)
+                    Spacer(Modifier.height(28.dp))
+                    Text(stringResource(page.title), style = MaterialTheme.typography.headlineMedium)
+                    Spacer(Modifier.height(8.dp))
                     Text(
-                        stringResource(R.string.backup_disclaimer),
-                        style = MaterialTheme.typography.bodySmall,
+                        stringResource(page.body),
+                        style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 8.dp),
                     )
-                }
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    stringResource(R.string.privacy_local),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    repeat(3) {
-                        Box(
-                            Modifier.size(width = if (it == step) 20.dp else 8.dp, height = 8.dp)
-                                .background(
-                                    if (it == step) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.outlineVariant,
-                                    CircleShape,
-                                )
+                    Spacer(Modifier.height(20.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        page.points.forEach { (icon, text) -> IntroPoint(icon, stringResource(text)) }
+                    }
+                    if (index == introPages.lastIndex) {
+                        Spacer(Modifier.height(20.dp))
+                        OutlinedCard(onClick = folder, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+                            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(PackIcons.Folder, null, tint = MaterialTheme.colorScheme.primary)
+                                Spacer(Modifier.width(16.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text(stringResource(R.string.backup_folder), style = MaterialTheme.typography.titleSmall)
+                                    Text(
+                                        location,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                                Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        Text(
+                            stringResource(R.string.intro_folder_hint) + " " + stringResource(R.string.backup_disclaimer),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp, start = 4.dp),
                         )
                     }
                 }
-                if (step > 0) TextButton(onClick = { step-- }) { Text(stringResource(R.string.back)) }
-                Button(onClick = { if (step < 2) step++ else finish() }) {
-                    Text(stringResource(if (step == 2) R.string.start else R.string.next))
+            }
+            Row(Modifier.padding(horizontal = 24.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    repeat(introPages.size) {
+                        val on = it == pager.currentPage
+                        Box(
+                            Modifier.size(width = if (on) 24.dp else 8.dp, height = 8.dp)
+                                .background(if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                        )
+                    }
+                }
+                Button(
+                    onClick = { if (last) finish() else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } },
+                    contentPadding = PaddingValues(horizontal = 32.dp, vertical = 14.dp),
+                ) {
+                    Text(stringResource(if (last) R.string.start else R.string.next))
                 }
             }
         }
+    }
+}
+
+/** A large icon on a soft gradient, with the page's smaller themes around it. */
+@Composable
+private fun IntroHero(icon: ImageVector, around: List<ImageVector>) {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        Modifier.fillMaxWidth()
+            .height(220.dp)
+            .clip(MaterialTheme.shapes.extraLarge)
+            .background(Brush.linearGradient(listOf(colors.primaryContainer, colors.tertiaryContainer))),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(Modifier.size(176.dp).background(colors.surface.copy(alpha = 0.35f), CircleShape))
+        Box(Modifier.size(108.dp).background(colors.surface, CircleShape), contentAlignment = Alignment.Center) {
+            Icon(icon, null, Modifier.size(52.dp), tint = colors.primary)
+        }
+        val places = listOf(-108 to -56, 112 to -44, 92 to 64)
+        around.zip(places).forEach { (small, place) ->
+            Box(
+                Modifier.offset(place.first.dp, place.second.dp).size(48.dp).background(colors.surface, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(small, null, Modifier.size(24.dp), tint = colors.secondary)
+            }
+        }
+    }
+}
+
+@Composable
+private fun IntroPoint(icon: ImageVector, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
+        }
+        Spacer(Modifier.width(16.dp))
+        Text(text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
     }
 }

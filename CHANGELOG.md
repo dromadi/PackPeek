@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.0-alpha.18 — 2026-10-11
+
+**Perbaikan dari uji di HP: Ringkasan lambat, tampilan statistik, dan layar pengenalan.**
+
+- **Pemeriksaan semua aplikasi di Ringkasan jauh lebih cepat.** Sebelumnya setiap aplikasi menjalani analisis lengkap, termasuk pelacakan nilai yang bisa memakan sampai 30 detik per aplikasi, satu per satu. Kini Ringkasan memakai pemeriksaan cepat tanpa pelacakan nilai, dua aplikasi sekaligus. Temuan dan tingkatnya tetap sama; tes baru membandingkan keduanya pada 16 APK uji. Tanda "nilainya dilacak" dan alamat tujuan tetap muncul saat aplikasi dibuka.
+- **Statistik perangkat** kini kotak 2×2 dengan ikon. Angka dan label tidak lagi berantakan dengan huruf besar.
+- **Layar pengenalan dirombak:**
+  - halaman bisa digeser;
+  - setiap halaman punya ilustrasi dan tiga poin manfaat;
+  - isinya kini menyebut cek penipuan APK (SMS/OTP, Telegram, layar palsu di atas aplikasi bank, laporan PDF);
+  - paragraf privasi hanya sekali, di halaman terakhir;
+  - pilihan folder cadangan berupa kartu dengan keterangan bahwa folder bisa diubah nanti.
+- Teks baru dalam 8 bahasa. Tes: 142.
+
 ## 2.0.0-alpha.17 — 2026-10-11
 
 **Perbaikan regresi: analisis terpotong pada aplikasi besar.** Laporan InSaver alpha.16 hanya berisi 1 temuan, 3 SDK, dan bagian analisis mendalam kosong. Penyebabnya, pelacakan nilai (alpha.14–16) menghabiskan waktu dan memori pada aplikasi besar yang kodenya disamarkan, sehingga pemindaian dasar ikut gagal. Laporan alpha.16 untuk aplikasi seperti itu tidak bisa dipakai. Kini:

@@ -31,12 +31,6 @@
     <string name="backup_folder">Backup folder</string>
     <string name="privacy_local">Your app list and analysis stay on this device. No ads, analytics, or account required. The Internet permission is used only for the optional VirusTotal check, which you turn on with your own key; it sends only an app\'s SHA-256 fingerprint, never the file.</string>
     <string name="backup_disclaimer">Backups contain installation APKs, not app data, accounts, or game progress.</string>
-    <string name="onboarding_one">Keep a copy.\nKnow your apps.</string>
-    <string name="onboarding_one_body">Extract one app or select several to back them up together.</string>
-    <string name="onboarding_two">Look inside\nbefore installing.</string>
-    <string name="onboarding_two_body">Explore permissions, components, certificates, and technology. Inspect local APK and APKS files without installing them.</string>
-    <string name="onboarding_three">Choose where\nyour copies go.</string>
-    <string name="onboarding_three_body">Choose a folder through Android. Standalone apps stay as APK; split apps are saved as APKS bundles. You can share them from History.</string>
     <string name="error_folder">The folder is unavailable or its permission was revoked. Choose a writable backup folder again.</string>
     <string name="error_storage">The destination ran out of storage. Free some space and try again.</string>
     <string name="error_source">The source file is unavailable or changed. Refresh the app list or select the file again.</string>
@@ -368,4 +362,19 @@
     <string name="delete_backup_title">Delete backup?</string>
     <string name="delete_backup_body">%1$s will be deleted from the backup folder. This cannot be undone.</string>
     <string name="ready_target_min">• Targets API %1$d; this Android version refuses new apps below API %2$d.</string>
+    <string name="intro_1_title">Know every app on your phone</string>
+    <string name="intro_1_body">See where each app came from, its version, size, and who signed it.</string>
+    <string name="intro_1_point_1">System and user apps in one list</string>
+    <string name="intro_1_point_2">Permissions, components, certificate, and technology</string>
+    <string name="intro_1_point_3">Back up apps as APK or APKS files</string>
+    <string name="intro_2_title">Check an APK before it\'s too late</string>
+    <string name="intro_2_body">PackPeek reads an app\'s code without running it and looks for patterns scammers often use.</string>
+    <string name="intro_2_point_1">Stealing SMS and OTP codes, sending data to Telegram</string>
+    <string name="intro_2_point_2">Fake screens drawn over banking apps</string>
+    <string name="intro_2_point_3">Graded evidence and a PDF report you can share</string>
+    <string name="intro_3_title">Everything stays on your phone</string>
+    <string name="intro_3_body">Analysis runs on this device, and the apps it checks are never started.</string>
+    <string name="intro_3_point_1">No ads, no analytics, no account</string>
+    <string name="intro_3_point_2">Internet is used only for the optional VirusTotal check, which sends just the app\'s SHA-256 fingerprint</string>
+    <string name="intro_folder_hint">Where APK copies are saved. You can change it later in Settings.</string>
 </resources>

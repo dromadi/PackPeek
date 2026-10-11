@@ -319,20 +319,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (again) riskBriefs.value = emptyMap()
         overviewJob = viewModelScope.launch {
             try {
-                for (app in apps.value.filter { !it.system && it.packageName !in riskBriefs.value }) {
-                    ensureActive()
-                    checkingApp.value = app.label
-                    try {
-                        val report = owner.risk.analyze(app, null)
-                        riskBriefs.value = riskBriefs.value + (app.packageName to RiskBrief.of(report))
-                        if (app.packageName !in tech.value)
-                            tech.value = tech.value + (app.packageName to owner.audit.technology(app).frameworks)
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        /* Outside check coverage. */
+                val queue = apps.value.filter { !it.system && it.packageName !in riskBriefs.value }.iterator()
+                // Two apps at a time: code reading waits on storage as much as on the CPU.
+                // Updates are applied on the main thread, so the workers never race on them.
+                List(2) {
+                    launch {
+                        while (true) {
+                            val app = queue.takeIf { it.hasNext() }?.next() ?: break
+                            checkingApp.value = app.label
+                            try {
+                                val report = owner.risk.quick(app)
+                                riskBriefs.value = riskBriefs.value + (app.packageName to RiskBrief.of(report))
+                                if (app.packageName !in tech.value)
+                                    tech.value = tech.value + (app.packageName to owner.audit.technology(app).frameworks)
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                /* Outside check coverage. */
+                            }
+                        }
                     }
-                }
+                }.joinAll()
             } finally {
                 checkingApp.value = null
                 checkingOverview.value = false

@@ -161,4 +161,26 @@ class ScreenRenderTest {
 
     @Test
     fun deepButton() = render("deep-button") { DeepAnalysisButton {} }
+
+    /** A whole phone screen (411 × 891 dp), for full-screen layouts such as the introduction. */
+    private fun screen(name: String, dark: Boolean = false, content: @Composable () -> Unit) =
+        render(name, dark) { Box(Modifier.requiredSize(411.dp, 891.dp)) { content() } }
+
+    @Test
+    @Config(qualifiers = "in-w411dp-h2400dp-xhdpi", fontScale = 1.15f)
+    fun statsIndonesianLargeFont() =
+        render("stats-id-large") {
+            StatsRow(List(758) { app("p$it", "App $it", system = it >= 258, size = 50_000_000).let { a -> if (it < 200) a.copy(splitPaths = listOf("split.apk")) else a } })
+        }
+
+    private fun intro(step: Int, dark: Boolean = false) =
+        screen("intro-id-$step${if (dark) "-dark" else ""}", dark) { Onboarding({}, {}, "Pilih folder", firstStep = step) }
+
+    @Test @Config(qualifiers = "in-w411dp-h2400dp-xhdpi", fontScale = 1.15f) fun introOne() = intro(0)
+
+    @Test @Config(qualifiers = "in-w411dp-h2400dp-xhdpi", fontScale = 1.15f) fun introTwo() = intro(1)
+
+    @Test @Config(qualifiers = "in-w411dp-h2400dp-xhdpi", fontScale = 1.15f) fun introThree() = intro(2)
+
+    @Test @Config(qualifiers = "in-w411dp-h2400dp-xhdpi", fontScale = 1.15f) fun introOneDark() = intro(0, dark = true)
 }

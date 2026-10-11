@@ -526,7 +526,7 @@ object DexScanner {
         for (slot in 0 until PARAM_SLOTS) if (bits and (1 shl (PARAM_SHIFT + slot)) != 0) action(slot)
     }
 
-    private class State(val deadline: Long, val deep: Boolean = false, val trackDeadline: Long = deadline) {
+    private class State(val deadline: Long, val deep: Boolean = false, val trackDeadline: Long = deadline, val track: Boolean = true) {
         /** Value tracking was skipped or stopped somewhere to keep the scan within its limit. */
         var trackingCut = false
         private var trackChecks = 0
@@ -537,7 +537,7 @@ object DexScanner {
          * Tracking data grows with app size; the plain scan must never run out of memory for it.
          */
         fun mayTrack(): Boolean {
-            if (trackingCut) return false
+            if (!track || trackingCut) return false
             if (System.currentTimeMillis() >= trackDeadline || (++trackChecks and 255 == 0 && memoryTight(0.55))) trackingCut = true
             return !trackingCut
         }
@@ -618,12 +618,17 @@ object DexScanner {
         apks: List<File>,
         timeLimitMs: Long = TIME_LIMIT_MS,
         deep: Boolean = false,
+        /**
+         * Value tracking: which value reaches which send, and its address. Off for quick checks of
+         * many apps, where only the findings and their levels matter; those do not depend on it.
+         */
+        track: Boolean = true,
         tracedBy: ((Map<String, Map<Capability, Map<Capability, Set<String>>>>) -> Unit)? = null,
     ): CodeFacts {
         val started = System.currentTimeMillis()
         // Value tracking gets part of the time: the plain scan (capabilities, SDKs, addresses,
         // code paths) must always finish, even for very large apps on a slow phone.
-        val state = State(started + timeLimitMs, deep, trackDeadline = started + timeLimitMs * 6 / 10)
+        val state = State(started + timeLimitMs, deep, trackDeadline = started + timeLimitMs * 6 / 10, track = track)
         apks.forEach { apk ->
             runCatching {
                     ZipFile(apk).use { zip ->
@@ -654,7 +659,8 @@ object DexScanner {
         }
         if (state.stopped) state.gaps += CodeGap(GapKind.LIMIT, "time")
         val traced =
-            try {
+            if (!track) emptyMap()
+            else try {
                 tracedFlows(state, started + timeLimitMs * 9 / 10)
             } catch (e: OutOfMemoryError) {
                 // Last resort: everything tracking allocated is garbage once it unwinds.
