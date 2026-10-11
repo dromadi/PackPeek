@@ -1,6 +1,6 @@
 # Status grand design
 
-Implementasi source dan penerimaan perangkat dibedakan. Workbook asli tidak diubah. Status ditinjau terhadap alpha.19. Tidak ada persentase keseluruhan karena bukti implementasi, pengujian otomatis, dan penerimaan perangkat berbeda.
+Implementasi source dan penerimaan perangkat dibedakan. Workbook asli tidak diubah. Status ditinjau terhadap alpha.20. Tidak ada persentase keseluruhan karena bukti implementasi, pengujian otomatis, dan penerimaan perangkat berbeda.
 
 | ID | Tugas | Status | Bukti / batas |
 |---|---|---|---|
@@ -42,7 +42,7 @@ Implementasi source dan penerimaan perangkat dibedakan. Workbook asli tidak diub
 | T803 | Aksesibilitas & layar besar (tablet/foldable) | Sebagian / menunggu QA | Grid adaptive dan kontrol Material; TalkBack, font 200%, kontras dan foldable menunggu QA perangkat. |
 | T706 | Halaman Tentang & Lisensi Open Source | Sebagian / menunggu QA | About/versi/notice OSS/privasi lokal ada; kontak dan URL kebijakan privasi publik belum diisi. |
 | T317 | Menu Masukan/Dukungan, Bagikan Aplikasi & Beri Rating | Sebagian / menunggu QA | Share info/diagnostik ada; email belum diberikan, rating Play disembunyikan. |
-| T208 | Unit test untuk logika inti | Implementasi alpha | BUILD_REPORT alpha.19 mencatat 150 tes; jumlah dan hasil perubahan PR berikutnya mengikuti laporan CI pada commit terkait |
+| T208 | Unit test untuk logika inti | Implementasi alpha | BUILD_REPORT alpha.20 mencatat 151 tes; jumlah dan hasil perubahan PR berikutnya mengikuti laporan CI pada commit terkait |
 | T341 | Optimasi performa: Baseline Profile & startup | Belum selesai | Baseline Profile khusus aplikasi dan benchmark startup/scroll belum dibuat/dijalankan. |
 | T802 | Uji build release dengan R8 & aturan ProGuard | Sebagian / menunggu QA | Build release R8 diperiksa dalam BUILD_REPORT; pengujian runtime release belum dilakukan. |
 | T801 | Uji di berbagai versi Android & perangkat | Belum selesai | BUILD_REPORT mencatat emulator API 36 alpha.13 dan uji HP pemilik alpha.17/18. Matriks API 24/29/33/34/36 untuk commit rilis belum lengkap. |

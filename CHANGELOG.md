@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — review alpha.19
+## Unreleased — review alpha.19–20
 
 - Bound backup indexing by shared inflated bytes and entry count, including nested APKs and skipped entries; preserve cancellation and release ZIP inflaters.
 - Require MAIN and a launcher category in the same intent filter in both manifest readers.
@@ -9,6 +9,14 @@
 - Label static URLs and unrecognized code origins conservatively in English/Indonesian reports.
 - Add regression coverage and CI for unit tests, lint, debug and R8 release builds. CI results are recorded on the PR; no new release or production-signing claim.
 
+## 2.0.0-alpha.20 — 2026-10-11
+
+**Kalibrasi lanjutan "Pola pencurian OTP" dari laporan Getcontact.** Di alpha.19, Getcontact (Play Store) masih ditandai indikator kuat karena `TelephonyManager.sendUssdRequest` dianggap tanda pengalihan panggilan. Getcontact memakainya di `TelcoActivationRepositoryImpl.callUssd` untuk aktivasi layanan operator. USSD juga dipakai untuk cek pulsa dan paket data.
+
+- Untuk aplikasi dari toko resmi, hanya **kode pengalihan yang tertulis di kode** (`**21*`, `*61*`, `*62*`, `*67*`, `**002*`, `**004*`) yang dihitung sebagai tanda pencurian OTP. Panggilan USSD tanpa kode itu tidak lagi dihitung.
+- Untuk aplikasi dari luar toko dan berkas APK, aturannya tidak berubah: panggilan USSD apa pun tetap dihitung.
+- Temuan "Kode pengalihan panggilan" (perlu perhatian) tetap muncul seperti sebelumnya.
+- Tes: 151.
 
 ## 2.0.0-alpha.19 — 2026-10-11
 
