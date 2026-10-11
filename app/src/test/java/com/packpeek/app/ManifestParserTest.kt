@@ -133,7 +133,7 @@ class ManifestParserTest {
     }
 
     private fun apk(manifest: ByteArray): File {
-        val file = temp.newFile("base.apk")
+        val file = temp.newFile()
         ZipOutputStream(file.outputStream()).use { zip ->
             zip.putNextEntry(ZipEntry("AndroidManifest.xml"))
             zip.write(manifest)
