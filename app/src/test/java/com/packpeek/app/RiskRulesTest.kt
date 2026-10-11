@@ -330,6 +330,25 @@ class RiskRulesTest {
         assertEquals(Severity.STRONG, RiskRules.evaluate(sms, context(source = "PLAY"), DeviceState(), bot).findings.single { it.id == RiskId.OTP_THEFT }.severity)
     }
 
+    /**
+     * Like Getcontact: an SMS app from the store that also sends USSD requests to activate an
+     * operator service. Not OTP theft; a forwarding code (**21*) in its code would be.
+     */
+    @Test
+    fun ussdFromAStoreIsNotCallForwardingForOtp() {
+        val sms = facts(listOf(internet, receiveSms, "android.permission.READ_SMS"))
+        val ussd = hit(Capability.CALL_FORWARDING, "TelephonyManager.sendUssdRequest", "test.app.Telco.callUssd")
+        val store = RiskRules.evaluate(sms, context(source = "PLAY"), DeviceState(), code(listOf(ussd)))
+        assertTrue(store.findings.none { it.id == RiskId.OTP_THEFT })
+        assertEquals(0, store.count(Severity.STRONG))
+        assertTrue(store.findings.any { it.id == RiskId.CALL_FORWARDING })
+        val side = RiskRules.evaluate(sms, context(source = "SIDE"), DeviceState(), code(listOf(ussd)))
+        assertEquals(Severity.STRONG, side.findings.single { it.id == RiskId.OTP_THEFT }.severity)
+        val forwardCode = CodeHit(Capability.CALL_FORWARDING, "**21*", "test.app.Forward.run", null, string = true)
+        val forwarding = RiskRules.evaluate(sms, context(source = "PLAY"), DeviceState(), code(listOf(ussd, forwardCode)))
+        assertEquals(Severity.STRONG, forwarding.findings.single { it.id == RiskId.OTP_THEFT }.severity)
+    }
+
     /** Like Google's API Demos: an SMS demo installed with adb, with clean, fully analysed code. */
     @Test
     fun sideloadingAloneIsNotOtpTheftWhenCodeIsClean() {

@@ -247,7 +247,10 @@ object RiskRules {
         val smsOut =
             if (outsideStore) flowsFrom(Capability.SMS_READ)
             else flowsFrom(Capability.SMS_READ, sinks = Capability.hiddenDestinations)
-        val otpSigns = concealment + smsOut + hiddenDestinations + forwarding
+        // A USSD request on its own is also how apps check a balance or activate an operator
+        // service; for store apps only a forwarding code written in the code (**21* …) counts.
+        val forwardingSigns = if (outsideStore) forwarding else forwarding.filter { it.kind == EvidenceKind.STRING }
+        val otpSigns = concealment + smsOut + hiddenDestinations + forwardingSigns
         if (
             smsDeclared.isNotEmpty() &&
                 (internet.isNotEmpty() || sendSms.isNotEmpty()) &&
@@ -259,7 +262,7 @@ object RiskRules {
                 finding(
                     RiskId.OTP_THEFT,
                     Severity.STRONG,
-                    sms + internet + untrusted + hiddenDestinations + forwarding,
+                    sms + internet + untrusted + hiddenDestinations + forwardingSigns,
                 )
         if (sendSms.isNotEmpty()) {
             val evidence = sendSms + calls(Capability.SMS_SEND) + flowsFrom(*personalSources.toTypedArray(), sinks = setOf(Capability.SMS_SEND))
