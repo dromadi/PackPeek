@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="crash_title">PackPeek geçen sefer durdu</string>
+    <string name="crash_body">Hata ayrıntıları yalnızca bu cihazda saklanır. Bunları kopyalayıp geliştiriciye gönderin.</string>
+    <string name="crash_copy">Hata kaydını kopyala</string>
+    <string name="split_format">Bölünmüş uygulama biçimi</string>
+    <string name="split_format_apks">.apks (SAI, PackPeek)</string>
+    <string name="split_format_xapk">.xapk (APKPure, XAPK yükleyicileri)</string>
+    <string name="split_format_zip">.zip (düz arşiv)</string>
+    <string name="preview_split">Bölünmüş uygulamalar için önizleme</string>
+    <string name="split_format_apk">Birleştirilmiş .apk (deneysel)</string>
+    <string name="merged_apk_warning">⚠ Birleştirilmiş .apk, PackPeek\'in anahtarıyla yeniden imzalanır: orijinal uygulamayı güncelleyemez (önce onu kaldırın, verileri silinir), Play Store onu güncellemez, bazı uygulamalar (bankacılık, oyunlar, Meta) çalışmayı reddeder ve yalnızca bu cihaza ait parçaları içerir.</string>
+    <string name="error_merge">Bölünmüş APK\'lar birleştirilemedi. Uygulama çok büyük veya desteklenmiyor olabilir; bunun yerine .apks, .xapk veya .zip seçin.</string>
+    <string name="folder_root">Depolama: %1$s</string>
+    <string name="folder_selected">Seçili klasör</string>
+    <string name="favorite_apps">Favoriler</string>
+    <string name="favorite">Favorilere ekle</string>
+    <string name="unfavorite">Favorilerden kaldır</string>
+    <string name="signer_changed_title">İmza değişti</string>
+    <string name="signer_changed_body">Bu uygulama artık %1$s (%2$s) sürümünün yedeğinizden farklı bir sertifikayla imzalanmış. Bu, geliştirici anahtar değiştirdiğinde olur; ancak değiştirilmiş veya sahte bir derleme anlamına da gelebilir. Nereden kurulduğunu kontrol edin.</string>
+    <string name="signer_changed_badge">⚠ İmzacı önceki yedekten farklı</string>
+    <string name="reinstall">Yeniden kur</string>
+    <string name="keep_versions">Uygulama başına yedek</string>
+    <string name="keep_all">Tümünü sakla</string>
+    <string name="keep_1">En yeni 1</string>
+    <string name="keep_3">En yeni 3</string>
+    <string name="keep_5">En yeni 5</string>
+    <string name="keep_versions_explanation">Her başarılı yedeklemeden sonra, aynı uygulamanın bu sayıyı aşan eski yedek dosyaları klasörden silinir.</string>
+    <string name="internal_storage">Dahili depolama</string>
+    <string name="no_folder_hint">Yedekler için bir klasör seçin</string>
+    <string name="choose">Seç</string>
+    <string name="selected_count">%1$d seçildi</string>
+    <string name="clear_selection_short">Seçimi temizle</string>
+    <string name="tag_split">Bölünmüş</string>
+    <string name="tag_system">Sistem</string>
+    <string name="backup_progress">Uygulama %1$d / %2$d · %%%3$d</string>
+    <string name="dont_ask_again">Tekrar sorma</string>
+    <string name="backup_done">Yedekleme tamamlandı</string>
+    <string name="backup_partial">Yedekleme hatalarla tamamlandı</string>
+    <string name="result_summary">%1$d / %2$d kaydedildi · %3$s</string>
+    <string name="app_info">Uygulama bilgisi</string>
+    <string name="score_short">puan</string>
+    <string name="history_empty_title">Henüz yedek yok</string>
+    <string name="history_empty_body">Uygulamalar sekmesinden bir uygulama çıkarın; sürümleri burada listelenecek.</string>
+    <string name="search_apps_short">Uygulama ara</string>
+    <plurals name="version_count">
+        <item quantity="one">%1$d sürüm</item>
+        <item quantity="other">%1$d sürüm</item>
+    </plurals>
+    <plurals name="app_count_short">
+        <item quantity="one">%1$d uygulama</item>
+        <item quantity="other">%1$d uygulama</item>
+    </plurals>
+    <plurals name="backup_summary">
+        <item quantity="one">%1$d uygulama · %2$s</item>
+        <item quantity="other">%1$d uygulama · %2$s</item>
+    </plurals>
+    <string name="saved_file">Kaydedildi: %1$s</string>
+    <string name="min_android">Minimum Android</string>
+    <string name="target_android">Hedef Android</string>
+    <string name="first_installed">İlk kurulum</string>
+    <string name="cpu_architecture">CPU mimarisi</string>
+    <string name="no_native_code">Yerel kod yok</string>
+    <string name="show_all_groups">Tümünü göster (%1$d)</string>
+    <string name="show_fewer">Daha az göster</string>
+    <string name="abi_note">Birden çok mimari için yerel kod içeren uygulamalar her birinde görünür.</string>
+    <string name="signer_note">Aynı anahtarla imzalanan uygulamalar aynı geliştiriciden veya derleme sisteminden gelir. \"Android Debug\" bir test derlemesini belirtir.</string>
+    <string name="show_all_apps">Tüm uygulamaları göster</string>
+    <string name="quick_details">Kısa ayrıntılar</string>
+    <string name="full_details">Tüm ayrıntılar</string>
+    <string name="activities">Etkinlikler</string>
+    <string name="services">Hizmetler</string>
+    <string name="receivers">Alıcılar</string>
+    <string name="providers">Sağlayıcılar</string>
+    <string name="tap_opens">Uygulamaya dokunulunca açılan</string>
+    <string name="needs_review">İnceleme gerekli</string>
+    <string name="security_check_title">Uygulamalarınızı kontrol edin</string>
+    <string name="security_check_body">PackPeek, kurduğunuz her uygulamanın manifestini ve kodunu okur ve kanıt arar: ne yapabildiği, kodunun neleri çağırdığı ve verilerin gizli bir yere gönderilip gönderilmediği. Her şey bu telefonda çalışır.</string>
+    <plurals name="security_check_button">
+        <item quantity="one">%1$d uygulamayı kontrol et</item>
+        <item quantity="other">%1$d uygulamayı kontrol et</item>
+    </plurals>
+    <string name="security_checking">Kontrol ediliyor: %1$d / %2$d…</string>
+    <plurals name="security_strong">
+        <item quantity="one">Güçlü gösterge bulunan %1$d uygulama</item>
+        <item quantity="other">Güçlü gösterge bulunan %1$d uygulama</item>
+    </plurals>
+    <plurals name="security_attention">
+        <item quantity="one">Güçlü gösterge yok · %1$d uygulama dikkat gerektiriyor</item>
+        <item quantity="other">Güçlü gösterge yok · %1$d uygulama dikkat gerektiriyor</item>
+    </plurals>
+    <string name="security_clear">Güçlü gösterge bulunmadı</string>
+    <string name="security_checked">Kurulu %2$d uygulamanın %1$d tanesi kontrol edildi (manifest, kod ve cihaz durumu). Bu, bir uygulamanın güvenli olduğunun garantisi değildir.</string>
+    <string name="security_continue">Devam et</string>
+    <string name="security_again">Yeniden kontrol et</string>
+    <string name="active_all_clear">Hiçbir uygulamada erişilebilirlik, bildirim erişimi veya cihaz yöneticisi açık değil.</string>
+    <string name="app_analysis">Uygulama analizi</string>
+    <string name="tech_after_check">Teknoloji, yukarıdaki uygulama kontrolü sırasında belirlenir.</string>
+    <string name="reading_groups">Sertifikalar ve yerel kod okunuyor…</string>
+    <plurals name="other_groups">
+        <item quantity="one">%1$d grup daha</item>
+        <item quantity="other">%1$d grup daha</item>
+    </plurals>
+    <string name="deep_button_title">Derin analiz</string>
+    <string name="deep_button_body">Kod içindeki veri yollarını izler, gizli metinleri çözer ve gizli kod dosyalarını açar. Bir dakikaya kadar sürer.</string>
+    <string name="deep_running">Kod analiz ediliyor… bu bir dakikaya kadar sürebilir.</string>
+    <string name="deep_failed">Derin analiz bu uygulamanın kodunu okuyamadı.</string>
+    <string name="deep_done">%1$d sn\'de bitti · %2$d veri yolu · %3$d gizli metin · %4$d gizli kod dosyası</string>
+    <string name="section_chains">Veri yolları</string>
+    <string name="chains_note">Kodun veriyi okuduğu yerden gönderdiği yere kadar, diğer bileşenlere aktarımlar dahil, üç çağrı derinliğine kadar izlenen kod yolları. Bir yol, okuma ve göndermenin kodda bağlantılı olduğunu gösterir; aynı değerin gönderildiğini göstermez.</string>
+    <string name="chains_none">Üç çağrı derinlikte bile kişisel veriden gönderime giden bir yol bulunmadı.</string>
+    <string name="chain_read">Okuma: %1$s</string>
+    <string name="chain_send">Gönderme: %1$s</string>
+    <string name="via_start">buradan başlar</string>
+    <string name="via_call">çağırır</string>
+    <string name="via_intent">bir Intent ile başka bir bileşeni başlatır</string>
+    <string name="via_object">nesne olarak çalışır (thread veya callback)</string>
+    <string name="section_decoded">Gizli metinler</string>
+    <string name="decoded_note">Kodun hızlı bir bakıştan gizlediği metinler; uygulama çalıştırılmadan çözüldü.</string>
+    <string name="decoded_none">Gizli adres veya kod bulunmadı.</string>
+    <string name="tech_base64">Base64\'ten çözüldü</string>
+    <string name="tech_joined">Parçalardan birleştirildi</string>
+    <string name="tech_char_array">Karakter dizisinden oluşturuldu</string>
+    <string name="tech_xor">XOR anahtarıyla çözüldü: %1$s</string>
+    <string name="tech_reversed">Ters çevrilmiş metin</string>
+    <string name="section_payloads">Gizli kod</string>
+    <string name="payloads_note">Paketin içinde saklanan ve çoğunlukla dropper\'lar tarafından sonradan yüklenen kod dosyaları; aynı kurallarla analiz edilir.</string>
+    <string name="payloads_none">Gizli kod dosyası yok.</string>
+    <string name="payload_dex">Gizli DEX dosyası · %1$d sınıf</string>
+    <string name="payload_archive">Gizli APK/JAR · %1$d sınıf</string>
+    <string name="payload_encrypted">Şifrelenmiş görünüyor (entropi %1$s bit/bayt); içeriği bilinmiyor</string>
+    <string name="payload_can">Kodu: %1$s</string>
+    <string name="payload_nothing">Kodu, PackPeek\'in kontrol ettiği hassas çağrıların hiçbirini yapmıyor.</string>
+    <string name="section_code">Şüpheli kod</string>
+    <string name="code_note">Kanıtların dayandığı metotların kısa listeleri. ⚠ hassas bir çağrıyı işaretler.</string>
+    <string name="section_actions">Neler yapabilirsiniz</string>
+    <string name="action_uninstall">Kaldır</string>
+    <string name="action_app_info">Uygulama bilgisi: izinleri geri al</string>
+    <string name="action_accessibility">Erişilebilirlik ayarları</string>
+    <string name="action_notification_access">Bildirim erişimi</string>
+    <string name="action_admin">Güvenlik ayarları (cihaz yöneticisi)</string>
+    <string name="action_call_forwarding">Arama yönlendirmeyi kontrol et (*#21#)</string>
+    <string name="action_secure_accounts">Hesaplarınızı güvenceye alın</string>
+    <string name="secure_accounts_body">1. Uygulamayı bir daha açmayın; kaldırın (istenirse önce cihaz yöneticisini devre dışı bırakın).\n2. WhatsApp, e-posta, mobil bankacılık ve e-cüzdan şifrelerinizi, mümkünse başka bir telefondan değiştirin.\n3. İki adımlı doğrulamayı yeniden açın ve diğer cihazlardaki oturumları kapatın.\n4. OTP kodları okunmuş olabilirse bankanızı resmi numarasından arayın.\n5. Arama yönlendirmeyi kontrol etmek için *#21#, iptal etmek için ##002# tuşlayın.</string>
+    <string name="action_dont_install">Bu dosyayı kurmayın. İndirilenler\'den ve dosyayı aldığınız sohbetten silin.</string>
+    <string name="section_report">Kanıt raporu</string>
+    <string name="report_note">Bulguları bankanız, polis, aileniz veya bir güvenlik ekibiyle paylaşın.</string>
+    <string name="report_share_text">Metin olarak paylaş</string>
+    <string name="report_share_pdf">PDF olarak paylaş</string>
+    <string name="section_lookup">Çevrimiçi kontrol (isteğe bağlı)</string>
+    <string name="lookup_note">Dosyanın parmak izini (SHA-256) VirusTotal veritabanıyla karşılaştırır. Yalnızca parmak izi gönderilir; dosya veya uygulama listeniz asla gönderilmez.</string>
+    <string name="lookup_button">Parmak izini kontrol et</string>
+    <string name="lookup_browser">Tarayıcıda aç</string>
+    <string name="lookup_running">Kontrol ediliyor…</string>
+    <string name="lookup_no_key">Burada kontrol etmek için Ayarlar\'a ücretsiz VirusTotal API anahtarınızı ekleyin veya sonucu tarayıcıda açın.</string>
+    <string name="lookup_not_found">VirusTotal bu dosyayı daha önce hiç görmemiş. Bu, güvenli olduğu anlamına gelmez: yeni dolandırıcılık APK\'ları çoğu zaman henüz bilinmez.</string>
+    <string name="lookup_found">%2$d güvenlik motorundan %1$d tanesi bu dosyayı işaretliyor</string>
+    <string name="lookup_suspicious">%1$d tanesi daha şüpheli olarak niteliyor</string>
+    <string name="lookup_label">Bilinen adı: %1$s</string>
+    <string name="lookup_clean">Hiçbir güvenlik motoru bu dosyayı işaretlemiyor (%1$d kontrol edildi). Yeni dolandırıcılık APK\'ları çoğu zaman henüz tespit edilmez.</string>
+    <string name="lookup_key_error">VirusTotal API anahtarını reddetti. Ayarlar\'dan kontrol edin.</string>
+    <string name="lookup_quota">VirusTotal ücretsiz sınırına ulaşıldı. Bir dakika sonra tekrar deneyin.</string>
+    <string name="lookup_network">VirusTotal\'a ulaşılamadı. Bağlantıyı kontrol edin.</string>
+    <string name="copy_sha">SHA-256\'yı kopyala</string>
+    <string name="vt_key_title">VirusTotal API anahtarı (isteğe bağlı)</string>
+    <string name="vt_key_set">Ayarlandı · yalnızca Parmak izini kontrol et\'e dokunduğunuzda kullanılır</string>
+    <string name="vt_key_unset">Ayarlanmadı · ücretsiz anahtarı virustotal.com adresinden alın</string>
+    <string name="vt_key_hint">API anahtarı</string>
+    <string name="vt_key_note">Yalnızca derin analizdeki isteğe bağlı parmak izi kontrolü için kullanılır. Yalnızca SHA-256 gönderilir.</string>
+    <string name="save">Kaydet</string>
+    <string name="remove">Kaldır</string>
+    <string name="report_title">PackPeek kanıt raporu</string>
+    <string name="report_created">Oluşturulma: %1$s</string>
+    <string name="report_app">Uygulama: %1$s (%2$s), sürüm %3$s</string>
+    <string name="report_from_file">APK dosyası olarak kontrol edildi; kurulu değil</string>
+    <string name="report_installed">Kurulu · kaynak: %1$s</string>
+    <string name="report_counts">%1$d güçlü gösterge · %2$d dikkat gerektiren · %3$d not</string>
+    <string name="report_disclaimer">Bu sonuçlar bir uygulamanın zararlı ya da güvenli olduğunu kanıtlamaz. Kanıt düzeyleri: T1 manifest içinde yazılı, T2 kodda bulundu, T3 okuma ve gönderme aynı kod yolunda (değerin kendisi izlendiğinde işaretlenir), T4 bu cihazda gözlemlendi.</string>
+    <string name="report_findings">Bulgular</string>
+    <string name="report_deep">Derin analiz</string>
+    <string name="report_lookup">VirusTotal</string>
+    <string name="report_footer">PackPeek ile doğrudan cihazda oluşturuldu; uygulama çalıştırılmadı.</string>
+    <string-array name="risk_otp_theft">
+        <item>OTP hırsızlığı / hesap ele geçirme örüntüsü</item>
+        <item>Uygulama, banka ve WhatsApp tek kullanımlık kodları dahil SMS alabilir ve internete erişebilir. Sahte davetiye, trafik cezası ve kargo APK\'ları hesapları ele geçirmek için bu birleşimi kullanır.</item>
+        <item>Bu örüntü, SMS erişimi gizlenme veya güvenilmeyen kaynak işaretleriyle (gizli simge, uygulama mağazası dışından gelen dosya, hata ayıklama ya da yepyeni sertifika, cezbedici ad) veya SMS içeriğini dışarı gönderen kod, gizli bir hedef ya da arama yönlendirmeyle birlikte bulunduğu için görünür.</item>
+        <item>Uygulamanın kodu henüz analiz edilmedi; bu nedenle SMS\'lerin okunduğu veya bir yere gönderildiği kanıtlanmış değil. Bu değerlendirme yalnızca manifest ve bağlama dayanır.</item>
+        <item>Bu dosyayı kurmayın. Kuruluysa: SMS iznini geri alın, uygulamayı kaldırın, ardından önemli hesaplarınızın (WhatsApp, banka, e-posta) şifrelerini değiştirin ve iki adımlı doğrulamayı yeniden açın.</item>
+    </string-array>
+    <string-array name="risk_screen_spying">
+        <item>Ekran izleme örüntüsü</item>
+        <item>Bir erişilebilirlik hizmeti, mesajlar, bakiyeler ve yazılan metin dahil diğer uygulamaların ekranlarını okuyabilir ve uygulama bunları internet üzerinden gönderebilir.</item>
+        <item>Bu örüntü, ekran okuyan erişilebilirlik hizmeti gizli simge, yer paylaşımları, cihaz yöneticisi, bildirim dinleyicisi veya güvenilmeyen kaynak gibi başka işaretlerle birlikte bulunduğu için görünür.</item>
+        <item>Ekran içeriğinin bir yere gönderildiği kanıtlanmış değil. Uygulamanın kodu henüz analiz edilmedi.</item>
+        <item>Bilerek kullanmıyorsanız bu uygulamanın erişilebilirlik hizmetini Ayarlar → Erişilebilirlik\'ten kapatın. Tanımıyorsanız uygulamayı kaldırın.</item>
+    </string-array>
+    <string-array name="risk_accessibility">
+        <item>Erişilebilirlik hizmeti</item>
+        <item>Etkinleştirildiğinde ekran içeriğini okuyabilir ve kullanıcı adına dokunabilir.</item>
+        <item>Ekran okuyucular, şifre yöneticileri, otomasyon araçları ve alternatif başlatıcılar için normaldir.</item>
+        <item>Ekran verilerinin cihazdan çıktığı kanıtlanmış değil. Kod henüz analiz edilmedi.</item>
+        <item>Yalnızca ne işe yaradığını biliyorsanız etkinleştirin. Ayarlar → Erişilebilirlik\'i kontrol edin.</item>
+    </string-array>
+    <string-array name="risk_notifications">
+        <item>Bildirim dinleyicisi</item>
+        <item>Etkinleştirildiğinde uygulama, mesaj metinleri ve tek kullanımlık kodlar dahil tüm bildirimleri okuyabilir.</item>
+        <item>Akıllı saatler, hatırlatıcı uygulamaları ve bildirim yöneticileri için normaldir.</item>
+        <item>Bildirimlerin saklandığı veya gönderildiği kanıtlanmış değil.</item>
+        <item>Yalnızca güvendiğiniz uygulamalara izin verin. Ayarlar → Bildirimler → Bildirim erişimi\'ni kontrol edin.</item>
+    </string-array>
+    <string-array name="risk_device_admin">
+        <item>Cihaz yöneticisi</item>
+        <item>Cihaz yöneticisi ekranı kilitleyebilir, ekran kilidini değiştirebilir, hatta verileri silebilir; etkinken kaldırılması zordur.</item>
+        <item>İş (MDM), cihazımı bul ve ebeveyn denetimi uygulamaları için normaldir.</item>
+        <item>Bu politikaların kullanıldığı kanıtlanmış değil.</item>
+        <item>Gerekmiyorsa Ayarlar → Güvenlik → Cihaz yöneticisi uygulamaları\'ndan devre dışı bırakın.</item>
+    </string-array>
+    <string-array name="risk_sms">
+        <item>SMS erişimi</item>
+        <item>Uygulama, tek kullanımlık kodlar dahil SMS alabilir veya okuyabilir.</item>
+        <item>SMS uygulamaları, doğrulama kodlarını otomatik dolduran bazı bankacılık uygulamaları ve spam engelleyiciler için normaldir.</item>
+        <item>SMS\'lerin okunduğu veya bir yere gönderildiği kanıtlanmış değil. Kod henüz analiz edilmedi.</item>
+        <item>Uygulamanın özellikleri için SMS gerekmiyorsa Ayarlar → Uygulamalar\'dan SMS iznini geri alın.</item>
+    </string-array>
+    <string-array name="risk_sms_send">
+        <item>SMS gönderme</item>
+        <item>Uygulama numaranızdan SMS gönderebilir; bu ücrete yol açabilir veya kişilerinize bağlantı yayabilir.</item>
+        <item>SMS uygulamaları ve bazı doğrulama uygulamaları için normaldir.</item>
+        <item>Herhangi bir SMS gönderildiği kanıtlanmış değil.</item>
+        <item>Gerekmiyorsa SMS iznini geri alın ve gönderilen mesajlarınızı kontrol edin.</item>
+    </string-array>
+    <string-array name="risk_contacts_calls">
+        <item>Kişiler ve arama geçmişi</item>
+        <item>Uygulama kişi listenizi veya arama geçmişinizi okuyabilir.</item>
+        <item>Mesajlaşma, telefon ve kişi yedekleme uygulamaları için normaldir.</item>
+        <item>Kişi verilerinin cihazdan çıktığı kanıtlanmış değil.</item>
+        <item>Uygulamanın amacıyla ilgisi yoksa kişiler veya arama kaydı iznini geri alın.</item>
+    </string-array>
+    <string-array name="risk_phone_identity">
+        <item>Telefon kimliği ve hesaplar</item>
+        <item>Uygulama telefon durumunu, numaranızı veya cihazdaki hesapları okuyabilir.</item>
+        <item>Arama uygulamalarında, oyunlarda ve cihazları birbirinden ayıran analiz SDK\'larında yaygındır.</item>
+        <item>Bu verilerin gönderildiği kanıtlanmış değil.</item>
+        <item>Uygulama arama yapmıyorsa \"Telefon\" iznini geri alın.</item>
+    </string-array>
+    <string-array name="risk_camera_mic">
+        <item>Kamera ve mikrofon</item>
+        <item>İzin verildiğinde uygulama kamerayı kullanabilir veya ses kaydedebilir.</item>
+        <item>Fotoğraf, video, arama ve QR uygulamaları için normaldir. Android 12+ kamera veya mikrofon kullanılırken yeşil bir gösterge gösterir.</item>
+        <item>Arka planda kayıt yapıldığı kanıtlanmış değil.</item>
+        <item>Kamera ve mikrofon için \"Yalnızca uygulama kullanılırken\" veya \"Her zaman sor\" seçeneğini seçin.</item>
+    </string-array>
+    <string-array name="risk_location">
+        <item>Konum</item>
+        <item>Uygulama nerede olduğunuzu bilebilir; arka plan konumuyla, kapalıyken de.</item>
+        <item>Harita, araç çağırma, hava durumu ve cihazımı bul uygulamaları için normaldir.</item>
+        <item>Konumun gönderildiği veya saklandığı kanıtlanmış değil.</item>
+        <item>Mümkün olduğunda yaklaşık konum veya \"Yalnızca uygulama kullanılırken\" seçeneğini kullanın.</item>
+    </string-array>
+    <string-array name="risk_screen_capture">
+        <item>Ekran kaydı</item>
+        <item>Android\'in sorusunu kabul ettikten sonra uygulama tüm ekranı kaydedebilir veya yansıtabilir.</item>
+        <item>Ekran kaydediciler, toplantıda ekran paylaşımı ve oyun yayını için normaldir.</item>
+        <item>Android her kayıt başlangıcında sorar; bir şey kaydedildiği kanıtlanmış değil.</item>
+        <item>Özellikle bankacılık uygulamalarını açarken beklenmedik ekran kaydı isteklerini reddedin.</item>
+    </string-array>
+    <string-array name="risk_overlay">
+        <item>Diğer uygulamaların üzerinde gösterme</item>
+        <item>Uygulama diğer uygulamaların üzerine pencere çizebilir; bu, sahte giriş ekranları için kötüye kullanılabilir.</item>
+        <item>Sohbet balonları, ekran kaydediciler ve mavi ışık filtreleri için normaldir.</item>
+        <item>Diğer uygulamaların üzerini kapattığı kanıtlanmış değil.</item>
+        <item>Gerekmiyorsa Ayarlar → Uygulamalar → Özel erişim → Diğer uygulamaların üzerinde göster\'den geri alın.</item>
+    </string-array>
+    <string-array name="risk_persistence">
+        <item>Arka planda çalışır</item>
+        <item>Uygulama telefon açıldıktan sonra yeniden başlayabilir veya pil optimizasyonundan muaftır.</item>
+        <item>Mesajlaşma, alarm ve senkronizasyon uygulamaları için normaldir.</item>
+        <item>Sürekli çalıştığı kanıtlanmış değil.</item>
+        <item>Uygulamanın arka planda çalışması gerekmiyorsa pil muafiyetini kaldırın.</item>
+    </string-array>
+    <string-array name="risk_hidden_icon">
+        <item>Ana ekran simgesi yok</item>
+        <item>Uygulama, uygulama çekmecesinde görünmez; bu yüzden kolayca unutulur ve kaldırmak için bulmak zordur.</item>
+        <item>Klavyeler, widget\'lar, duvar kâğıtları ve başka uygulamalardan açılan eklentiler için normaldir.</item>
+        <item>Simgenin bilerek gizlenip gizlenmediği bilinmiyor.</item>
+        <item>Bu uygulamanın ne olduğunu bildiğinizden emin olun. Tanımıyorsanız Ayarlar → Uygulamalar\'dan kaldırın.</item>
+    </string-array>
+    <string-array name="risk_install_apps">
+        <item>Başka uygulamalar kurar</item>
+        <item>Uygulama başka APK\'ları kurmayı isteyebilir; bu, ek uygulamalar indirmek için kullanılabilir.</item>
+        <item>Uygulama mağazaları, dosya yöneticileri, tarayıcılar ve PackPeek gibi yedekleme araçları için normaldir.</item>
+        <item>Android her kurulumdan önce yine de sorar; kullanıldığı kanıtlanmış değil.</item>
+        <item>Güvenmediğiniz uygulamalara \"Bilinmeyen uygulamaları yükle\" izni vermeyin.</item>
+    </string-array>
+    <string-array name="risk_all_files">
+        <item>Tüm dosyalara erişim</item>
+        <item>Uygulama, fotoğraflar ve belgeler dahil depolamadaki her dosyayı okuyabilir ve değiştirebilir.</item>
+        <item>Dosya yöneticileri, antivirüs ve yedekleme araçları için normaldir.</item>
+        <item>Dosyaların cihazdan çıktığı kanıtlanmış değil.</item>
+        <item>Uygulama dosya yönetmiyorsa \"Tüm dosyalara erişim\" iznini geri alın.</item>
+    </string-array>
+    <string-array name="risk_cleartext">
+        <item>Şifresiz trafiğe izin veriliyor</item>
+        <item>Uygulama şifreleme olmadan (HTTP) iletişim kurabilir; bu nedenle aynı Wi-Fi ağındaki başkaları verileri okuyabilir.</item>
+        <item>Bazen yazıcılar veya güvenlik kameraları gibi yerel cihazlar için gereklidir.</item>
+        <item>Hassas verilerin şifresiz gönderildiği kanıtlanmış değil.</item>
+        <item>Herkese açık Wi-Fi ağlarında bu uygulama üzerinden giriş yapmaktan veya ödeme yapmaktan kaçının.</item>
+    </string-array>
+    <string-array name="risk_network_usage">
+        <item>Ağ veri kullanımı</item>
+        <item>Uygulamanın son 30 günde, açık olmadığı zamanlar dahil ne kadar veri kullandığını gösterir.</item>
+        <item>Arka plan verisi senkronizasyon, mesajlaşma ve güncellemeler için normaldir. Nadiren kullandığınız bir uygulamada yüksek miktarlar incelenmeye değer.</item>
+        <item>Bu rakamlar verinin ne olduğunu veya nereye gittiğini göstermez.</item>
+        <item>Miktar yanlış görünüyorsa Ayarlar → Uygulamalar → Mobil veri\'den arka plan verisini kısıtlayın.</item>
+    </string-array>
+    <string-array name="risk_untrusted_signer">
+        <item>Olağandışı imza sertifikası</item>
+        <item>Uygulama, hata ayıklama sertifikasıyla veya çok yakın zamanda oluşturulmuş bir sertifikayla imzalanmış; bu, resmi mağazalar dışında hızla derlenen APK\'larda yaygındır.</item>
+        <item>Kendi derlediğiniz uygulamalar, test derlemeleri veya PackPeek ile birleştirilmiş .apk dosyaları için normaldir.</item>
+        <item>Uygulamanın zararlı olduğunu kanıtlamaz.</item>
+        <item>Kurmadan önce dosyanın geldiği kaynağa güvendiğinizden emin olun.</item>
+    </string-array>
+    <string name="context_default_sms">Bu, seçtiğiniz varsayılan SMS uygulamasıdır; bu nedenle SMS erişimi amacına uygundur.</string>
+    <string name="context_system_app">Bu, yerleşik bir sistem uygulamasıdır; bu yetenek genellikle sistem işlevlerinin bir parçasıdır.</string>
+    <string name="concerns">Endişeler</string>
+    <string name="concerns_none">Bu kontrolde endişe yok.</string>
+    <string name="concerns_disclaimer">Bu sonuçlar bir uygulamanın güvenli veya zararlı olduğunu söylemez. Kanıt düzeyini ve \"Henüz kanıtlanmadı\" bölümünü kontrol edin.</string>
+    <string name="severity_strong">Güçlü gösterge</string>
+    <string name="severity_attention">Dikkat gerektiriyor</string>
+    <string name="severity_info">Bilgi</string>
+    <plurals name="severity_strong_count">
+        <item quantity="one">%1$d güçlü gösterge</item>
+        <item quantity="other">%1$d güçlü gösterge</item>
+    </plurals>
+    <plurals name="severity_attention_count">
+        <item quantity="one">%1$d dikkat gerektiriyor</item>
+        <item quantity="other">%1$d dikkat gerektiriyor</item>
+    </plurals>
+    <plurals name="severity_info_count">
+        <item quantity="one">%1$d not</item>
+        <item quantity="other">%1$d not</item>
+    </plurals>
+    <string name="risk_found">Ne bulundu</string>
+    <string name="risk_impact">Sizin için etkisi</string>
+    <string name="risk_context">Bağlam</string>
+    <string name="risk_unproven">Henüz kanıtlanmadı</string>
+    <string name="risk_action">Önerilen işlem</string>
+    <string name="level_declared">T1 Beyan edildi</string>
+    <string name="level_code">T2 Kodda</string>
+    <string name="level_flow">T3 Kod yolu</string>
+    <string name="level_observed">T4 Gözlemlendi</string>
+    <string name="levels_explained">T1: manifest içinde yazılı. T2: kodda fonksiyon bulundu. T3: okuma ve gönderme aynı kod yolunda; değerin kendisi izlendiğinde işaretlenir. T4: bu cihazda gözlemlendi.</string>
+    <string name="ev_permission">İstediği izin: %1$s</string>
+    <string name="ev_component">Bileşen %1$s</string>
+    <string name="ev_config_retrieve">Yapılandırma: diğer uygulamaların ekran içeriğini okuyabilir</string>
+    <string name="ev_config_gestures">Yapılandırma: dokunma ve hareketler yapabilir</string>
+    <string name="ev_config_all_events">Yapılandırma: her tür ekran olayını alır</string>
+    <string name="ev_accessibility_enabled">Erişilebilirlik hizmeti ETKİN</string>
+    <string name="ev_notification_enabled">Bildirim dinleyicisi ETKİN</string>
+    <string name="ev_admin_active">Cihaz yöneticisi ETKİN</string>
+    <string name="ev_default_sms">Varsayılan SMS uygulaması olarak seçili</string>
+    <string name="ev_granted">%1$s verildi</string>
+    <string name="ev_overlay_allowed">Diğer uygulamaların üzerinde gösterme izni var</string>
+    <string name="ev_battery_exempt">Pil optimizasyonundan muaf</string>
+    <string name="ev_sideloaded">Uygulama mağazası dışından kuruldu</string>
+    <string name="ev_file">APK dosyası, kurulu değil</string>
+    <string name="ev_no_launcher">Ana ekranda gösterilen etkinlik yok</string>
+    <string name="ev_debug_cert">Hata ayıklama sertifikasıyla imzalanmış</string>
+    <string name="ev_new_cert">Sertifika yakın zamanda oluşturulmuş (%1$s gün önce)</string>
+    <string name="ev_lure_label">Cezbedici uygulama adı: \"%1$s\"</string>
+    <string name="ev_cleartext">usesCleartextTraffic etkin</string>
+    <string name="ev_network">30 gün: açıkken %1$s, arka planda %2$s</string>
+    <string name="coverage">Kontrol kapsamı</string>
+    <plurals name="coverage_apks">
+        <item quantity="one">%1$d APK manifesti kontrol edildi</item>
+        <item quantity="other">%1$d APK manifesti kontrol edildi</item>
+    </plurals>
+    <string name="coverage_unreadable">Okunamadı: %1$s</string>
+    <plurals name="coverage_configs">
+        <item quantity="one">%1$d yapılandırma dosyası okunamadı</item>
+        <item quantity="other">%1$d yapılandırma dosyası okunamadı</item>
+    </plurals>
+    <string name="coverage_device">Cihaz durumu okundu (etkin hizmetler, verilen izinler)</string>
+    <string name="coverage_file">Dosya kurulu değil; bu nedenle cihaz durumu kullanılamıyor</string>
+    <string name="coverage_usage_on">Veri kullanımı, Kullanım erişimi aracılığıyla okundu</string>
+    <string name="coverage_usage_off">Kullanım erişimine izin verilmediği için veri kullanımı okunmadı</string>
+    <string name="grant_usage_access">İzin ver</string>
+    <string name="install_risk_title">Güçlü gösterge bulundu</string>
+    <string name="install_risk_body">Kontrol, veri çalan uygulamaların sık kullandığı örüntüler buldu:\n\n%1$s\n\nYine de kurulsun mu?</string>
+    <string name="install_anyway">Yine de kur</string>
+    <string name="risk_badge_ok">Yok</string>
+    <string name="risk_badge_label">endişe</string>
+    <string name="old_score_title">Önceki yapılandırma puanı</string>
+    <string name="active_on_device">Bu cihazda etkin</string>
+    <string name="active_on_device_note">Bu hizmetler ekranı veya bildirimleri okuyabilir ya da cihazı kontrol edebilir. Her uygulamayı tanıdığınızdan emin olun.</string>
+    <string name="active_accessibility">Erişilebilirlik hizmetleri</string>
+    <string name="active_notifications">Bildirim dinleyicileri</string>
+    <string name="active_admins">Cihaz yöneticileri</string>
+    <string name="active_default_sms">Varsayılan SMS uygulaması</string>
+    <string name="usage_access">Kullanım erişimi</string>
+    <string name="usage_access_on">İzin verildi: uygulama başına veri kullanımı gözlemlenen kanıt olarak gösterilir</string>
+    <string name="usage_access_off">İzin verilmedi. İsteğe bağlı: uygulama başına veri kullanımını gösterir (içeriğini veya hedefini değil).</string>
+    <string name="risk_analysis">Risk analizi</string>
+    <string-array name="risk_data_theft">
+        <item>Kişisel veriler gizli bir hedefe gönderiliyor</item>
+        <item>Uygulamanın kendi kodu kişisel verileri (SMS, kişiler, bildirimler veya ekran metni gibi) okuyor ve aynı kod yolunda verileri bir Telegram botuna, bir Discord webhook\'una veya gönderen kodda yazılı genel bir IP adresine gönderiyor. Dolandırıcı uygulamalar bu kanalları, izlenebilecek adlı bir sunucuya ihtiyaç duymadıkları için kullanır.</item>
+        <item>Sıradan uygulamalar verileri bot veya webhook\'lara değil, kendi adlı sunucularına gönderir. Geliştiriciler bazen hata raporları için bot kullanır, ancak bunlar kişisel verileri okumaz. Doğrudan IP yalnızca güvenilmeyen kaynaktan gelen bir dosya veya uygulama için güçlü göstergedir; aksi halde dikkat gerektirir.</item>
+        <item></item>
+        <item>Bu dosyayı kurmayın. Kuruluysa: kaldırın, kodlarını veya mesajlarını okuyabileceği hesapların şifrelerini değiştirin ve iki adımlı doğrulamayı yeniden açın.</item>
+    </string-array>
+    <string-array name="risk_hidden_destination">
+        <item>Kodda gizli hedef</item>
+        <item>Kod bir Telegram botu, bir Discord webhook\'u veya alan adı olmayan genel bir IP adresi içeriyor. Oraya gönderilen veriler bir şirkete kolayca bağlanamaz. Yerel adresler (ev ağı, cihazın kendisi) sayılmaz.</item>
+        <item>Bazı uygulamalar uyarılar için bot veya webhook kullanır ya da kendi sunucularına IP ile bağlanır. Kişisel verilere erişimle birlikte olduğunda endişe vericidir.</item>
+        <item></item>
+        <item>Uygulamanın amacı için sohbet hizmetleriyle veya doğrudan IP adresleriyle iletişim kurması gerekip gerekmediğini kontrol edin. Bilinen geliştiricilerin uygulamalarını tercih edin.</item>
+    </string-array>
+    <string-array name="risk_call_forwarding">
+        <item>Arama yönlendirme kodları</item>
+        <item>Kod, aramalarınızı yönlendiren telefon kodları (örneğin **21*) içeriyor veya USSD istekleri gönderiyor. Hesap hırsızları, sesli OTP kodları size değil kendilerine ulaşsın diye aramaları yönlendirir.</item>
+        <item>Telefon, operatör ve arama yönetimi uygulamaları bu kodları meşru şekilde kullanabilir.</item>
+        <item></item>
+        <item>Arama yönlendirme ayarlarınızı kontrol edin (*#21# tuşlayın). Sizin kurmadığınız yönlendirmeleri kaldırın ve tanımıyorsanız uygulamayı kaldırın.</item>
+    </string-array>
+    <string-array name="risk_dynamic_code">
+        <item>Ek kod yükler</item>
+        <item>Uygulama, kontrol edilenin parçası olmayan kodu yükleyebilir veya çalıştırabilir: paketin içinde gizli bir DEX/APK, şifreleyen bir packer veya bir class loader.</item>
+        <item>Büyük uygulamalar eklentiler ve güncellemeler için dinamik yükleme kullanır; bazı şirketler kodlarını paketleyicilerle korur.</item>
+        <item></item>
+        <item>Bu kontrolün sonucunu bu uygulama için eksik kabul edin. Uygulama ayrıca uygulama mağazası dışından geliyorsa dikkatli olun.</item>
+    </string-array>
+    <string-array name="risk_clipboard">
+        <item>Panoyu okur</item>
+        <item>Uygulama kopyaladığınız metni okuyabilir; bu metin şifreler, OTP kodları veya hesap numaraları içerebilir.</item>
+        <item>İndirme ve bağlantı paylaşma uygulamaları, kopyalanan bağlantıyı almak için panoyu sık sık okur. Android 10\'dan beri uygulamalar panoyu yalnızca ekrandayken okuyabilir ve Android 12+ bir bildirim gösterir.</item>
+        <item></item>
+        <item>Bu uygulama açıkken şifre veya OTP kodu kopyalamaktan kaçının.</item>
+    </string-array>
+    <string-array name="risk_web_login">
+        <item>WebView çerezlerini okur</item>
+        <item>Uygulama, yerleşik tarayıcısındaki çerezleri okur. Çerezler oturumunuzu açık tutabilir; bu yüzden onlara sahip olan kişi o web sitesinde sizin yerinize işlem yapabilir.</item>
+        <item>Uygulama içinde bir web sitesine giriş yapmanızı sağlayan uygulamalar (örneğin kendi gönderilerinizi indirmek için) bu oturum için çerezlere ihtiyaç duyar.</item>
+        <item></item>
+        <item>Önemli hesaplara yalnızca resmi uygulamaları veya tarayıcı üzerinden giriş yapın. Emin değilseniz oturumu kapatın ve şifreyi değiştirin.</item>
+    </string-array>
+    <string-array name="risk_ad_sdks">
+        <item>Reklam ve analiz SDK\'ları</item>
+        <item>Reklam gösteren veya uygulamayı nasıl kullandığınızı ölçen üçüncü taraf kod. Bu SDK\'lar cihaz tanımlayıcıları ve kullanım verileri toplayabilir.</item>
+        <item>Ücretsiz uygulamalarda çok yaygındır; genellikle uygulamanın gizlilik politikasında yer alır.</item>
+        <item>Her SDK\'nın gerçekte hangi verileri topladığı kod kontrolünden görülemez.</item>
+        <item>Google Play\'deki Veri güvenliği bölümünü kontrol edin; isterseniz Ayarlar → Gizlilik → Reklamlar\'dan reklam kimliğinizi sıfırlayın.</item>
+    </string-array>
+    <string-array name="risk_destinations">
+        <item>Koddaki adresler</item>
+        <item>Uygulamanın kendi koduna yazılmış web adresleri: uygulamanın büyük olasılıkla bağlandığı yerler.</item>
+        <item>İnternete bağlanan her uygulamada bulunur. Bilinmeyen alan adları tek başına şüpheli değildir.</item>
+        <item>Bu adreslere bağlanılıp bağlanılmadığı ve ne gönderildiği yalnızca koddan görülemez.</item>
+        <item>Uygulamanın geliştiricisiyle eşleşmeyen adreslere ve şifresiz http kullanımına dikkat edin.</item>
+    </string-array>
+    <string name="cap_sms_read">SMS</string>
+    <string name="cap_contacts">kişiler</string>
+    <string name="cap_call_log">arama geçmişi</string>
+    <string name="cap_clipboard">pano</string>
+    <string name="cap_notification_read">bildirimler</string>
+    <string name="cap_screen_read">ekran metni</string>
+    <string name="cap_cookies">oturum çerezleri</string>
+    <string name="cap_phone_id">telefon numarası veya cihaz kimliği</string>
+    <string name="cap_accounts">hesaplar</string>
+    <string name="cap_location">konum</string>
+    <string name="cap_network">internet</string>
+    <string name="cap_sms_send">SMS</string>
+    <string name="cap_telegram">bir Telegram botu</string>
+    <string name="cap_discord">bir Discord webhook\'u</string>
+    <string name="ev_code_call">Çağırır: %1$s</string>
+    <string name="ev_code_string">İçerdiği metin: %1$s</string>
+    <string name="ev_flow">%1$s okur ve aynı kod yolunda gönderir: %2$s (değer izlenmedi)</string>
+    <string name="ev_destination">Bağlandığı adres: %1$s</string>
+    <string name="ev_destination_cleartext">%1$s (şifresiz http)</string>
+    <string name="ev_destination_ip">%1$s (IP adresi, alan adı yok)</string>
+    <string name="ev_origin_app">uygulamanın kendi kodu</string>
+    <string name="ev_origin_library">kitaplık: %1$s</string>
+    <string name="ev_hidden_code">Gizli kod dosyası: %1$s</string>
+    <string name="ev_packer">Kod paketleyici: %1$s</string>
+    <string name="unproven_flow">Bu veriden okunan değer, onu dışarı gönderen bir çağrıya kadar izlendi (T3). Bu yolun cihazınızda çalıştığı hâlâ kanıtlanmış değil; bunu yalnızca uygulama çalışırken izlemek gösterebilir.</string>
+    <string name="unproven_calls">Kod bunun için gereken işlevleri çağırıyor (T2), ancak veriyi dışarı gönderen bir yol bulunmadı. Hiç çalışmayan kod veya sonradan yüklenen kod göz ardı edilemez.</string>
+    <string name="unproven_none">Uygulamanın kendi kodu kontrol edildi ve bunun için gereken işlevleri çağırmıyor. Kitaplıklar veya sonradan yüklenen kod yine de bunu kullanabilir.</string>
+    <string name="unproven_gaps">Uygulamanın bazı bölümleri analiz edilemedi (Kontrol kapsamı\'na bakın); bu nedenle kod sonucu eksik olabilir.</string>
+    <string name="evidence_strength">En güçlü kanıt: %1$s</string>
+    <string name="strength_t1">yalnızca manifestte yazılı</string>
+    <string name="strength_t2">kod bu çağrıları yapıyor</string>
+    <string name="strength_t3">okuma ve gönderme aynı kod yolunda</string>
+    <string name="strength_t4">bu cihazda gözlemlendi</string>
+    <string name="coverage_code">Kod (DEX) analiz edildi: %1$d DEX dosyası, %2$d sınıf, bunların %3$d tanesi uygulamanın kendi kodunda</string>
+    <string name="coverage_code_failed">Uygulama kodu (DEX) analiz edilemedi</string>
+    <string name="coverage_gap_hidden">Gizli kod analiz edilmedi: %1$s</string>
+    <string name="coverage_gap_packer">Kod bir paketleyiciyle korunuyor (%1$s); gerçek kod şifreli</string>
+    <string name="coverage_gap_cross">%1$s mantığı DEX dışında çalışıyor ve analiz edilmiyor</string>
+    <string name="coverage_gap_unreadable">Koddaki şu bölüm okunamadı: %1$s</string>
+    <string name="coverage_gap_limit">Kod analizi süre veya boyut sınırında durdu; sonuçlar kısmi</string>
+    <string name="coverage_gap_tracking">Değer izleme için süre yetmedi; yetenekler ve adresler eksiksiz, ancak bazı veri yolları izlendi olarak işaretlenmedi</string>
+    <string name="find_target_body">Hedef SDK, API 31\'in (Android 12) altında. Bazı yeni korumalar geçerli olmayabilir.</string>
+    <string name="find_exported_body">Bileşen izni olmayan etkin dışa aktarılmış bileşenler: %1$d. Başlatıcı giriş noktaları sayılmaz.</string>
+    <string name="format_explanation">Tek parça uygulamalar her zaman .apk olarak kaydedilir. Bölünmüş uygulamalar yukarıda seçilen biçimi kullanır. Var olan adlara numaralı bir sonek eklenir.</string>
+    <string name="report_share_quick">Kanıt raporunu paylaş (PDF)</string>
+    <string name="ev_flow_traced">%1$s değeri, gönderen çağrıya kadar izlendi: %2$s</string>
+    <string name="unproven_flow_untraced">Bu verinin okunması ve gönderme aynı kod yolunda (T3), ancak okunan değer gönderilene kadar izlenemedi; ikisi ilgisiz olabilir. Neyin gönderildiğini yalnızca uygulama çalışırken izlemek gösterebilir.</string>
+    <string name="install_fail_no_result">Android bu kurulumun sonucunu bildirmedi. Uygulamanın kurulu olup olmadığını kontrol edin ve tekrar deneyin.</string>
+    <string name="ready_target_min">• Hedef API %1$d; bu Android sürümü API %2$d altındaki yeni uygulamaları reddeder.</string>
+    <string-array name="risk_shell_command">
+        <item>Kabuk komutları çalıştırır</item>
+        <item>Kod sistem komutları başlatır (Runtime.exec veya ProcessBuilder). Komutlar cihaz bilgilerini veya günlükleri okuyabilir, root\'lu bir cihazda çok daha fazlasını yapabilir.</item>
+        <item>Çökme raporlayıcıları ve cihaz bilgisi SDK\'ları sık sık getprop veya logcat gibi zararsız komutlar çalıştırır. En çok, bunu uygulamanın kendi kodu yaptığında önemlidir.</item>
+        <item></item>
+        <item>Uygulamanın işlevi için buna gerçekten ihtiyaç duyup duymadığını kontrol edin. Root erişimi de istiyorsa veya bir uygulama mağazası dışından geldiyse dikkatli olun.</item>
+    </string-array>
+    <string name="strength_t3_traced">okumadan göndermeye kadar izlenen bir değer</string>
+    <string name="ev_flow_traced_to">%1$s değeri, gönderen çağrıya kadar izlendi: %2$s, adres: %3$s</string>
+    <string name="chain_destination">Gönderildiği yer: %1$s</string>
+    <string name="ev_flow_traced_to_any">%1$s değeri, gönderen bir çağrıya kadar izlendi: %2$s. Bu çağrı birkaç adrese hizmet ediyor; değer şunlardan birine gidiyor: %3$s</string>
+    <string name="chain_destination_any">Şunlardan birine gönderilir: %1$s</string>
+    <string name="more_hosts">ve diğerleri</string>
+    <string name="analysis_progress_title">Uygulama kontrol ediliyor</string>
+    <string name="analysis_stage_manifest">Manifest ve sertifika okunuyor</string>
+    <string name="analysis_stage_code">Kod okunuyor: dosya %1$d / %2$d</string>
+    <string name="analysis_stage_resolving">Veriler kodda izleniyor</string>
+    <string name="security_paused">Duraklatıldı: %2$d uygulamadan %1$d tanesi kontrol edildi. Sonuçlar kaydedildi, istediğin zaman devam edebilirsin.</string>
+    <string name="chart_title">Kontrol sonuçları</string>
+    <string name="chart_clear">Önemli bulgu yok</string>
+    <string name="chart_unchecked">Henüz kontrol edilmedi</string>
+    <string name="chart_center">kontrol edildi</string>
+    <string name="chart_description">%1$d güçlü belirti, %2$d dikkat gerektiriyor, %3$d önemli bulgu yok, %4$d henüz kontrol edilmedi</string>
+</resources>

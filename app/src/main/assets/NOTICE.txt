@@ -1,4 +1,4 @@
-PackPeek uses AndroidX / Jetpack Compose / Room / WorkManager / DataStore (The Android Open Source Project), Kotlin and kotlinx.coroutines (JetBrains), and apksig (The Android Open Source Project). These libraries use Apache License 2.0.
+PackPeek uses AndroidX / Jetpack Compose / Room / WorkManager / DataStore (The Android Open Source Project), Kotlin and kotlinx.coroutines (JetBrains), apksig (The Android Open Source Project), and ARSCLib (github.com/REAndroid) for the experimental merged APK format. These libraries use Apache License 2.0.
 
 
                                  Apache License

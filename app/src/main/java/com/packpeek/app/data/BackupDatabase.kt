@@ -1,6 +1,8 @@
 package com.packpeek.app.data
 
 import androidx.room.*
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
 @Entity(tableName = "jobs")
@@ -27,6 +29,8 @@ data class BackupRecord(
     val bytes: Long = 0,
     val error: String = "",
     val hidden: Boolean = false,
+    /** SHA-256 of the installed app's signer(s) when backed up; empty for older rows. */
+    @ColumnInfo(defaultValue = "") val signer: String = "",
 )
 
 data class BackupStats(val count: Int, val bytes: Long)
@@ -75,7 +79,27 @@ interface BackupDao {
     @Query("UPDATE backups SET state='CANCELLED' WHERE jobId=:id AND state IN ('QUEUED','RUNNING')")
     suspend fun cancelPending(id: String)
 
+    @Query(
+        "UPDATE backups SET state='FAILED',error='UNKNOWN' WHERE jobId=:id AND state IN ('QUEUED','RUNNING')"
+    )
+    suspend fun failPending(id: String)
+
+    @Query("UPDATE backups SET state='QUEUED' WHERE jobId=:id AND state='RUNNING'")
+    suspend fun requeue(id: String)
+
     @Query("UPDATE backups SET hidden=1 WHERE id=:id") suspend fun hide(id: Long)
+
+    @Query("UPDATE backups SET signer=:signer WHERE id=:id")
+    suspend fun setSigner(id: Long, signer: String)
+
+    @Query(
+        "SELECT * FROM backups WHERE packageName=:pkg AND state='SUCCESS' ORDER BY created DESC, id DESC"
+    )
+    suspend fun successes(pkg: String): List<BackupRecord>
+
+    /** Backups removed by the keep-N setting leave history and totals. */
+    @Query("UPDATE backups SET state='PRUNED' WHERE id=:id") suspend fun prune(id: Long)
+    @Query("UPDATE backups SET hidden=1 WHERE uri=:uri") suspend fun hideUri(uri: String)
 
     @Transaction
     suspend fun create(job: BackupJob, records: List<BackupRecord>) {
@@ -84,7 +108,61 @@ interface BackupDao {
     }
 }
 
-@Database(entities = [BackupJob::class, BackupRecord::class], version = 1, exportSchema = true)
+@Database(entities = [BackupJob::class, BackupRecord::class], version = 2, exportSchema = true)
 abstract class BackupDatabase : RoomDatabase() {
     abstract fun backups(): BackupDao
+
+    companion object {
+        val MIGRATION_1_2 =
+            object : Migration(1, 2) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("ALTER TABLE backups ADD COLUMN signer TEXT NOT NULL DEFAULT ''")
+                }
+            }
+    }
 }
+
+/** What the keep-N setting does with older backups of one app. */
+data class PrunePlan(
+    /** Delete the file, then drop the record once the file is gone. */
+    val delete: List<BackupRecord>,
+    /** Drop the record only; its file is not ours to delete. */
+    val forget: List<BackupRecord>,
+)
+
+/**
+ * Plans the keep-N setting (0 keeps all) for successful backups of one app, newest first.
+ * - SAF document URIs are path based: after a user deletes an old backup by hand, a new backup
+ *   can get the same name and URI. A URI that a kept backup still uses is never deleted.
+ * - Only files inside [folder], the backup folder tree in use now, are deleted. Backups in a
+ *   previous folder are left alone, records included.
+ */
+fun prunePlan(newestFirst: List<BackupRecord>, keep: Int, folder: String): PrunePlan {
+    if (keep <= 0) return PrunePlan(emptyList(), emptyList())
+    val keptUris = newestFirst.take(keep).map { it.uri }.toSet()
+    val older = newestFirst.drop(keep)
+    val forget = older.filter { it.uri.isBlank() || it.uri in keptUris }
+    val delete = (older - forget.toSet()).filter { inFolder(it.uri, folder) }
+    return PrunePlan(delete, forget)
+}
+
+/** True when a document URI was created inside the tree URI [folder]. */
+fun inFolder(documentUri: String, folder: String): Boolean =
+    folder.isNotBlank() && documentUri.startsWith(folder.trimEnd('/') + "/document/")
+
+/**
+ * Ids of backups whose signer differs from the previous backup of the same package. A change
+ * means the app was re-signed: a different developer key, or a modified or fake build.
+ */
+fun signerChanges(records: List<BackupRecord>): Set<Long> =
+    records
+        .filter { it.signer.isNotBlank() }
+        .groupBy { it.packageName }
+        .values
+        .flatMap { rows ->
+            rows.sortedWith(compareBy({ it.created }, { it.id })).zipWithNext().mapNotNull {
+                (old, new) ->
+                new.id.takeIf { old.signer != new.signer }
+            }
+        }
+        .toSet()

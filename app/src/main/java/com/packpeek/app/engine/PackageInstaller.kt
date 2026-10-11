@@ -1,18 +1,23 @@
 package com.packpeek.app.engine
 
 import android.app.Activity
+import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
-import com.packpeek.app.R
+import com.packpeek.app.PackPeekApp
+import com.packpeek.app.model.InstallErrors
+import com.packpeek.app.model.InstallResult
 import java.io.File
 import kotlinx.coroutines.*
 
-suspend fun installPackage(context: Context, pkg: String, files: List<File>) =
+private const val EXTRA_TARGET = "com.packpeek.app.extra.TARGET_PACKAGE"
+
+/** Writes and commits an installer session; returns its id so the result can be matched to it. */
+suspend fun installPackage(context: Context, pkg: String, files: List<File>): Int =
     withContext(Dispatchers.IO) {
         val installer = context.packageManager.packageInstaller
         val params =
@@ -49,15 +54,43 @@ suspend fun installPackage(context: Context, pkg: String, files: List<File>) =
                 val intent =
                     Intent(context, InstallStatusActivity::class.java)
                         .setAction("${context.packageName}.INSTALL_RESULT.$id")
+                        .putExtra(EXTRA_TARGET, pkg)
                 val flags =
                     PendingIntent.FLAG_UPDATE_CURRENT or
                         if (Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0
-                session.commit(PendingIntent.getActivity(context, id, intent, flags).intentSender)
+                session.commit(
+                    PendingIntent.getActivity(context, id, intent, flags, creatorMayStart())
+                        .intentSender
+                )
             }
+            id
         } catch (e: Exception) {
             installer.abandonSession(id)
             throw e
         }
+    }
+
+/**
+ * The system installer reports through this PendingIntent while PackPeek is on screen. From
+ * Android 15 (target SDK 35+) the creator must opt in, or the launch of [InstallStatusActivity],
+ * and with it the confirmation prompt, is blocked as a background activity start.
+ */
+@Suppress("DEPRECATION")
+private fun creatorMayStart(): Bundle? =
+    when {
+        Build.VERSION.SDK_INT >= 36 ->
+            ActivityOptions.makeBasic()
+                .setPendingIntentCreatorBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE
+                )
+                .toBundle()
+        Build.VERSION.SDK_INT >= 34 ->
+            ActivityOptions.makeBasic()
+                .setPendingIntentCreatorBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                )
+                .toBundle()
+        else -> null
     }
 
 class InstallStatusActivity : Activity() {
@@ -73,19 +106,29 @@ class InstallStatusActivity : Activity() {
 
     @Suppress("DEPRECATION")
     private fun handle(intent: Intent) {
-        when (intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)) {
-            PackageInstaller.STATUS_PENDING_USER_ACTION -> {
-                val confirm =
-                    if (Build.VERSION.SDK_INT >= 33)
-                        intent.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
-                    else intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
-                if (confirm != null) startActivity(confirm)
-                else Toast.makeText(this, R.string.install_failed, Toast.LENGTH_LONG).show()
+        val status =
+            intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
+        val pkg =
+            intent.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME)
+                ?: intent.getStringExtra(EXTRA_TARGET).orEmpty()
+        val message = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE).orEmpty()
+        val session = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
+        val result =
+            when (status) {
+                PackageInstaller.STATUS_PENDING_USER_ACTION -> {
+                    val confirm =
+                        if (Build.VERSION.SDK_INT >= 33)
+                            intent.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
+                        else intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
+                    if (confirm != null && runCatching { startActivity(confirm) }.isSuccess) null
+                    else InstallResult(pkg, InstallErrors.classify(status, message), message, session)
+                }
+                PackageInstaller.STATUS_SUCCESS -> InstallResult(pkg, sessionId = session)
+                else -> InstallResult(pkg, InstallErrors.classify(status, message), message, session)
             }
-            PackageInstaller.STATUS_SUCCESS ->
-                Toast.makeText(this, R.string.install_success, Toast.LENGTH_LONG).show()
-            else -> Toast.makeText(this, R.string.install_failed, Toast.LENGTH_LONG).show()
-        }
+        // The main screen shows the result, including after it is reopened.
+        if (result != null) (application as PackPeekApp).installResult.value = result
         finish()
     }
+
 }

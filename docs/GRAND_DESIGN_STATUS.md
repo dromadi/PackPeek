@@ -9,7 +9,7 @@ Implementasi source dan penerimaan perangkat dibedakan. Workbook asli tidak diub
 | T101 | Ganti applicationId, namespace & package Kotlin | Implementasi alpha | Namespace/package, authority per applicationId |
 | T102 | Ganti label & ikon launcher (adaptive + monochrome) | Implementasi alpha | Ikon adaptive dan monochrome |
 | T103 | Naikkan compileSdk/targetSdk ke 36 & upgrade dependensi | Implementasi alpha | API 36; dependensi versi tetap, bukan klaim selalu terbaru |
-| T104 | Bersihkan izin manifest yang tidak dipakai | Implementasi alpha | Izin sesuai inventaris, installer dan foreground; tanpa Internet |
+| T104 | Bersihkan izin manifest yang tidak dipakai | Implementasi alpha | Izin sesuai inventaris, installer dan foreground; `INTERNET` sejak alpha.10 hanya untuk cek hash VirusTotal opsional |
 | T106 | Pindahkan semua teks hardcoded ke strings.xml | Implementasi alpha | 219 string EN dan ID; label teknis tetap literal |
 | T707 | Splash Screen API & tema brand | Implementasi alpha | Splash API dan brand theme |
 | T201 | Perbaiki bug tombol ekstraksi tunggal | Implementasi alpha | Tombol tunggal menggunakan listOf(app), tidak mengubah seleksi |
@@ -42,7 +42,7 @@ Implementasi source dan penerimaan perangkat dibedakan. Workbook asli tidak diub
 | T803 | Aksesibilitas & layar besar (tablet/foldable) | Sebagian / menunggu QA | Grid adaptive dan kontrol Material; TalkBack, font 200%, kontras dan foldable menunggu QA perangkat. |
 | T706 | Halaman Tentang & Lisensi Open Source | Sebagian / menunggu QA | About/versi/notice OSS/privasi lokal ada; kontak dan URL kebijakan privasi publik belum diisi. |
 | T317 | Menu Masukan/Dukungan, Bagikan Aplikasi & Beri Rating | Sebagian / menunggu QA | Share info/diagnostik ada; email belum diberikan, rating Play disembunyikan. |
-| T208 | Unit test untuk logika inti | Implementasi alpha | 12 unit test aturan inti dan manifest; hasil di BUILD_REPORT |
+| T208 | Unit test untuk logika inti | Implementasi alpha | 20 unit test aturan inti dan manifest (termasuk deteksi launcher dan filter multi-framework) |
 | T341 | Optimasi performa: Baseline Profile & startup | Belum selesai | Baseline Profile khusus aplikasi dan benchmark startup/scroll belum dibuat/dijalankan. |
 | T802 | Uji build release dengan R8 & aturan ProGuard | Sebagian / menunggu QA | Build release R8 diperiksa dalam BUILD_REPORT; pengujian runtime release belum dilakukan. |
 | T801 | Uji di berbagai versi Android & perangkat | Belum selesai | Uji emulator API 24/29/33/34/36 dan satu HP fisik belum dilakukan. |

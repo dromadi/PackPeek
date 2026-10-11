@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="crash_title">Lần trước PackPeek đã bị dừng</string>
+    <string name="crash_body">Chi tiết lỗi chỉ được lưu trên thiết bị này. Hãy sao chép và gửi cho nhà phát triển.</string>
+    <string name="crash_copy">Sao chép nhật ký lỗi</string>
+    <string name="split_format">Định dạng ứng dụng chia nhỏ</string>
+    <string name="split_format_apks">.apks (SAI, PackPeek)</string>
+    <string name="split_format_xapk">.xapk (APKPure, trình cài XAPK)</string>
+    <string name="split_format_zip">.zip (tệp nén thông thường)</string>
+    <string name="preview_split">Xem trước cho ứng dụng chia nhỏ</string>
+    <string name="split_format_apk">.apk gộp (thử nghiệm)</string>
+    <string name="merged_apk_warning">⚠ Tệp .apk gộp được ký lại bằng khóa của PackPeek: không thể cập nhật ứng dụng gốc (phải gỡ trước, dữ liệu sẽ mất), Play Store sẽ không cập nhật nó, một số ứng dụng (ngân hàng, trò chơi, Meta) từ chối chạy, và nó chỉ chứa các phần dành cho thiết bị này.</string>
+    <string name="error_merge">Không gộp được các split APK. Ứng dụng có thể quá lớn hoặc không được hỗ trợ; hãy chọn .apks, .xapk hoặc .zip.</string>
+    <string name="folder_root">Bộ nhớ %1$s</string>
+    <string name="folder_selected">Thư mục đã chọn</string>
+    <string name="favorite_apps">Yêu thích</string>
+    <string name="favorite">Thêm vào yêu thích</string>
+    <string name="unfavorite">Xóa khỏi yêu thích</string>
+    <string name="signer_changed_title">Chữ ký đã thay đổi</string>
+    <string name="signer_changed_body">Ứng dụng này hiện được ký bằng chứng chỉ khác với bản sao lưu phiên bản %1$s (%2$s) của bạn. Điều này xảy ra khi nhà phát triển đổi khóa, nhưng cũng có thể là bản đã bị sửa đổi hoặc giả mạo. Hãy kiểm tra nguồn cài đặt.</string>
+    <string name="signer_changed_badge">⚠ Người ký khác với bản sao lưu trước</string>
+    <string name="reinstall">Cài lại</string>
+    <string name="keep_versions">Số bản sao lưu mỗi ứng dụng</string>
+    <string name="keep_all">Giữ tất cả</string>
+    <string name="keep_1">1 bản mới nhất</string>
+    <string name="keep_3">3 bản mới nhất</string>
+    <string name="keep_5">5 bản mới nhất</string>
+    <string name="keep_versions_explanation">Sau mỗi lần sao lưu thành công, các tệp sao lưu cũ hơn của cùng ứng dụng vượt quá số này sẽ bị xóa khỏi thư mục.</string>
+    <string name="internal_storage">Bộ nhớ trong</string>
+    <string name="no_folder_hint">Chọn thư mục để sao lưu</string>
+    <string name="choose">Chọn</string>
+    <string name="selected_count">Đã chọn %1$d</string>
+    <string name="clear_selection_short">Bỏ chọn</string>
+    <string name="tag_split">Chia nhỏ</string>
+    <string name="tag_system">Hệ thống</string>
+    <string name="backup_progress">Ứng dụng %1$d/%2$d · %3$d%%</string>
+    <string name="dont_ask_again">Không hỏi lại</string>
+    <string name="backup_done">Đã sao lưu xong</string>
+    <string name="backup_partial">Sao lưu xong nhưng có lỗi</string>
+    <string name="result_summary">Đã lưu %1$d/%2$d · %3$s</string>
+    <string name="app_info">Thông tin ứng dụng</string>
+    <string name="score_short">điểm</string>
+    <string name="history_empty_title">Chưa có bản sao lưu</string>
+    <string name="history_empty_body">Trích xuất một ứng dụng từ thẻ Ứng dụng; các phiên bản của nó sẽ hiện ở đây.</string>
+    <string name="search_apps_short">Tìm ứng dụng</string>
+    <plurals name="version_count">
+        <item quantity="other">%1$d phiên bản</item>
+    </plurals>
+    <plurals name="app_count_short">
+        <item quantity="other">%1$d ứng dụng</item>
+    </plurals>
+    <plurals name="backup_summary">
+        <item quantity="other">%1$d ứng dụng · %2$s</item>
+    </plurals>
+    <string name="saved_file">Đã lưu: %1$s</string>
+    <string name="min_android">Android tối thiểu</string>
+    <string name="target_android">Android mục tiêu</string>
+    <string name="first_installed">Cài lần đầu</string>
+    <string name="cpu_architecture">Kiến trúc CPU</string>
+    <string name="no_native_code">Không có mã native</string>
+    <string name="show_all_groups">Hiện tất cả (%1$d)</string>
+    <string name="show_fewer">Thu gọn</string>
+    <string name="abi_note">Ứng dụng có mã native cho nhiều kiến trúc sẽ xuất hiện ở từng kiến trúc.</string>
+    <string name="signer_note">Các ứng dụng ký cùng một khóa đến từ cùng nhà phát triển hoặc hệ thống build. \"Android Debug\" cho biết đây là bản dựng thử nghiệm.</string>
+    <string name="show_all_apps">Hiện tất cả ứng dụng</string>
+    <string name="quick_details">Chi tiết nhanh</string>
+    <string name="full_details">Chi tiết đầy đủ</string>
+    <string name="activities">Activity</string>
+    <string name="services">Service</string>
+    <string name="receivers">Receiver</string>
+    <string name="providers">Provider</string>
+    <string name="tap_opens">Chạm vào ứng dụng sẽ mở</string>
+    <string name="needs_review">Cần xem xét</string>
+    <string name="security_check_title">Kiểm tra ứng dụng của bạn</string>
+    <string name="security_check_body">PackPeek đọc manifest và mã của mọi ứng dụng bạn đã cài để tìm bằng chứng: ứng dụng có thể làm gì, mã của nó gọi gì, và dữ liệu có bị gửi đến nơi ẩn nào không. Mọi thứ đều chạy trên điện thoại này.</string>
+    <plurals name="security_check_button">
+        <item quantity="other">Kiểm tra %1$d ứng dụng</item>
+    </plurals>
+    <string name="security_checking">Đang kiểm tra %1$d/%2$d…</string>
+    <plurals name="security_strong">
+        <item quantity="other">%1$d ứng dụng có dấu hiệu mạnh</item>
+    </plurals>
+    <plurals name="security_attention">
+        <item quantity="other">Không có dấu hiệu mạnh · %1$d ứng dụng cần chú ý</item>
+    </plurals>
+    <string name="security_clear">Không tìm thấy dấu hiệu mạnh</string>
+    <string name="security_checked">Đã kiểm tra %1$d/%2$d ứng dụng đã cài (manifest, mã và trạng thái thiết bị). Đây không phải là bảo đảm rằng ứng dụng an toàn.</string>
+    <string name="security_continue">Tiếp tục</string>
+    <string name="security_again">Kiểm tra lại</string>
+    <string name="active_all_clear">Không ứng dụng nào được bật hỗ trợ tiếp cận, quyền truy cập thông báo hoặc quản trị thiết bị.</string>
+    <string name="app_analysis">Phân tích ứng dụng</string>
+    <string name="tech_after_check">Công nghệ được nhận diện trong lúc kiểm tra ứng dụng ở trên.</string>
+    <string name="reading_groups">Đang đọc chứng chỉ và mã native…</string>
+    <plurals name="other_groups">
+        <item quantity="other">%1$d nhóm khác</item>
+    </plurals>
+    <string name="deep_button_title">Phân tích sâu</string>
+    <string name="deep_button_body">Lần theo đường đi của dữ liệu trong mã, giải mã văn bản ẩn và mở các tệp mã ẩn. Mất tối đa một phút.</string>
+    <string name="deep_running">Đang phân tích mã… có thể mất tối đa một phút.</string>
+    <string name="deep_failed">Phân tích sâu không đọc được mã của ứng dụng này.</string>
+    <string name="deep_done">Xong trong %1$d giây · %2$d đường dữ liệu · %3$d văn bản ẩn · %4$d tệp mã ẩn</string>
+    <string name="section_chains">Đường đi của dữ liệu</string>
+    <string name="chains_note">Các đường mã từ nơi mã đọc dữ liệu tới nơi mã gửi, được lần theo sâu tới ba lệnh gọi, gồm cả việc chuyển sang thành phần khác. Một đường cho thấy việc đọc và gửi có liên kết trong mã, không cho thấy cùng một giá trị được gửi.</string>
+    <string name="chains_none">Không tìm thấy đường nào từ dữ liệu cá nhân đến việc gửi đi, kể cả ở độ sâu ba lệnh gọi.</string>
+    <string name="chain_read">Đọc bằng %1$s</string>
+    <string name="chain_send">Gửi bằng %1$s</string>
+    <string name="via_start">bắt đầu tại đây</string>
+    <string name="via_call">gọi</string>
+    <string name="via_intent">khởi chạy thành phần khác qua Intent</string>
+    <string name="via_object">chạy dưới dạng đối tượng (thread hoặc callback)</string>
+    <string name="section_decoded">Văn bản ẩn</string>
+    <string name="decoded_note">Văn bản mà mã giấu khỏi cái nhìn lướt qua, được giải mã mà không chạy ứng dụng.</string>
+    <string name="decoded_none">Không tìm thấy địa chỉ hay mã ẩn nào.</string>
+    <string name="tech_base64">Giải mã từ Base64</string>
+    <string name="tech_joined">Ghép từ nhiều mảnh</string>
+    <string name="tech_char_array">Tạo từ mảng ký tự</string>
+    <string name="tech_xor">Giải mã bằng khóa XOR %1$s</string>
+    <string name="tech_reversed">Văn bản bị đảo ngược</string>
+    <string name="section_payloads">Mã ẩn</string>
+    <string name="payloads_note">Các tệp mã nằm trong gói, thường được dropper tải sau, được phân tích bằng cùng quy tắc.</string>
+    <string name="payloads_none">Không có tệp mã ẩn.</string>
+    <string name="payload_dex">Tệp DEX ẩn · %1$d lớp</string>
+    <string name="payload_archive">APK/JAR ẩn · %1$d lớp</string>
+    <string name="payload_encrypted">Có vẻ đã được mã hóa (entropy %1$s bit/byte); không rõ nội dung</string>
+    <string name="payload_can">Mã của nó: %1$s</string>
+    <string name="payload_nothing">Mã của nó không thực hiện lệnh gọi nhạy cảm nào mà PackPeek kiểm tra.</string>
+    <string name="section_code">Mã đáng ngờ</string>
+    <string name="code_note">Danh sách ngắn các phương thức đứng sau bằng chứng. ⚠ đánh dấu lệnh gọi nhạy cảm.</string>
+    <string name="section_actions">Bạn có thể làm gì</string>
+    <string name="action_uninstall">Gỡ cài đặt</string>
+    <string name="action_app_info">Thông tin ứng dụng: thu hồi quyền</string>
+    <string name="action_accessibility">Cài đặt hỗ trợ tiếp cận</string>
+    <string name="action_notification_access">Quyền truy cập thông báo</string>
+    <string name="action_admin">Cài đặt bảo mật (quản trị thiết bị)</string>
+    <string name="action_call_forwarding">Kiểm tra chuyển tiếp cuộc gọi (*#21#)</string>
+    <string name="action_secure_accounts">Bảo vệ tài khoản của bạn</string>
+    <string name="secure_accounts_body">1. Không mở lại ứng dụng; hãy gỡ nó (nếu được yêu cầu, tắt quản trị thiết bị trước).\n2. Đổi mật khẩu WhatsApp, email, ngân hàng di động và ví điện tử, nên dùng điện thoại khác nếu có thể.\n3. Bật lại xác minh hai bước và đăng xuất các thiết bị khác.\n4. Gọi ngân hàng qua số chính thức nếu mã OTP có thể đã bị đọc.\n5. Bấm *#21# để kiểm tra chuyển tiếp cuộc gọi và ##002# để hủy.</string>
+    <string name="action_dont_install">Đừng cài tệp này. Hãy xóa nó khỏi Downloads và khỏi cuộc trò chuyện mà bạn nhận được.</string>
+    <string name="section_report">Báo cáo bằng chứng</string>
+    <string name="report_note">Chia sẻ kết quả với ngân hàng, công an, gia đình hoặc đội ngũ bảo mật.</string>
+    <string name="report_share_text">Chia sẻ dạng văn bản</string>
+    <string name="report_share_pdf">Chia sẻ dạng PDF</string>
+    <string name="section_lookup">Kiểm tra trực tuyến (tùy chọn)</string>
+    <string name="lookup_note">So sánh dấu vân tay (SHA-256) của tệp với cơ sở dữ liệu của VirusTotal. Chỉ gửi dấu vân tay, không bao giờ gửi tệp hay danh sách ứng dụng của bạn.</string>
+    <string name="lookup_button">Kiểm tra dấu vân tay</string>
+    <string name="lookup_browser">Mở trong trình duyệt</string>
+    <string name="lookup_running">Đang kiểm tra…</string>
+    <string name="lookup_no_key">Thêm khóa API VirusTotal miễn phí trong Cài đặt để kiểm tra tại đây, hoặc mở kết quả trong trình duyệt.</string>
+    <string name="lookup_not_found">VirusTotal chưa từng thấy tệp này. Điều đó không có nghĩa là nó an toàn: APK lừa đảo mới thường chưa được biết đến.</string>
+    <string name="lookup_found">%1$d/%2$d công cụ bảo mật gắn cờ tệp này</string>
+    <string name="lookup_suspicious">%1$d công cụ khác cho là đáng ngờ</string>
+    <string name="lookup_label">Được biết với tên: %1$s</string>
+    <string name="lookup_clean">Không công cụ bảo mật nào gắn cờ tệp này (đã kiểm tra %1$d). APK lừa đảo mới thường chưa bị phát hiện.</string>
+    <string name="lookup_key_error">VirusTotal đã từ chối khóa API. Hãy kiểm tra trong Cài đặt.</string>
+    <string name="lookup_quota">Đã hết hạn mức miễn phí của VirusTotal. Hãy thử lại sau một phút.</string>
+    <string name="lookup_network">Không kết nối được VirusTotal. Hãy kiểm tra kết nối.</string>
+    <string name="copy_sha">Sao chép SHA-256</string>
+    <string name="vt_key_title">Khóa API VirusTotal (tùy chọn)</string>
+    <string name="vt_key_set">Đã đặt · chỉ dùng khi bạn chạm Kiểm tra dấu vân tay</string>
+    <string name="vt_key_unset">Chưa đặt · nhận khóa miễn phí tại virustotal.com</string>
+    <string name="vt_key_hint">Khóa API</string>
+    <string name="vt_key_note">Chỉ dùng cho bước kiểm tra dấu vân tay tùy chọn trong phân tích sâu. Chỉ gửi SHA-256.</string>
+    <string name="save">Lưu</string>
+    <string name="remove">Xóa</string>
+    <string name="report_title">Báo cáo bằng chứng PackPeek</string>
+    <string name="report_created">Tạo lúc: %1$s</string>
+    <string name="report_app">Ứng dụng: %1$s (%2$s), phiên bản %3$s</string>
+    <string name="report_from_file">Kiểm tra dưới dạng tệp APK; chưa cài</string>
+    <string name="report_installed">Đã cài · nguồn: %1$s</string>
+    <string name="report_counts">%1$d dấu hiệu mạnh · %2$d cần chú ý · %3$d ghi chú</string>
+    <string name="report_disclaimer">Kết quả này không chứng minh ứng dụng có hại hay an toàn. Mức bằng chứng: T1 ghi trong manifest, T2 tìm thấy trong mã, T3 đọc và gửi trong cùng một đường mã (được đánh dấu khi chính giá trị được lần theo), T4 quan sát trên thiết bị này.</string>
+    <string name="report_findings">Phát hiện</string>
+    <string name="report_deep">Phân tích sâu</string>
+    <string name="report_lookup">VirusTotal</string>
+    <string name="report_footer">Tạo bằng PackPeek ngay trên thiết bị; ứng dụng không được chạy.</string>
+    <string-array name="risk_otp_theft">
+        <item>Mẫu đánh cắp OTP / chiếm tài khoản</item>
+        <item>Ứng dụng có thể nhận SMS, kể cả mã một lần của ngân hàng và WhatsApp, và có thể truy cập internet. Các APK giả thiệp mời, giấy phạt giao thông và bưu kiện dùng tổ hợp này để chiếm tài khoản.</item>
+        <item>Mẫu này xuất hiện vì quyền SMS đi kèm dấu hiệu che giấu hoặc nguồn không đáng tin (biểu tượng ẩn, tệp từ ngoài cửa hàng ứng dụng, chứng chỉ gỡ lỗi hoặc rất mới, tên dụ dỗ), hoặc đi kèm mã gửi nội dung SMS ra ngoài, đích ẩn hay chuyển tiếp cuộc gọi.</item>
+        <item>Mã của ứng dụng chưa được phân tích, nên chưa chứng minh được SMS bị đọc hay gửi đi đâu. Đánh giá này chỉ dựa trên manifest và ngữ cảnh.</item>
+        <item>Đừng cài tệp này. Nếu đã cài: thu hồi quyền SMS, gỡ ứng dụng, rồi đổi mật khẩu và bật lại xác minh hai bước cho các tài khoản quan trọng (WhatsApp, ngân hàng, email).</item>
+    </string-array>
+    <string-array name="risk_screen_spying">
+        <item>Mẫu theo dõi màn hình</item>
+        <item>Dịch vụ hỗ trợ tiếp cận có thể đọc màn hình của ứng dụng khác, gồm tin nhắn, số dư và văn bản đã nhập, và ứng dụng có thể gửi chúng qua internet.</item>
+        <item>Mẫu này xuất hiện vì quyền hỗ trợ tiếp cận đọc màn hình đi kèm các dấu hiệu khác, như biểu tượng ẩn, lớp phủ, quản trị thiết bị, trình nghe thông báo hoặc nguồn không đáng tin.</item>
+        <item>Chưa chứng minh được nội dung màn hình bị gửi đi đâu. Mã của ứng dụng chưa được phân tích.</item>
+        <item>Tắt dịch vụ hỗ trợ tiếp cận của ứng dụng này trong Cài đặt → Hỗ trợ tiếp cận, trừ khi bạn chủ động dùng nó. Gỡ ứng dụng nếu bạn không nhận ra nó.</item>
+    </string-array>
+    <string-array name="risk_accessibility">
+        <item>Dịch vụ hỗ trợ tiếp cận</item>
+        <item>Khi được bật, nó có thể đọc nội dung màn hình và chạm thay người dùng.</item>
+        <item>Bình thường với trình đọc màn hình, trình quản lý mật khẩu, công cụ tự động hóa và launcher thay thế.</item>
+        <item>Chưa chứng minh được dữ liệu màn hình rời khỏi thiết bị. Mã chưa được phân tích.</item>
+        <item>Chỉ bật nếu bạn biết nó dùng để làm gì. Kiểm tra Cài đặt → Hỗ trợ tiếp cận.</item>
+    </string-array>
+    <string-array name="risk_notifications">
+        <item>Trình nghe thông báo</item>
+        <item>Khi được bật, ứng dụng có thể đọc mọi thông báo, kể cả nội dung tin nhắn và mã một lần.</item>
+        <item>Bình thường với đồng hồ thông minh, ứng dụng nhắc việc và trình quản lý thông báo.</item>
+        <item>Chưa chứng minh được thông báo bị lưu lại hay gửi đi.</item>
+        <item>Chỉ cho phép với ứng dụng bạn tin tưởng. Kiểm tra Cài đặt → Thông báo → Quyền truy cập thông báo.</item>
+    </string-array>
+    <string-array name="risk_device_admin">
+        <item>Quản trị thiết bị</item>
+        <item>Ứng dụng quản trị thiết bị có thể khóa màn hình, đổi khóa màn hình hoặc thậm chí xóa dữ liệu, và khó gỡ khi đang hoạt động.</item>
+        <item>Bình thường với ứng dụng công việc (MDM), tìm thiết bị và kiểm soát của phụ huynh.</item>
+        <item>Chưa chứng minh được các chính sách này được sử dụng.</item>
+        <item>Tắt nó trong Cài đặt → Bảo mật → Ứng dụng quản trị thiết bị nếu không cần.</item>
+    </string-array>
+    <string-array name="risk_sms">
+        <item>Quyền truy cập SMS</item>
+        <item>Ứng dụng có thể nhận hoặc đọc SMS, kể cả mã một lần.</item>
+        <item>Bình thường với ứng dụng SMS, một số ứng dụng ngân hàng tự điền mã xác minh và trình chặn tin rác.</item>
+        <item>Chưa chứng minh được SMS bị đọc hay gửi đi đâu. Mã chưa được phân tích.</item>
+        <item>Nếu tính năng của ứng dụng không cần SMS, hãy thu hồi quyền SMS trong Cài đặt → Ứng dụng.</item>
+    </string-array>
+    <string-array name="risk_sms_send">
+        <item>Gửi SMS</item>
+        <item>Ứng dụng có thể gửi SMS từ số của bạn, có thể tốn tiền hoặc phát tán liên kết đến danh bạ của bạn.</item>
+        <item>Bình thường với ứng dụng SMS và một số ứng dụng xác minh.</item>
+        <item>Chưa chứng minh được có SMS nào đã được gửi.</item>
+        <item>Thu hồi quyền SMS nếu không cần và kiểm tra tin nhắn đã gửi.</item>
+    </string-array>
+    <string-array name="risk_contacts_calls">
+        <item>Danh bạ và nhật ký cuộc gọi</item>
+        <item>Ứng dụng có thể đọc danh bạ hoặc nhật ký cuộc gọi của bạn.</item>
+        <item>Bình thường với ứng dụng nhắn tin, điện thoại và sao lưu danh bạ.</item>
+        <item>Chưa chứng minh được dữ liệu danh bạ rời khỏi thiết bị.</item>
+        <item>Thu hồi quyền danh bạ hoặc nhật ký cuộc gọi nếu không liên quan đến mục đích của ứng dụng.</item>
+    </string-array>
+    <string-array name="risk_phone_identity">
+        <item>Định danh điện thoại và tài khoản</item>
+        <item>Ứng dụng có thể đọc trạng thái điện thoại, số điện thoại của bạn hoặc các tài khoản trên thiết bị.</item>
+        <item>Phổ biến ở ứng dụng gọi điện, trò chơi và SDK phân tích dùng để phân biệt thiết bị.</item>
+        <item>Chưa chứng minh được dữ liệu này bị gửi đi.</item>
+        <item>Thu hồi quyền \"Điện thoại\" nếu ứng dụng không thực hiện cuộc gọi.</item>
+    </string-array>
+    <string-array name="risk_camera_mic">
+        <item>Camera và micrô</item>
+        <item>Ứng dụng có thể dùng camera hoặc ghi âm khi được cho phép.</item>
+        <item>Bình thường với ứng dụng ảnh, video, gọi điện và QR. Android 12+ hiện chỉ báo màu xanh khi camera hoặc micrô đang được dùng.</item>
+        <item>Chưa chứng minh được có ghi hình hay ghi âm chạy nền.</item>
+        <item>Chọn \"Chỉ khi dùng ứng dụng\" hoặc \"Luôn hỏi\" cho camera và micrô.</item>
+    </string-array>
+    <string-array name="risk_location">
+        <item>Vị trí</item>
+        <item>Ứng dụng có thể biết bạn đang ở đâu; với vị trí nền, kể cả khi ứng dụng đã đóng.</item>
+        <item>Bình thường với ứng dụng bản đồ, gọi xe, thời tiết và tìm thiết bị.</item>
+        <item>Chưa chứng minh được vị trí bị gửi đi hay lưu lại.</item>
+        <item>Dùng vị trí gần đúng hoặc \"Chỉ khi dùng ứng dụng\" khi có thể.</item>
+    </string-array>
+    <string-array name="risk_screen_capture">
+        <item>Ghi màn hình</item>
+        <item>Ứng dụng có thể ghi hoặc truyền toàn bộ màn hình sau khi bạn chấp nhận lời nhắc của Android.</item>
+        <item>Bình thường với ứng dụng ghi màn hình, chia sẻ màn hình trong cuộc họp và phát trực tiếp trò chơi.</item>
+        <item>Android hỏi mỗi lần bắt đầu ghi; chưa chứng minh được có gì đã bị ghi.</item>
+        <item>Từ chối các lời nhắc ghi màn hình bất ngờ, nhất là khi đang mở ứng dụng ngân hàng.</item>
+    </string-array>
+    <string-array name="risk_overlay">
+        <item>Hiển thị trên ứng dụng khác</item>
+        <item>Ứng dụng có thể vẽ cửa sổ đè lên ứng dụng khác, điều có thể bị lạm dụng để tạo màn hình đăng nhập giả.</item>
+        <item>Bình thường với bong bóng chat, ứng dụng ghi màn hình và bộ lọc ánh sáng xanh.</item>
+        <item>Chưa chứng minh được nó che phủ ứng dụng khác.</item>
+        <item>Thu hồi trong Cài đặt → Ứng dụng → Quyền truy cập đặc biệt → Hiển thị trên các ứng dụng khác nếu không cần.</item>
+    </string-array>
+    <string-array name="risk_persistence">
+        <item>Chạy nền</item>
+        <item>Ứng dụng có thể tự khởi động lại sau khi điện thoại bật, hoặc được miễn tối ưu hóa pin.</item>
+        <item>Bình thường với ứng dụng nhắn tin, báo thức và đồng bộ.</item>
+        <item>Chưa chứng minh được nó luôn chạy.</item>
+        <item>Bỏ miễn trừ pin nếu ứng dụng không cần chạy nền.</item>
+    </string-array>
+    <string-array name="risk_hidden_icon">
+        <item>Không có biểu tượng trên màn hình chính</item>
+        <item>Ứng dụng không hiện trong ngăn ứng dụng, nên dễ bị quên và khó tìm để gỡ.</item>
+        <item>Bình thường với bàn phím, tiện ích, hình nền và plug-in được mở từ ứng dụng khác.</item>
+        <item>Không rõ biểu tượng có bị cố ý ẩn hay không.</item>
+        <item>Hãy chắc chắn bạn biết ứng dụng này là gì. Gỡ nó trong Cài đặt → Ứng dụng nếu bạn không nhận ra.</item>
+    </string-array>
+    <string-array name="risk_install_apps">
+        <item>Cài ứng dụng khác</item>
+        <item>Ứng dụng có thể yêu cầu cài APK khác, điều có thể được dùng để tải thêm ứng dụng.</item>
+        <item>Bình thường với cửa hàng ứng dụng, trình quản lý tệp, trình duyệt và công cụ sao lưu như PackPeek.</item>
+        <item>Android vẫn hỏi trước mỗi lần cài; chưa chứng minh được quyền này đã được dùng.</item>
+        <item>Đừng cho phép \"Cài ứng dụng không rõ nguồn gốc\" với ứng dụng bạn không tin tưởng.</item>
+    </string-array>
+    <string-array name="risk_all_files">
+        <item>Quyền truy cập mọi tệp</item>
+        <item>Ứng dụng có thể đọc và thay đổi mọi tệp trong bộ nhớ, kể cả ảnh và tài liệu.</item>
+        <item>Bình thường với trình quản lý tệp, phần mềm diệt virus và công cụ sao lưu.</item>
+        <item>Chưa chứng minh được tệp rời khỏi thiết bị.</item>
+        <item>Thu hồi \"Quyền truy cập mọi tệp\" nếu ứng dụng không quản lý tệp.</item>
+    </string-array>
+    <string-array name="risk_cleartext">
+        <item>Cho phép lưu lượng không mã hóa</item>
+        <item>Ứng dụng có thể giao tiếp không mã hóa (HTTP), nên người khác trên cùng Wi-Fi có thể đọc dữ liệu.</item>
+        <item>Đôi khi cần cho thiết bị cục bộ như máy in hoặc camera CCTV.</item>
+        <item>Chưa chứng minh được dữ liệu nhạy cảm được gửi không mã hóa.</item>
+        <item>Tránh đăng nhập hoặc thanh toán qua ứng dụng này trên Wi-Fi công cộng.</item>
+    </string-array>
+    <string-array name="risk_network_usage">
+        <item>Mức dùng dữ liệu mạng</item>
+        <item>Cho biết ứng dụng đã dùng bao nhiêu dữ liệu trong 30 ngày qua, kể cả khi không mở.</item>
+        <item>Dữ liệu nền là bình thường cho đồng bộ, nhắn tin và cập nhật. Lượng lớn ở ứng dụng bạn hiếm khi dùng thì đáng xem lại.</item>
+        <item>Các con số này không cho biết đó là dữ liệu gì hay đã đi đâu.</item>
+        <item>Hạn chế dữ liệu nền trong Cài đặt → Ứng dụng → Dữ liệu di động nếu lượng dữ liệu có vẻ bất thường.</item>
+    </string-array>
+    <string-array name="risk_untrusted_signer">
+        <item>Chứng chỉ ký bất thường</item>
+        <item>Ứng dụng được ký bằng chứng chỉ gỡ lỗi hoặc chứng chỉ mới tạo gần đây, thường gặp ở APK được dựng vội ngoài cửa hàng chính thức.</item>
+        <item>Bình thường với ứng dụng tự build, bản dựng thử nghiệm hoặc tệp .apk gộp của PackPeek.</item>
+        <item>Không chứng minh ứng dụng có hại.</item>
+        <item>Hãy chắc chắn bạn tin nguồn của tệp trước khi cài.</item>
+    </string-array>
+    <string name="context_default_sms">Đây là ứng dụng SMS mặc định bạn đã chọn, nên quyền SMS phù hợp với mục đích của nó.</string>
+    <string name="context_system_app">Đây là ứng dụng hệ thống tích hợp sẵn; khả năng này thường là một phần chức năng hệ thống.</string>
+    <string name="concerns">Mối lo ngại</string>
+    <string name="concerns_none">Lần kiểm tra này không có mối lo ngại nào.</string>
+    <string name="concerns_disclaimer">Kết quả này không nói ứng dụng an toàn hay có hại. Hãy xem mức bằng chứng và mục \"Chưa được chứng minh\".</string>
+    <string name="severity_strong">Dấu hiệu mạnh</string>
+    <string name="severity_attention">Cần chú ý</string>
+    <string name="severity_info">Thông tin</string>
+    <plurals name="severity_strong_count">
+        <item quantity="other">%1$d dấu hiệu mạnh</item>
+    </plurals>
+    <plurals name="severity_attention_count">
+        <item quantity="other">%1$d mục cần chú ý</item>
+    </plurals>
+    <plurals name="severity_info_count">
+        <item quantity="other">%1$d ghi chú</item>
+    </plurals>
+    <string name="risk_found">Đã tìm thấy gì</string>
+    <string name="risk_impact">Ảnh hưởng tới bạn</string>
+    <string name="risk_context">Ngữ cảnh</string>
+    <string name="risk_unproven">Chưa được chứng minh</string>
+    <string name="risk_action">Hành động đề xuất</string>
+    <string name="level_declared">T1 Khai báo</string>
+    <string name="level_code">T2 Trong mã</string>
+    <string name="level_flow">T3 Đường mã</string>
+    <string name="level_observed">T4 Quan sát được</string>
+    <string name="levels_explained">T1: ghi trong manifest. T2: tìm thấy hàm trong mã. T3: đọc và gửi trong cùng một đường mã; được đánh dấu khi chính giá trị được lần theo. T4: quan sát trên thiết bị này.</string>
+    <string name="ev_permission">Yêu cầu %1$s</string>
+    <string name="ev_component">Thành phần %1$s</string>
+    <string name="ev_config_retrieve">Cấu hình: có thể đọc nội dung màn hình của ứng dụng khác</string>
+    <string name="ev_config_gestures">Cấu hình: có thể thực hiện thao tác chạm và cử chỉ</string>
+    <string name="ev_config_all_events">Cấu hình: nhận mọi loại sự kiện màn hình</string>
+    <string name="ev_accessibility_enabled">Dịch vụ hỗ trợ tiếp cận ĐANG BẬT</string>
+    <string name="ev_notification_enabled">Trình nghe thông báo ĐANG BẬT</string>
+    <string name="ev_admin_active">Quản trị thiết bị ĐANG HOẠT ĐỘNG</string>
+    <string name="ev_default_sms">Được chọn làm ứng dụng SMS mặc định</string>
+    <string name="ev_granted">Đã cấp %1$s</string>
+    <string name="ev_overlay_allowed">Được phép hiển thị trên ứng dụng khác</string>
+    <string name="ev_battery_exempt">Được miễn tối ưu hóa pin</string>
+    <string name="ev_sideloaded">Cài từ ngoài cửa hàng ứng dụng</string>
+    <string name="ev_file">Tệp APK, chưa cài</string>
+    <string name="ev_no_launcher">Không có activity nào hiện trên màn hình chính</string>
+    <string name="ev_debug_cert">Ký bằng chứng chỉ gỡ lỗi</string>
+    <string name="ev_new_cert">Chứng chỉ mới được tạo (%1$s ngày trước)</string>
+    <string name="ev_lure_label">Tên ứng dụng dụ dỗ: \"%1$s\"</string>
+    <string name="ev_cleartext">usesCleartextTraffic đang bật</string>
+    <string name="ev_network">30 ngày: %1$s khi mở, %2$s khi chạy nền</string>
+    <string name="coverage">Phạm vi kiểm tra</string>
+    <plurals name="coverage_apks">
+        <item quantity="other">Đã kiểm tra manifest của %1$d APK</item>
+    </plurals>
+    <string name="coverage_unreadable">Không đọc được: %1$s</string>
+    <plurals name="coverage_configs">
+        <item quantity="other">Không đọc được %1$d tệp cấu hình</item>
+    </plurals>
+    <string name="coverage_device">Đã đọc trạng thái thiết bị (dịch vụ đang bật, quyền đã cấp)</string>
+    <string name="coverage_file">Tệp chưa được cài nên không có trạng thái thiết bị</string>
+    <string name="coverage_usage_on">Đã đọc mức dùng dữ liệu qua Quyền truy cập dữ liệu sử dụng</string>
+    <string name="coverage_usage_off">Chưa đọc mức dùng dữ liệu vì Quyền truy cập dữ liệu sử dụng chưa được cấp</string>
+    <string name="grant_usage_access">Cho phép</string>
+    <string name="install_risk_title">Phát hiện dấu hiệu mạnh</string>
+    <string name="install_risk_body">Lần kiểm tra phát hiện các mẫu thường được ứng dụng đánh cắp dữ liệu sử dụng:\n\n%1$s\n\nVẫn cài đặt?</string>
+    <string name="install_anyway">Vẫn cài đặt</string>
+    <string name="risk_badge_ok">Không có</string>
+    <string name="risk_badge_label">mối lo ngại</string>
+    <string name="old_score_title">Điểm cấu hình trước đây</string>
+    <string name="active_on_device">Đang hoạt động trên thiết bị này</string>
+    <string name="active_on_device_note">Các dịch vụ này có thể đọc màn hình hoặc thông báo, hoặc điều khiển thiết bị. Hãy chắc chắn bạn nhận ra từng ứng dụng.</string>
+    <string name="active_accessibility">Dịch vụ hỗ trợ tiếp cận</string>
+    <string name="active_notifications">Trình nghe thông báo</string>
+    <string name="active_admins">Quản trị thiết bị</string>
+    <string name="active_default_sms">Ứng dụng SMS mặc định</string>
+    <string name="usage_access">Quyền truy cập dữ liệu sử dụng</string>
+    <string name="usage_access_on">Đã cho phép: mức dùng dữ liệu của từng ứng dụng được hiển thị như bằng chứng quan sát được</string>
+    <string name="usage_access_off">Chưa cho phép. Tùy chọn: hiển thị mức dùng dữ liệu của từng ứng dụng (không phải nội dung hay nơi nhận).</string>
+    <string name="risk_analysis">Phân tích rủi ro</string>
+    <string-array name="risk_data_theft">
+        <item>Dữ liệu cá nhân được gửi đến đích ẩn</item>
+        <item>Mã của chính ứng dụng đọc dữ liệu cá nhân (như SMS, danh bạ, thông báo hoặc văn bản trên màn hình) và trong cùng đường mã gửi dữ liệu tới bot Telegram, webhook Discord hoặc một địa chỉ IP công khai được ghi trong mã gửi. Ứng dụng lừa đảo dùng các kênh này vì không cần máy chủ có tên có thể bị truy vết.</item>
+        <item>Ứng dụng thông thường gửi dữ liệu tới máy chủ có tên của mình, không phải bot hay webhook. Nhà phát triển đôi khi dùng bot để báo lỗi, nhưng chúng không đọc dữ liệu cá nhân. IP trực tiếp chỉ là dấu hiệu mạnh với tệp hoặc ứng dụng từ nguồn không đáng tin cậy; nếu không thì cần chú ý.</item>
+        <item></item>
+        <item>Đừng cài tệp này. Nếu đã cài: gỡ ứng dụng, đổi mật khẩu các tài khoản mà mã hoặc tin nhắn có thể đã bị nó đọc, và bật lại xác minh hai bước.</item>
+    </string-array>
+    <string-array name="risk_hidden_destination">
+        <item>Đích ẩn trong mã</item>
+        <item>Mã chứa địa chỉ bot Telegram, webhook Discord hoặc địa chỉ IP công khai không có tên miền. Dữ liệu gửi tới đó khó truy ra một công ty nào. Địa chỉ cục bộ (mạng gia đình, chính thiết bị) không được tính.</item>
+        <item>Một số ứng dụng dùng bot hoặc webhook để cảnh báo, hoặc kết nối máy chủ của mình qua IP. Đáng lo ngại khi đi kèm quyền truy cập dữ liệu cá nhân.</item>
+        <item></item>
+        <item>Xem ứng dụng có cần liên lạc với dịch vụ chat hoặc địa chỉ IP trần cho mục đích của nó không. Nên chọn ứng dụng từ nhà phát triển có tên tuổi.</item>
+    </string-array>
+    <string-array name="risk_call_forwarding">
+        <item>Mã chuyển tiếp cuộc gọi</item>
+        <item>Mã chứa các mã điện thoại chuyển tiếp cuộc gọi của bạn (ví dụ **21*) hoặc gửi yêu cầu USSD. Kẻ chiếm tài khoản chuyển tiếp cuộc gọi để mã OTP qua cuộc gọi thoại đến tay họ thay vì bạn.</item>
+        <item>Ứng dụng điện thoại, nhà mạng và quản lý cuộc gọi có thể dùng các mã này một cách hợp lệ.</item>
+        <item></item>
+        <item>Kiểm tra cài đặt chuyển tiếp cuộc gọi (bấm *#21#). Xóa chuyển tiếp mà bạn không tự thiết lập, và gỡ ứng dụng nếu bạn không nhận ra nó.</item>
+    </string-array>
+    <string-array name="risk_dynamic_code">
+        <item>Tải thêm mã</item>
+        <item>Ứng dụng có thể tải hoặc chạy mã không nằm trong phần đã kiểm tra: DEX/APK ẩn trong gói, packer mã hóa hoặc class loader.</item>
+        <item>Ứng dụng lớn dùng tải động cho plug-in và cập nhật, và một số công ty bảo vệ mã bằng packer.</item>
+        <item></item>
+        <item>Hãy coi kết quả kiểm tra này là chưa đầy đủ đối với ứng dụng này. Cẩn thận hơn nếu ứng dụng cũng đến từ ngoài cửa hàng ứng dụng.</item>
+    </string-array>
+    <string-array name="risk_clipboard">
+        <item>Đọc bộ nhớ tạm</item>
+        <item>Ứng dụng có thể đọc văn bản bạn sao chép, có thể gồm mật khẩu, mã OTP hoặc số tài khoản.</item>
+        <item>Ứng dụng tải xuống và chia sẻ liên kết thường đọc bộ nhớ tạm để lấy liên kết đã sao chép. Từ Android 10, ứng dụng chỉ đọc được khi đang hiện trên màn hình, và Android 12+ có hiện thông báo.</item>
+        <item></item>
+        <item>Tránh sao chép mật khẩu hoặc mã OTP khi ứng dụng này đang mở.</item>
+    </string-array>
+    <string-array name="risk_web_login">
+        <item>Đọc cookie WebView</item>
+        <item>Ứng dụng đọc cookie từ trình duyệt tích hợp. Cookie có thể giữ bạn ở trạng thái đăng nhập, nên ai nắm được chúng có thể thao tác như bạn trên trang web đó.</item>
+        <item>Các ứng dụng cho phép đăng nhập vào trang web ngay trong ứng dụng (ví dụ để tải bài đăng của chính bạn) cần cookie cho phiên đó.</item>
+        <item></item>
+        <item>Chỉ đăng nhập tài khoản quan trọng trong ứng dụng hoặc trình duyệt chính thức. Nếu không chắc, hãy đăng xuất và đổi mật khẩu.</item>
+    </string-array>
+    <string-array name="risk_ad_sdks">
+        <item>SDK quảng cáo và phân tích</item>
+        <item>Mã của bên thứ ba hiển thị quảng cáo hoặc đo cách bạn dùng ứng dụng. Các SDK này có thể thu thập mã nhận dạng thiết bị và dữ liệu sử dụng.</item>
+        <item>Rất phổ biến trong ứng dụng miễn phí; thường được nêu trong chính sách quyền riêng tư của ứng dụng.</item>
+        <item>Việc kiểm tra mã không cho thấy mỗi SDK thực sự thu thập dữ liệu gì.</item>
+        <item>Xem mục An toàn dữ liệu trên Google Play và đặt lại mã quảng cáo trong Cài đặt → Quyền riêng tư → Quảng cáo nếu muốn.</item>
+    </string-array>
+    <string-array name="risk_destinations">
+        <item>Địa chỉ trong mã</item>
+        <item>Địa chỉ web được viết trong mã riêng của ứng dụng: nơi ứng dụng có khả năng kết nối tới.</item>
+        <item>Mọi ứng dụng có kết nối mạng đều có. Tên miền lạ tự nó không đáng ngờ.</item>
+        <item>Chỉ dựa vào mã thì không thấy được các địa chỉ này có được liên hệ không, và gửi gì.</item>
+        <item>Hãy để ý địa chỉ không khớp với nhà phát triển ứng dụng, và http không mã hóa.</item>
+    </string-array>
+    <string name="cap_sms_read">SMS</string>
+    <string name="cap_contacts">danh bạ</string>
+    <string name="cap_call_log">nhật ký cuộc gọi</string>
+    <string name="cap_clipboard">bộ nhớ tạm</string>
+    <string name="cap_notification_read">thông báo</string>
+    <string name="cap_screen_read">văn bản trên màn hình</string>
+    <string name="cap_cookies">cookie đăng nhập</string>
+    <string name="cap_phone_id">số điện thoại hoặc ID thiết bị</string>
+    <string name="cap_accounts">tài khoản</string>
+    <string name="cap_location">vị trí</string>
+    <string name="cap_network">internet</string>
+    <string name="cap_sms_send">SMS</string>
+    <string name="cap_telegram">bot Telegram</string>
+    <string name="cap_discord">webhook Discord</string>
+    <string name="ev_code_call">Gọi %1$s</string>
+    <string name="ev_code_string">Chứa văn bản %1$s</string>
+    <string name="ev_flow">Đọc %1$s và gửi tới %2$s trong cùng một đường mã (giá trị chưa được lần theo)</string>
+    <string name="ev_destination">Kết nối tới %1$s</string>
+    <string name="ev_destination_cleartext">%1$s (http không mã hóa)</string>
+    <string name="ev_destination_ip">%1$s (địa chỉ IP, không có tên miền)</string>
+    <string name="ev_origin_app">mã riêng của ứng dụng</string>
+    <string name="ev_origin_library">thư viện: %1$s</string>
+    <string name="ev_hidden_code">Tệp mã ẩn: %1$s</string>
+    <string name="ev_packer">Packer mã: %1$s</string>
+    <string name="unproven_flow">Giá trị đọc từ dữ liệu này được lần theo tới một lệnh gọi gửi nó ra ngoài (T3). Vẫn chưa chứng minh được đường này đã chạy trên thiết bị của bạn; chỉ việc quan sát ứng dụng khi chạy mới cho thấy điều đó.</string>
+    <string name="unproven_calls">Mã có gọi các hàm cần thiết cho việc này (T2), nhưng không tìm thấy đường nào gửi dữ liệu ra ngoài. Không thể loại trừ mã không bao giờ chạy hoặc mã được tải sau.</string>
+    <string name="unproven_none">Mã riêng của ứng dụng đã được kiểm tra và không gọi các hàm cần thiết cho việc này. Thư viện hoặc mã được tải sau vẫn có thể dùng nó.</string>
+    <string name="unproven_gaps">Một số phần của ứng dụng không phân tích được (xem Phạm vi kiểm tra), nên kết quả về mã có thể chưa đầy đủ.</string>
+    <string name="evidence_strength">Bằng chứng mạnh nhất: %1$s</string>
+    <string name="strength_t1">chỉ ghi trong manifest</string>
+    <string name="strength_t2">mã thực hiện các lệnh gọi này</string>
+    <string name="strength_t3">đọc và gửi trong cùng một đường mã</string>
+    <string name="strength_t4">quan sát được trên thiết bị này</string>
+    <string name="coverage_code">Đã phân tích mã (DEX): %1$d tệp DEX, %2$d lớp, %3$d trong mã riêng của ứng dụng</string>
+    <string name="coverage_code_failed">Không phân tích được mã ứng dụng (DEX)</string>
+    <string name="coverage_gap_hidden">Chưa phân tích mã ẩn: %1$s</string>
+    <string name="coverage_gap_packer">Mã được bảo vệ bằng packer (%1$s); mã thật đã bị mã hóa</string>
+    <string name="coverage_gap_cross">Logic %1$s chạy ngoài DEX và không được phân tích</string>
+    <string name="coverage_gap_unreadable">Không đọc được mã trong %1$s</string>
+    <string name="coverage_gap_limit">Phân tích mã đã dừng ở giới hạn thời gian hoặc kích thước; kết quả chỉ là một phần</string>
+    <string name="coverage_gap_tracking">Việc theo dõi giá trị đã hết thời gian; khả năng và địa chỉ đầy đủ, nhưng một số đường dữ liệu chưa được đánh dấu là đã theo dõi</string>
+    <string name="find_target_body">SDK mục tiêu thấp hơn API 31 (Android 12). Một số cơ chế bảo vệ mới hơn có thể không được áp dụng.</string>
+    <string name="find_exported_body">Thành phần được xuất đang bật mà không có quyền thành phần: %1$d. Không tính điểm vào từ launcher.</string>
+    <string name="format_explanation">Ứng dụng đơn lẻ luôn được lưu dạng .apk. Ứng dụng chia nhỏ dùng định dạng đã chọn ở trên. Tên đã tồn tại sẽ được thêm hậu tố số.</string>
+    <string name="report_share_quick">Chia sẻ báo cáo bằng chứng (PDF)</string>
+    <string name="ev_flow_traced">Giá trị %1$s được lần theo tới lệnh gọi gửi tới %2$s</string>
+    <string name="unproven_flow_untraced">Việc đọc dữ liệu này và việc gửi diễn ra trong cùng một đường mã (T3), nhưng giá trị đã đọc chưa được lần theo tới thứ được gửi, nên hai việc có thể không liên quan. Chỉ việc quan sát ứng dụng khi chạy mới cho thấy thứ gì được gửi.</string>
+    <string name="install_fail_no_result">Android không báo kết quả của lần cài đặt này. Hãy kiểm tra xem ứng dụng đã được cài chưa, rồi thử lại.</string>
+    <string name="ready_target_min">• Nhắm tới API %1$d; phiên bản Android này từ chối ứng dụng mới dưới API %2$d.</string>
+    <string-array name="risk_shell_command">
+        <item>Chạy lệnh shell</item>
+        <item>Mã khởi chạy lệnh hệ thống (Runtime.exec hoặc ProcessBuilder). Lệnh có thể đọc thông tin thiết bị hoặc nhật ký, và trên thiết bị đã root có thể làm nhiều hơn nữa.</item>
+        <item>Trình báo lỗi và SDK thông tin thiết bị thường chạy các lệnh vô hại như getprop hoặc logcat. Quan trọng nhất là khi chính mã của ứng dụng làm việc này.</item>
+        <item></item>
+        <item>Kiểm tra xem ứng dụng có thật sự cần điều này cho chức năng của nó không. Hãy thận trọng nếu nó còn xin quyền root hoặc đến từ ngoài cửa hàng ứng dụng.</item>
+    </string-array>
+    <string name="strength_t3_traced">một giá trị được lần theo từ lúc đọc tới lúc gửi</string>
+    <string name="ev_flow_traced_to">Giá trị %1$s được lần theo tới lệnh gọi gửi tới %2$s, địa chỉ: %3$s</string>
+    <string name="chain_destination">Gửi tới: %1$s</string>
+    <string name="ev_flow_traced_to_any">Giá trị %1$s được lần theo tới một lệnh gọi gửi tới %2$s. Lệnh gọi đó dùng cho nhiều địa chỉ; giá trị đi tới một trong: %3$s</string>
+    <string name="chain_destination_any">Gửi tới một trong: %1$s</string>
+    <string name="more_hosts">và các địa chỉ khác</string>
+    <string name="analysis_progress_title">Đang kiểm tra ứng dụng</string>
+    <string name="analysis_stage_manifest">Đang đọc manifest và chứng chỉ</string>
+    <string name="analysis_stage_code">Đang đọc mã: tệp %1$d / %2$d</string>
+    <string name="analysis_stage_resolving">Đang lần theo dữ liệu trong mã</string>
+    <string name="security_paused">Đã tạm dừng: đã kiểm tra %1$d / %2$d ứng dụng. Kết quả đã được lưu, có thể tiếp tục bất cứ lúc nào.</string>
+    <string name="chart_title">Kết quả kiểm tra</string>
+    <string name="chart_clear">Không có phát hiện đáng chú ý</string>
+    <string name="chart_unchecked">Chưa kiểm tra</string>
+    <string name="chart_center">đã kiểm tra</string>
+    <string name="chart_description">%1$d có dấu hiệu mạnh, %2$d cần chú ý, %3$d không có phát hiện đáng chú ý, %4$d chưa kiểm tra</string>
+</resources>

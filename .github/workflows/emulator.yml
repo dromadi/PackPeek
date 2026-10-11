@@ -1,0 +1,107 @@
+# Runs PackPeek on a hardware-accelerated Android emulator (GitHub's Linux runners have KVM) and
+# publishes the screenshots to the "emulator-results" branch, readable from a phone on GitHub.
+#
+# To save Actions minutes on this private repository it runs only when asked:
+#   - a pushed commit whose message contains [emulator]   (API 36), or
+#   - Actions → "Emulator test" → Run workflow             (choose the Android version; needs this
+#     file on the default branch).
+name: Emulator test
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      api:
+        description: Android API level
+        type: choice
+        default: "36"
+        options: ["36", "35", "34", "30", "26"]
+
+permissions:
+  contents: write
+
+jobs:
+  emulator:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[emulator]')
+    # On the job, not the workflow: a push without [emulator] must not cancel a running test.
+    concurrency:
+      group: emulator-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      API: ${{ github.event.inputs.api || '36' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug --console=plain
+
+      - name: Run the scenario
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.API }}
+          target: ${{ env.API == '26' && 'default' || 'google_apis' }}
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash tools/emulator/scenario.sh app/build/outputs/apk/debug/app-debug.apk tools/undangan-sim/undangan-sim.apk emulator-results app/src/test/resources/samples/control-clean.apk || echo "SCENARIO_FAILED=1" >> "$GITHUB_ENV"
+
+      - name: Keep results as an artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: emulator-results-api${{ env.API }}
+          path: emulator-results
+          if-no-files-found: warn
+
+      - name: Publish screenshots to the emulator-results branch
+        if: always()
+        run: |
+          set -e
+          [ -f emulator-results/SUMMARY.md ] || { echo "no results"; exit 0; }
+          run="runs/${GITHUB_RUN_NUMBER}-api${API}"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin emulator-results >/dev/null; then
+            git fetch --depth 1 origin emulator-results
+            git worktree add /tmp/results FETCH_HEAD
+            cd /tmp/results && git switch -c emulator-results
+          else
+            git worktree add --detach /tmp/results
+            cd /tmp/results && git switch --orphan emulator-results
+          fi
+          mkdir -p "$run"
+          cp "$GITHUB_WORKSPACE"/emulator-results/*.png "$GITHUB_WORKSPACE"/emulator-results/SUMMARY.md "$run"/ 2>/dev/null || true
+          cp "$GITHUB_WORKSPACE"/emulator-results/crash.txt "$run"/ 2>/dev/null || true
+          tail -n 3000 "$GITHUB_WORKSPACE"/emulator-results/logcat.txt > "$run/logcat-tail.txt" 2>/dev/null || true
+          # ⚠️ when the scenario did not reach its last step (cancelled or timed out).
+          if [ "${SCENARIO_FAILED:-0}" = 1 ]; then status="❌"
+          elif grep -q "No crash" "$run/SUMMARY.md"; then status="✅"
+          else status="⚠️"; fi
+          line="- $status [Run ${GITHUB_RUN_NUMBER} · API ${API} · ${GITHUB_REF_NAME} · ${GITHUB_SHA::7}]($run/SUMMARY.md) · $(date -u '+%Y-%m-%d %H:%M UTC')"
+          { echo "# PackPeek emulator results"; echo; echo "Newest first. Open a run to see its steps and screenshots."; echo;
+            echo "$line"; [ -f README.md ] && grep '^- ' README.md | head -n 49 || true; } > README.new
+          mv README.new README.md
+          git add -A
+          git commit -q -m "Emulator results: run ${GITHUB_RUN_NUMBER}, API ${API}, ${GITHUB_SHA::7}"
+          git push origin emulator-results
+          echo "Results: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/emulator-results/$run/SUMMARY.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail when the scenario failed
+        if: env.SCENARIO_FAILED == '1'
+        run: exit 1

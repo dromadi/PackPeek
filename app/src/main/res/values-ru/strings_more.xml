@@ -1,0 +1,556 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="crash_title">В прошлый раз PackPeek аварийно завершился</string>
+    <string name="crash_body">Сведения об ошибке хранятся только на этом устройстве. Скопируйте их и отправьте разработчику.</string>
+    <string name="crash_copy">Скопировать журнал ошибки</string>
+    <string name="split_format">Формат разделённых приложений</string>
+    <string name="split_format_apks">.apks (SAI, PackPeek)</string>
+    <string name="split_format_xapk">.xapk (APKPure, установщики XAPK)</string>
+    <string name="split_format_zip">.zip (обычный архив)</string>
+    <string name="preview_split">Пример для разделённых приложений</string>
+    <string name="split_format_apk">Объединённый .apk (экспериментально)</string>
+    <string name="merged_apk_warning">⚠ Объединённый .apk переподписывается ключом PackPeek: он не сможет обновить исходное приложение (сначала удалите его, его данные будут потеряны), Play Маркет не будет его обновлять, некоторые приложения (банковские, игры, Meta) откажутся работать, и он содержит только части для этого устройства.</string>
+    <string name="error_merge">Не удалось объединить разделённые APK. Возможно, приложение слишком большое или не поддерживается; выберите .apks, .xapk или .zip.</string>
+    <string name="folder_root">Хранилище: %1$s</string>
+    <string name="folder_selected">Выбранная папка</string>
+    <string name="favorite_apps">Избранное</string>
+    <string name="favorite">Добавить в избранное</string>
+    <string name="unfavorite">Удалить из избранного</string>
+    <string name="signer_changed_title">Подпись изменилась</string>
+    <string name="signer_changed_body">Теперь это приложение подписано другим сертификатом, чем ваша резервная копия версии %1$s (%2$s). Так бывает, когда разработчик меняет ключи, но это может означать и изменённую или поддельную сборку. Проверьте, откуда оно было установлено.</string>
+    <string name="signer_changed_badge">⚠ Подпись отличается от предыдущей копии</string>
+    <string name="reinstall">Переустановить</string>
+    <string name="keep_versions">Копий на приложение</string>
+    <string name="keep_all">Хранить все</string>
+    <string name="keep_1">1 последнюю</string>
+    <string name="keep_3">3 последние</string>
+    <string name="keep_5">5 последних</string>
+    <string name="keep_versions_explanation">После каждого успешного копирования более старые файлы копий того же приложения сверх этого числа удаляются из папки.</string>
+    <string name="internal_storage">Внутренняя память</string>
+    <string name="no_folder_hint">Выберите папку для резервных копий</string>
+    <string name="choose">Выбрать</string>
+    <string name="selected_count">Выбрано: %1$d</string>
+    <string name="clear_selection_short">Снять выбор</string>
+    <string name="tag_split">Split</string>
+    <string name="tag_system">Системное</string>
+    <string name="backup_progress">Приложение %1$d из %2$d · %3$d%%</string>
+    <string name="dont_ask_again">Больше не спрашивать</string>
+    <string name="backup_done">Копирование завершено</string>
+    <string name="backup_partial">Копирование завершено с ошибками</string>
+    <string name="result_summary">Сохранено %1$d из %2$d · %3$s</string>
+    <string name="app_info">О приложении</string>
+    <string name="score_short">оценка</string>
+    <string name="history_empty_title">Резервных копий пока нет</string>
+    <string name="history_empty_body">Извлеките приложение на вкладке «Приложения» — его версии появятся здесь.</string>
+    <string name="search_apps_short">Поиск приложений</string>
+    <plurals name="version_count">
+        <item quantity="one">%1$d версия</item>
+        <item quantity="few">%1$d версии</item>
+        <item quantity="many">%1$d версий</item>
+        <item quantity="other">%1$d версии</item>
+    </plurals>
+    <plurals name="app_count_short">
+        <item quantity="one">%1$d приложение</item>
+        <item quantity="few">%1$d приложения</item>
+        <item quantity="many">%1$d приложений</item>
+        <item quantity="other">%1$d приложения</item>
+    </plurals>
+    <plurals name="backup_summary">
+        <item quantity="one">%1$d приложение · %2$s</item>
+        <item quantity="few">%1$d приложения · %2$s</item>
+        <item quantity="many">%1$d приложений · %2$s</item>
+        <item quantity="other">%1$d приложения · %2$s</item>
+    </plurals>
+    <string name="saved_file">Сохранено: %1$s</string>
+    <string name="min_android">Минимальная версия Android</string>
+    <string name="target_android">Целевая версия Android</string>
+    <string name="first_installed">Первая установка</string>
+    <string name="cpu_architecture">Архитектура процессора</string>
+    <string name="no_native_code">Нет нативного кода</string>
+    <string name="show_all_groups">Показать все (%1$d)</string>
+    <string name="show_fewer">Свернуть</string>
+    <string name="abi_note">Приложения с нативным кодом для нескольких архитектур показаны в каждой из них.</string>
+    <string name="signer_note">Приложения, подписанные одним ключом, происходят от одного разработчика или одной системы сборки. «Android Debug» означает тестовую сборку.</string>
+    <string name="show_all_apps">Показать все приложения</string>
+    <string name="quick_details">Краткие сведения</string>
+    <string name="full_details">Подробные сведения</string>
+    <string name="activities">Активности</string>
+    <string name="services">Службы</string>
+    <string name="receivers">Приёмники</string>
+    <string name="providers">Провайдеры</string>
+    <string name="tap_opens">Нажатие на приложение открывает</string>
+    <string name="needs_review">Требует проверки</string>
+    <string name="security_check_title">Проверьте свои приложения</string>
+    <string name="security_check_body">PackPeek читает манифест и код каждого установленного приложения и ищет признаки: что оно может делать, что вызывает его код и отправляются ли данные в скрытое место. Всё выполняется на этом телефоне.</string>
+    <plurals name="security_check_button">
+        <item quantity="one">Проверить %1$d приложение</item>
+        <item quantity="few">Проверить %1$d приложения</item>
+        <item quantity="many">Проверить %1$d приложений</item>
+        <item quantity="other">Проверить %1$d приложения</item>
+    </plurals>
+    <string name="security_checking">Проверка %1$d из %2$d…</string>
+    <plurals name="security_strong">
+        <item quantity="one">%1$d приложение с сильным индикатором</item>
+        <item quantity="few">%1$d приложения с сильным индикатором</item>
+        <item quantity="many">%1$d приложений с сильным индикатором</item>
+        <item quantity="other">%1$d приложения с сильным индикатором</item>
+    </plurals>
+    <plurals name="security_attention">
+        <item quantity="one">Сильных индикаторов нет · %1$d приложение требует внимания</item>
+        <item quantity="few">Сильных индикаторов нет · %1$d приложения требуют внимания</item>
+        <item quantity="many">Сильных индикаторов нет · %1$d приложений требуют внимания</item>
+        <item quantity="other">Сильных индикаторов нет · %1$d приложения требуют внимания</item>
+    </plurals>
+    <string name="security_clear">Сильных индикаторов не найдено</string>
+    <string name="security_checked">Проверено %1$d из %2$d установленных приложений (манифест, код и состояние устройства). Это не гарантирует, что приложение безопасно.</string>
+    <string name="security_continue">Продолжить</string>
+    <string name="security_again">Проверить снова</string>
+    <string name="active_all_clear">Ни у одного приложения не включены специальные возможности, доступ к уведомлениям или права администратора устройства.</string>
+    <string name="app_analysis">Анализ приложения</string>
+    <string name="tech_after_check">Технологии определяются во время проверки приложений выше.</string>
+    <string name="reading_groups">Чтение сертификатов и нативного кода…</string>
+    <plurals name="other_groups">
+        <item quantity="one">Ещё %1$d группа</item>
+        <item quantity="few">Ещё %1$d группы</item>
+        <item quantity="many">Ещё %1$d групп</item>
+        <item quantity="other">Ещё %1$d группы</item>
+    </plurals>
+    <string name="deep_button_title">Глубокий анализ</string>
+    <string name="deep_button_body">Отследить пути данных в коде, расшифровать скрытые тексты и открыть скрытые файлы кода. Занимает до минуты.</string>
+    <string name="deep_running">Анализ кода… это может занять до минуты.</string>
+    <string name="deep_failed">Глубокому анализу не удалось прочитать код этого приложения.</string>
+    <string name="deep_done">Готово за %1$d с · путей данных: %2$d · скрытых текстов: %3$d · скрытых файлов кода: %4$d</string>
+    <string name="section_chains">Пути данных</string>
+    <string name="chains_note">Пути кода от места, где код читает данные, до места отправки, отслеженные до трёх вызовов в глубину, включая передачу другим компонентам. Путь показывает, что чтение и отправка связаны в коде, а не то, что отправляется то же самое значение.</string>
+    <string name="chains_none">Путь от личных данных к отправке не найден даже на глубине трёх вызовов.</string>
+    <string name="chain_read">Читает через %1$s</string>
+    <string name="chain_send">Отправляет через %1$s</string>
+    <string name="via_start">начинается здесь</string>
+    <string name="via_call">вызывает</string>
+    <string name="via_intent">запускает другой компонент через Intent</string>
+    <string name="via_object">выполняется как объект (поток или callback)</string>
+    <string name="section_decoded">Скрытые тексты</string>
+    <string name="decoded_note">Тексты, которые код прячет от беглого взгляда, расшифрованные без запуска приложения.</string>
+    <string name="decoded_none">Скрытых адресов или кодов не найдено.</string>
+    <string name="tech_base64">Декодировано из Base64</string>
+    <string name="tech_joined">Собрано из частей</string>
+    <string name="tech_char_array">Собрано из массива символов</string>
+    <string name="tech_xor">Расшифровано XOR-ключом %1$s</string>
+    <string name="tech_reversed">Перевёрнутый текст</string>
+    <string name="section_payloads">Скрытый код</string>
+    <string name="payloads_note">Файлы кода внутри пакета, которые часто загружаются позже дропперами; анализируются по тем же правилам.</string>
+    <string name="payloads_none">Скрытых файлов кода нет.</string>
+    <string name="payload_dex">Скрытый файл DEX · классов: %1$d</string>
+    <string name="payload_archive">Скрытый APK/JAR · классов: %1$d</string>
+    <string name="payload_encrypted">Похоже на зашифрованные данные (энтропия %1$s бит/байт); содержимое неизвестно</string>
+    <string name="payload_can">Его код: %1$s</string>
+    <string name="payload_nothing">Его код не делает ни одного из чувствительных вызовов, которые проверяет PackPeek.</string>
+    <string name="section_code">Подозрительный код</string>
+    <string name="code_note">Краткие листинги методов, на которых основаны признаки. ⚠ отмечает чувствительный вызов.</string>
+    <string name="section_actions">Что можно сделать</string>
+    <string name="action_uninstall">Удалить</string>
+    <string name="action_app_info">О приложении: отозвать разрешения</string>
+    <string name="action_accessibility">Настройки специальных возможностей</string>
+    <string name="action_notification_access">Доступ к уведомлениям</string>
+    <string name="action_admin">Настройки безопасности (администратор устройства)</string>
+    <string name="action_call_forwarding">Проверить переадресацию (*#21#)</string>
+    <string name="action_secure_accounts">Защитите свои аккаунты</string>
+    <string name="secure_accounts_body">1. Больше не открывайте приложение; удалите его (если потребуется, сначала отключите права администратора устройства).\n2. Смените пароли WhatsApp, почты, мобильного банка и электронных кошельков — по возможности с другого телефона.\n3. Снова включите двухэтапную проверку и завершите сеансы на других устройствах.\n4. Если одноразовые коды могли быть прочитаны, позвоните в банк по официальному номеру.\n5. Наберите *#21#, чтобы проверить переадресацию, и ##002#, чтобы её отменить.</string>
+    <string name="action_dont_install">Не устанавливайте этот файл. Удалите его из «Загрузок» и из чата, где вы его получили.</string>
+    <string name="section_report">Отчёт о признаках</string>
+    <string name="report_note">Поделитесь результатами с банком, полицией, семьёй или специалистами по безопасности.</string>
+    <string name="report_share_text">Поделиться текстом</string>
+    <string name="report_share_pdf">Поделиться в PDF</string>
+    <string name="section_lookup">Онлайн-проверка (необязательно)</string>
+    <string name="lookup_note">Сравнивает отпечаток файла (SHA-256) с базой VirusTotal. Отправляется только отпечаток — никогда сам файл или список ваших приложений.</string>
+    <string name="lookup_button">Проверить отпечаток</string>
+    <string name="lookup_browser">Открыть в браузере</string>
+    <string name="lookup_running">Проверка…</string>
+    <string name="lookup_no_key">Добавьте бесплатный API-ключ VirusTotal в настройках, чтобы проверять здесь, или откройте результат в браузере.</string>
+    <string name="lookup_not_found">VirusTotal ещё не встречал этот файл. Это не значит, что он безопасен: новые мошеннические APK часто ещё неизвестны.</string>
+    <string name="lookup_found">Этот файл отмечают %1$d из %2$d антивирусных движков</string>
+    <string name="lookup_suspicious">Ещё %1$d считают его подозрительным</string>
+    <string name="lookup_label">Известен как: %1$s</string>
+    <string name="lookup_clean">Ни один антивирусный движок не отмечает этот файл (проверено: %1$d). Новые мошеннические APK часто ещё не обнаруживаются.</string>
+    <string name="lookup_key_error">VirusTotal отклонил API-ключ. Проверьте его в настройках.</string>
+    <string name="lookup_quota">Достигнут бесплатный лимит VirusTotal. Повторите попытку через минуту.</string>
+    <string name="lookup_network">Не удалось подключиться к VirusTotal. Проверьте соединение.</string>
+    <string name="copy_sha">Копировать SHA-256</string>
+    <string name="vt_key_title">API-ключ VirusTotal (необязательно)</string>
+    <string name="vt_key_set">Задан · используется, только когда вы нажимаете «Проверить отпечаток»</string>
+    <string name="vt_key_unset">Не задан · бесплатный ключ можно получить на virustotal.com</string>
+    <string name="vt_key_hint">API-ключ</string>
+    <string name="vt_key_note">Используется только для необязательной проверки отпечатка при глубоком анализе. Отправляется только SHA-256.</string>
+    <string name="save">Сохранить</string>
+    <string name="remove">Удалить</string>
+    <string name="report_title">Отчёт PackPeek о признаках</string>
+    <string name="report_created">Создан: %1$s</string>
+    <string name="report_app">Приложение: %1$s (%2$s), версия %3$s</string>
+    <string name="report_from_file">Проверено как файл APK; не установлено</string>
+    <string name="report_installed">Установлено · источник: %1$s</string>
+    <string name="report_counts">Сильных индикаторов: %1$d · требуют внимания: %2$d · примечаний: %3$d</string>
+    <string name="report_disclaimer">Эти результаты не доказывают, что приложение вредоносно или безопасно. Уровни доказательств: T1 указано в manifest, T2 найдено в коде, T3 чтение и отправка в одном пути кода (отмечено, если отслежено само значение), T4 наблюдается на этом устройстве.</string>
+    <string name="report_findings">Результаты</string>
+    <string name="report_deep">Глубокий анализ</string>
+    <string name="report_lookup">VirusTotal</string>
+    <string name="report_footer">Создано PackPeek на самом устройстве; приложение не запускалось.</string>
+    <string-array name="risk_otp_theft">
+        <item>Признаки кражи одноразовых кодов / захвата аккаунта</item>
+        <item>Приложение может получать SMS, включая одноразовые коды банков и WhatsApp, и имеет доступ к интернету. Поддельные APK-приглашения, «штрафы» и «посылки» используют это сочетание для захвата аккаунтов.</item>
+        <item>Этот шаблон отмечен, потому что доступ к SMS сочетается с признаками скрытности или ненадёжного источника (скрытый значок, файл не из магазина приложений, отладочный или совсем новый сертификат, заманчивое название) либо с кодом, который отправляет содержимое SMS, скрытым адресом назначения или переадресацией вызовов.</item>
+        <item>Код приложения ещё не анализировался, поэтому не доказано, что SMS читаются или куда-либо отправляются. Эта оценка основана только на манифесте и контексте.</item>
+        <item>Не устанавливайте этот файл. Если он установлен: отзовите разрешение на SMS, удалите приложение, затем смените пароли и снова включите двухэтапную проверку для важных аккаунтов (WhatsApp, банк, почта).</item>
+    </string-array>
+    <string-array name="risk_screen_spying">
+        <item>Признаки слежки за экраном</item>
+        <item>Служба специальных возможностей может читать экраны других приложений, включая сообщения, балансы и вводимый текст, а приложение может отправить это через интернет.</item>
+        <item>Этот шаблон отмечен, потому что чтение экрана через специальные возможности сочетается с другими признаками: скрытым значком, наложениями, правами администратора устройства, доступом к уведомлениям или ненадёжным источником.</item>
+        <item>Не доказано, что содержимое экрана куда-либо отправляется. Код приложения ещё не анализировался.</item>
+        <item>Отключите службу специальных возможностей этого приложения в разделе «Настройки → Специальные возможности», если вы не используете её намеренно. Удалите приложение, если не узнаёте его.</item>
+    </string-array>
+    <string-array name="risk_accessibility">
+        <item>Служба специальных возможностей</item>
+        <item>Когда она включена, она может читать содержимое экрана и нажимать за пользователя.</item>
+        <item>Обычно для программ чтения с экрана, менеджеров паролей, средств автоматизации и альтернативных лаунчеров.</item>
+        <item>Не доказано, что данные с экрана покидают устройство. Код ещё не анализировался.</item>
+        <item>Включайте её, только если знаете, для чего она. Проверьте «Настройки → Специальные возможности».</item>
+    </string-array>
+    <string-array name="risk_notifications">
+        <item>Доступ к уведомлениям</item>
+        <item>Когда он включён, приложение может читать все уведомления, включая текст сообщений и одноразовые коды.</item>
+        <item>Обычно для смарт-часов, приложений-напоминаний и менеджеров уведомлений.</item>
+        <item>Не доказано, что уведомления сохраняются или отправляются.</item>
+        <item>Разрешайте его только приложениям, которым доверяете. Проверьте «Настройки → Уведомления → Доступ к уведомлениям».</item>
+    </string-array>
+    <string-array name="risk_device_admin">
+        <item>Администратор устройства</item>
+        <item>Администратор устройства может блокировать экран, менять способ блокировки и даже стирать данные; пока он активен, приложение трудно удалить.</item>
+        <item>Обычно для рабочих приложений (MDM), поиска устройства и родительского контроля.</item>
+        <item>Не доказано, что эти политики применяются.</item>
+        <item>Отключите его в разделе «Настройки → Безопасность → Приложения администратора устройства», если он не нужен.</item>
+    </string-array>
+    <string-array name="risk_sms">
+        <item>Доступ к SMS</item>
+        <item>Приложение может получать или читать SMS, включая одноразовые коды.</item>
+        <item>Обычно для SMS-приложений, некоторых банковских приложений, которые автоматически подставляют коды подтверждения, и блокировщиков спама.</item>
+        <item>Не доказано, что SMS читаются или куда-либо отправляются. Код ещё не анализировался.</item>
+        <item>Если функциям приложения не нужны SMS, отзовите разрешение на SMS в разделе «Настройки → Приложения».</item>
+    </string-array>
+    <string-array name="risk_sms_send">
+        <item>Отправка SMS</item>
+        <item>Приложение может отправлять SMS с вашего номера, что может стоить денег или рассылать ссылки вашим контактам.</item>
+        <item>Обычно для SMS-приложений и некоторых приложений для подтверждения.</item>
+        <item>Не доказано, что какие-либо SMS были отправлены.</item>
+        <item>Отзовите разрешение на SMS, если оно не нужно, и проверьте отправленные сообщения.</item>
+    </string-array>
+    <string-array name="risk_contacts_calls">
+        <item>Контакты и журнал звонков</item>
+        <item>Приложение может читать ваш список контактов или журнал звонков.</item>
+        <item>Обычно для мессенджеров, звонилок и приложений резервного копирования контактов.</item>
+        <item>Не доказано, что данные контактов покидают устройство.</item>
+        <item>Отзовите разрешение на контакты или журнал звонков, если оно не связано с назначением приложения.</item>
+    </string-array>
+    <string-array name="risk_phone_identity">
+        <item>Идентификация телефона и аккаунты</item>
+        <item>Приложение может читать состояние телефона, ваш номер или аккаунты на устройстве.</item>
+        <item>Часто встречается в звонилках, играх и аналитических SDK, которые различают устройства.</item>
+        <item>Не доказано, что эти данные отправляются.</item>
+        <item>Отзовите разрешение «Телефон», если приложение не совершает звонков.</item>
+    </string-array>
+    <string-array name="risk_camera_mic">
+        <item>Камера и микрофон</item>
+        <item>После разрешения приложение может использовать камеру или записывать звук.</item>
+        <item>Обычно для приложений для фото, видео, звонков и QR-кодов. В Android 12+ при использовании камеры или микрофона отображается зелёный индикатор.</item>
+        <item>Не доказано, что запись ведётся в фоновом режиме.</item>
+        <item>Выберите «Только во время использования приложения» или «Спрашивать каждый раз» для камеры и микрофона.</item>
+    </string-array>
+    <string-array name="risk_location">
+        <item>Местоположение</item>
+        <item>Приложение может знать, где вы находитесь; с доступом в фоновом режиме — даже когда оно закрыто.</item>
+        <item>Обычно для карт, такси, погоды и поиска устройства.</item>
+        <item>Не доказано, что местоположение отправляется или сохраняется.</item>
+        <item>По возможности используйте приблизительное местоположение или «Только во время использования приложения».</item>
+    </string-array>
+    <string-array name="risk_screen_capture">
+        <item>Запись экрана</item>
+        <item>Приложение может записывать или транслировать весь экран после вашего согласия в запросе Android.</item>
+        <item>Обычно для программ записи экрана, демонстрации экрана на встречах и стриминга игр.</item>
+        <item>Android спрашивает при каждом начале записи; не доказано, что что-либо было записано.</item>
+        <item>Отклоняйте неожиданные запросы на запись экрана, особенно при открытии банковских приложений.</item>
+    </string-array>
+    <string-array name="risk_overlay">
+        <item>Поверх других приложений</item>
+        <item>Приложение может показывать окна поверх других приложений, что можно использовать для поддельных экранов входа.</item>
+        <item>Обычно для чат-пузырей, программ записи экрана и фильтров синего света.</item>
+        <item>Не доказано, что оно перекрывает другие приложения.</item>
+        <item>Отзовите это разрешение в разделе «Настройки → Приложения → Специальный доступ → Поверх других приложений», если оно не нужно.</item>
+    </string-array>
+    <string-array name="risk_persistence">
+        <item>Работает в фоновом режиме</item>
+        <item>Приложение может запускаться заново после включения телефона или исключено из оптимизации батареи.</item>
+        <item>Обычно для мессенджеров, будильников и приложений синхронизации.</item>
+        <item>Не доказано, что оно постоянно работает.</item>
+        <item>Уберите исключение из оптимизации батареи, если приложению не нужно работать в фоне.</item>
+    </string-array>
+    <string-array name="risk_hidden_icon">
+        <item>Нет значка на главном экране</item>
+        <item>Приложение не отображается в списке приложений, поэтому о нём легко забыть и его сложнее найти для удаления.</item>
+        <item>Обычно для клавиатур, виджетов, обоев и плагинов, которые открываются из других приложений.</item>
+        <item>Неизвестно, скрыт ли значок намеренно.</item>
+        <item>Убедитесь, что знаете, что это за приложение. Удалите его в разделе «Настройки → Приложения», если не узнаёте его.</item>
+    </string-array>
+    <string-array name="risk_install_apps">
+        <item>Устанавливает другие приложения</item>
+        <item>Приложение может запрашивать установку других APK, что можно использовать для загрузки дополнительных приложений.</item>
+        <item>Обычно для магазинов приложений, файловых менеджеров, браузеров и средств резервного копирования, таких как PackPeek.</item>
+        <item>Android всё равно спрашивает перед каждой установкой; не доказано, что это использовалось.</item>
+        <item>Не разрешайте «Установку неизвестных приложений» приложениям, которым не доверяете.</item>
+    </string-array>
+    <string-array name="risk_all_files">
+        <item>Доступ ко всем файлам</item>
+        <item>Приложение может читать и изменять все файлы в хранилище, включая фото и документы.</item>
+        <item>Обычно для файловых менеджеров, антивирусов и средств резервного копирования.</item>
+        <item>Не доказано, что файлы покидают устройство.</item>
+        <item>Отзовите «Доступ ко всем файлам», если приложение не управляет файлами.</item>
+    </string-array>
+    <string-array name="risk_cleartext">
+        <item>Разрешён незашифрованный трафик</item>
+        <item>Приложение может обмениваться данными без шифрования (HTTP), поэтому другие пользователи той же сети Wi-Fi могут их прочитать.</item>
+        <item>Иногда нужно для локальных устройств, например принтеров или камер видеонаблюдения.</item>
+        <item>Не доказано, что конфиденциальные данные отправляются без шифрования.</item>
+        <item>Не входите в аккаунты и не платите через это приложение в общедоступных сетях Wi-Fi.</item>
+    </string-array>
+    <string-array name="risk_network_usage">
+        <item>Использование сетевых данных</item>
+        <item>Показывает, сколько данных приложение использовало за последние 30 дней, в том числе когда оно не было открыто.</item>
+        <item>Фоновый трафик нормален для синхронизации, мессенджеров и обновлений. Большой объём у приложения, которым вы редко пользуетесь, стоит проверить.</item>
+        <item>Эти цифры не показывают, что это были за данные и куда они ушли.</item>
+        <item>Ограничьте фоновый трафик в разделе «Настройки → Приложения → Мобильные данные», если объём выглядит странно.</item>
+    </string-array>
+    <string-array name="risk_untrusted_signer">
+        <item>Необычный сертификат подписи</item>
+        <item>Приложение подписано отладочным или совсем недавно созданным сертификатом, что типично для наспех собранных APK вне официальных магазинов.</item>
+        <item>Обычно для самостоятельно собранных приложений, тестовых сборок или объединённых .apk-файлов PackPeek.</item>
+        <item>Не доказывает, что приложение вредоносно.</item>
+        <item>Перед установкой убедитесь, что доверяете источнику файла.</item>
+    </string-array>
+    <string name="context_default_sms">Это выбранное вами приложение для SMS по умолчанию, поэтому доступ к SMS соответствует его назначению.</string>
+    <string name="context_system_app">Это встроенное системное приложение; эта возможность обычно относится к системным функциям.</string>
+    <string name="concerns">Замечания</string>
+    <string name="concerns_none">По этой проверке замечаний нет.</string>
+    <string name="concerns_disclaimer">Эти результаты не говорят, что приложение безопасно или вредоносно. Смотрите уровень признаков и раздел «Ещё не доказано».</string>
+    <string name="severity_strong">Сильный индикатор</string>
+    <string name="severity_attention">Требует внимания</string>
+    <string name="severity_info">Информация</string>
+    <plurals name="severity_strong_count">
+        <item quantity="one">%1$d сильный индикатор</item>
+        <item quantity="few">%1$d сильных индикатора</item>
+        <item quantity="many">%1$d сильных индикаторов</item>
+        <item quantity="other">%1$d сильного индикатора</item>
+    </plurals>
+    <plurals name="severity_attention_count">
+        <item quantity="one">%1$d требует внимания</item>
+        <item quantity="few">%1$d требуют внимания</item>
+        <item quantity="many">%1$d требуют внимания</item>
+        <item quantity="other">%1$d требуют внимания</item>
+    </plurals>
+    <plurals name="severity_info_count">
+        <item quantity="one">%1$d примечание</item>
+        <item quantity="few">%1$d примечания</item>
+        <item quantity="many">%1$d примечаний</item>
+        <item quantity="other">%1$d примечания</item>
+    </plurals>
+    <string name="risk_found">Что обнаружено</string>
+    <string name="risk_impact">Что это значит для вас</string>
+    <string name="risk_context">Контекст</string>
+    <string name="risk_unproven">Ещё не доказано</string>
+    <string name="risk_action">Рекомендуемое действие</string>
+    <string name="level_declared">T1 Заявлено</string>
+    <string name="level_code">T2 В коде</string>
+    <string name="level_flow">T3 Путь кода</string>
+    <string name="level_observed">T4 Наблюдается</string>
+    <string name="levels_explained">T1: указано в manifest. T2: функция найдена в коде. T3: чтение и отправка в одном пути кода; отмечено, если отслежено само значение. T4: наблюдается на этом устройстве.</string>
+    <string name="ev_permission">Запрашивает %1$s</string>
+    <string name="ev_component">Компонент %1$s</string>
+    <string name="ev_config_retrieve">Конфигурация: может читать содержимое экрана других приложений</string>
+    <string name="ev_config_gestures">Конфигурация: может выполнять нажатия и жесты</string>
+    <string name="ev_config_all_events">Конфигурация: получает все типы событий экрана</string>
+    <string name="ev_accessibility_enabled">Служба специальных возможностей ВКЛЮЧЕНА</string>
+    <string name="ev_notification_enabled">Доступ к уведомлениям ВКЛЮЧЁН</string>
+    <string name="ev_admin_active">Администратор устройства АКТИВЕН</string>
+    <string name="ev_default_sms">Выбрано приложением для SMS по умолчанию</string>
+    <string name="ev_granted">%1$s: предоставлено</string>
+    <string name="ev_overlay_allowed">Показ поверх других приложений разрешён</string>
+    <string name="ev_battery_exempt">Исключено из оптимизации батареи</string>
+    <string name="ev_sideloaded">Установлено не из магазина приложений</string>
+    <string name="ev_file">Файл APK, не установлен</string>
+    <string name="ev_no_launcher">Нет активности, отображаемой на главном экране</string>
+    <string name="ev_debug_cert">Подписано отладочным сертификатом</string>
+    <string name="ev_new_cert">Сертификат создан недавно (дней назад: %1$s)</string>
+    <string name="ev_lure_label">Заманчивое название: «%1$s»</string>
+    <string name="ev_cleartext">usesCleartextTraffic включён</string>
+    <string name="ev_network">30 дней: %1$s при открытом приложении, %2$s в фоне</string>
+    <string name="coverage">Охват проверки</string>
+    <plurals name="coverage_apks">
+        <item quantity="one">Проверен манифест %1$d APK</item>
+        <item quantity="few">Проверены манифесты %1$d APK</item>
+        <item quantity="many">Проверены манифесты %1$d APK</item>
+        <item quantity="other">Проверены манифесты %1$d APK</item>
+    </plurals>
+    <string name="coverage_unreadable">Не удалось прочитать: %1$s</string>
+    <plurals name="coverage_configs">
+        <item quantity="one">Не удалось прочитать %1$d файл конфигурации</item>
+        <item quantity="few">Не удалось прочитать %1$d файла конфигурации</item>
+        <item quantity="many">Не удалось прочитать %1$d файлов конфигурации</item>
+        <item quantity="other">Не удалось прочитать %1$d файла конфигурации</item>
+    </plurals>
+    <string name="coverage_device">Прочитано состояние устройства (включённые службы, выданные разрешения)</string>
+    <string name="coverage_file">Файл не установлен, поэтому состояние устройства недоступно</string>
+    <string name="coverage_usage_on">Использование данных прочитано через доступ к истории использования</string>
+    <string name="coverage_usage_off">Использование данных не прочитано: доступ к истории использования не разрешён</string>
+    <string name="grant_usage_access">Разрешить</string>
+    <string name="install_risk_title">Обнаружен сильный индикатор</string>
+    <string name="install_risk_body">Проверка обнаружила шаблоны, которые часто используют приложения для кражи данных:\n\n%1$s\n\nВсё равно установить?</string>
+    <string name="install_anyway">Всё равно установить</string>
+    <string name="risk_badge_ok">Нет</string>
+    <string name="risk_badge_label">замечания</string>
+    <string name="old_score_title">Прежняя оценка конфигурации</string>
+    <string name="active_on_device">Активно на этом устройстве</string>
+    <string name="active_on_device_note">Эти службы могут читать экран или уведомления либо управлять устройством. Убедитесь, что узнаёте каждое приложение.</string>
+    <string name="active_accessibility">Службы специальных возможностей</string>
+    <string name="active_notifications">Доступ к уведомлениям</string>
+    <string name="active_admins">Администраторы устройства</string>
+    <string name="active_default_sms">Приложение для SMS по умолчанию</string>
+    <string name="usage_access">Доступ к истории использования</string>
+    <string name="usage_access_on">Разрешён: использование данных по приложениям показывается как наблюдаемый признак</string>
+    <string name="usage_access_off">Не разрешён. Необязательно: показывает использование данных по приложениям (без содержимого и адресата).</string>
+    <string name="risk_analysis">Анализ рисков</string>
+    <string-array name="risk_data_theft">
+        <item>Личные данные отправляются по скрытому адресу</item>
+        <item>Собственный код приложения читает личные данные (SMS, контакты, уведомления или текст на экране) и в том же пути кода отправляет данные боту Telegram, вебхуку Discord или на публичный IP-адрес, записанный в отправляющем коде. Мошеннические приложения используют такие каналы, потому что им не нужен именованный сервер, который можно отследить.</item>
+        <item>Обычные приложения отправляют данные на свои именованные серверы, а не ботам или вебхукам. Разработчики иногда используют ботов для отчётов об ошибках, но такие боты не читают личные данные. Прямой IP — сильный индикатор только для файла или приложения из ненадёжного источника; в остальных случаях это требует внимания.</item>
+        <item></item>
+        <item>Не устанавливайте этот файл. Если он установлен: удалите его, смените пароли аккаунтов, чьи коды или сообщения оно могло прочитать, и снова включите двухэтапную проверку.</item>
+    </string-array>
+    <string-array name="risk_hidden_destination">
+        <item>Скрытый адрес назначения в коде</item>
+        <item>Код содержит адрес бота Telegram, вебхука Discord или публичный IP-адрес без доменного имени. Данные, отправленные туда, трудно связать с какой-либо компанией. Локальные адреса (домашняя сеть, само устройство) не учитываются.</item>
+        <item>Некоторые приложения используют ботов или вебхуки для оповещений либо обращаются к своим серверам по IP. Это вызывает опасения в сочетании с доступом к личным данным.</item>
+        <item></item>
+        <item>Проверьте, нужно ли приложению по его назначению обращаться к чат-сервисам или напрямую к IP-адресам. Отдавайте предпочтение приложениям известных разработчиков.</item>
+    </string-array>
+    <string-array name="risk_call_forwarding">
+        <item>Коды переадресации вызовов</item>
+        <item>Код содержит телефонные коды, которые переадресуют ваши звонки (например, **21*), или отправляет USSD-запросы. Похитители аккаунтов переадресуют звонки, чтобы голосовые одноразовые коды доходили до них, а не до вас.</item>
+        <item>Звонилки, приложения операторов и приложения для управления вызовами могут законно использовать эти коды.</item>
+        <item></item>
+        <item>Проверьте настройки переадресации (наберите *#21#). Удалите переадресацию, которую вы не настраивали, и удалите приложение, если не узнаёте его.</item>
+    </string-array>
+    <string-array name="risk_dynamic_code">
+        <item>Загружает дополнительный код</item>
+        <item>Приложение может загружать или запускать код, который не входил в проверку: скрытый DEX/APK внутри пакета, шифрующий упаковщик или загрузчик классов.</item>
+        <item>Крупные приложения используют динамическую загрузку для плагинов и обновлений, а некоторые компании защищают свой код упаковщиками.</item>
+        <item></item>
+        <item>Считайте результат этой проверки неполным для этого приложения. Будьте осторожны, если приложение к тому же получено не из магазина приложений.</item>
+    </string-array>
+    <string-array name="risk_clipboard">
+        <item>Читает буфер обмена</item>
+        <item>Приложение может читать копируемый вами текст, в том числе пароли, одноразовые коды или номера счетов.</item>
+        <item>Приложения для загрузки и обмена ссылками часто читают буфер обмена, чтобы подхватить скопированную ссылку. Начиная с Android 10, приложения могут читать его только когда они на экране, а Android 12+ показывает уведомление.</item>
+        <item></item>
+        <item>Не копируйте пароли и одноразовые коды, пока это приложение открыто.</item>
+    </string-array>
+    <string-array name="risk_web_login">
+        <item>Читает cookie WebView</item>
+        <item>Приложение читает cookie из своего встроенного браузера. Cookie могут сохранять вход в аккаунт, поэтому тот, у кого они есть, может действовать от вашего имени на этом сайте.</item>
+        <item>Приложениям, которые позволяют войти на сайт внутри приложения (например, чтобы скачать свои публикации), cookie нужны для этого сеанса.</item>
+        <item></item>
+        <item>Входите в важные аккаунты только через их официальное приложение или браузер. Если сомневаетесь, выйдите из аккаунта и смените пароль.</item>
+    </string-array>
+    <string-array name="risk_ad_sdks">
+        <item>Рекламные и аналитические SDK</item>
+        <item>Сторонний код, который показывает рекламу или измеряет, как вы пользуетесь приложением. Такие SDK могут собирать идентификаторы устройства и данные об использовании.</item>
+        <item>Очень распространены в бесплатных приложениях; обычно описаны в политике конфиденциальности приложения.</item>
+        <item>Какие данные на самом деле собирает каждый SDK, по проверке кода не видно.</item>
+        <item>Проверьте раздел «Безопасность данных» в Google Play и при желании сбросьте рекламный идентификатор в разделе «Настройки → Конфиденциальность → Реклама».</item>
+    </string-array>
+    <string-array name="risk_destinations">
+        <item>Адреса в коде</item>
+        <item>Веб-адреса, записанные в собственном коде приложения: куда оно, скорее всего, подключается.</item>
+        <item>Они есть у каждого приложения, работающего с сетью. Незнакомые домены сами по себе не подозрительны.</item>
+        <item>Обращается ли приложение к этим адресам и что отправляет, по одному коду не видно.</item>
+        <item>Обратите внимание на адреса, не связанные с разработчиком приложения, и на незашифрованный http.</item>
+    </string-array>
+    <string name="cap_sms_read">SMS</string>
+    <string name="cap_contacts">контакты</string>
+    <string name="cap_call_log">журнал звонков</string>
+    <string name="cap_clipboard">буфер обмена</string>
+    <string name="cap_notification_read">уведомления</string>
+    <string name="cap_screen_read">текст на экране</string>
+    <string name="cap_cookies">cookie входа</string>
+    <string name="cap_phone_id">номер телефона или ID устройства</string>
+    <string name="cap_accounts">аккаунты</string>
+    <string name="cap_location">местоположение</string>
+    <string name="cap_network">интернет</string>
+    <string name="cap_sms_send">SMS</string>
+    <string name="cap_telegram">Telegram-бот</string>
+    <string name="cap_discord">Discord-вебхук</string>
+    <string name="ev_code_call">Вызывает %1$s</string>
+    <string name="ev_code_string">Содержит текст %1$s</string>
+    <string name="ev_flow">Читает %1$s и отправляет в %2$s в одном пути кода (значение не отслежено)</string>
+    <string name="ev_destination">Подключается к %1$s</string>
+    <string name="ev_destination_cleartext">%1$s (незашифрованный http)</string>
+    <string name="ev_destination_ip">%1$s (IP-адрес без доменного имени)</string>
+    <string name="ev_origin_app">собственный код приложения</string>
+    <string name="ev_origin_library">библиотека: %1$s</string>
+    <string name="ev_hidden_code">Скрытый файл кода: %1$s</string>
+    <string name="ev_packer">Упаковщик кода: %1$s</string>
+    <string name="unproven_flow">Значение, прочитанное из этих данных, отслежено до вызова, который отправляет его наружу (T3). Всё ещё не доказано, что этот путь выполнялся на вашем устройстве; показать это может только наблюдение за работающим приложением.</string>
+    <string name="unproven_calls">Код вызывает нужные для этого функции (T2), но путь, отправляющий данные наружу, не найден. Нельзя исключить код, который никогда не выполняется, или код, загружаемый позже.</string>
+    <string name="unproven_none">Собственный код приложения проверен и не вызывает нужные для этого функции. Библиотеки или код, загружаемый позже, всё же могут это использовать.</string>
+    <string name="unproven_gaps">Часть приложения не удалось проанализировать (см. «Охват проверки»), поэтому результат по коду может быть неполным.</string>
+    <string name="evidence_strength">Самый сильный признак: %1$s</string>
+    <string name="strength_t1">указано только в манифесте</string>
+    <string name="strength_t2">код делает эти вызовы</string>
+    <string name="strength_t3">чтение и отправка в одном пути кода</string>
+    <string name="strength_t4">наблюдается на этом устройстве</string>
+    <string name="coverage_code">Проанализирован код (DEX): файлов DEX: %1$d, классов: %2$d, из них в собственном коде приложения: %3$d</string>
+    <string name="coverage_code_failed">Не удалось проанализировать код приложения (DEX)</string>
+    <string name="coverage_gap_hidden">Скрытый код не проанализирован: %1$s</string>
+    <string name="coverage_gap_packer">Код защищён упаковщиком (%1$s); настоящий код зашифрован</string>
+    <string name="coverage_gap_cross">Логика %1$s выполняется вне DEX и не анализируется</string>
+    <string name="coverage_gap_unreadable">Не удалось прочитать код в %1$s</string>
+    <string name="coverage_gap_limit">Анализ кода остановлен по ограничению времени или размера; результаты неполные</string>
+    <string name="coverage_gap_tracking">Отслеживанию значений не хватило времени; возможности и адреса полные, но часть путей данных не отмечена как отслеженная</string>
+    <string name="find_target_body">Целевой SDK ниже API 31 (Android 12). Некоторые новые механизмы защиты могут не действовать.</string>
+    <string name="find_exported_body">Включённые экспортируемые компоненты без разрешения компонента: %1$d. Точки входа лаунчера не учитываются.</string>
+    <string name="format_explanation">Обычные приложения всегда сохраняются как .apk. Разделённые приложения сохраняются в выбранном выше формате. К существующим именам добавляется номер.</string>
+    <string name="report_share_quick">Поделиться отчётом с доказательствами (PDF)</string>
+    <string name="ev_flow_traced">Значение «%1$s» отслежено до вызова, который отправляет в %2$s</string>
+    <string name="unproven_flow_untraced">Чтение этих данных и отправка происходят в одном пути кода (T3), но прочитанное значение не отслежено до отправляемого, поэтому они могут быть не связаны. Что именно отправляется, может показать только наблюдение за работающим приложением.</string>
+    <string name="install_fail_no_result">Android не сообщил результат этой установки. Проверьте, установлено ли приложение, и попробуйте снова.</string>
+    <string name="ready_target_min">• Целевой API %1$d; эта версия Android отклоняет новые приложения с API ниже %2$d.</string>
+    <string-array name="risk_shell_command">
+        <item>Выполняет команды оболочки</item>
+        <item>Код запускает системные команды (Runtime.exec или ProcessBuilder). Команды могут читать сведения об устройстве или журналы, а на устройстве с root — гораздо больше.</item>
+        <item>Средства отчётов о сбоях и SDK сведений об устройстве часто запускают безобидные команды вроде getprop или logcat. Важнее всего, когда это делает собственный код приложения.</item>
+        <item></item>
+        <item>Проверьте, нужно ли это приложению для его задачи. Будьте осторожны, если оно также просит root-доступ или получено не из магазина приложений.</item>
+    </string-array>
+    <string name="strength_t3_traced">значение отслежено от чтения до отправки</string>
+    <string name="ev_flow_traced_to">Значение «%1$s» отслежено до вызова, который отправляет в %2$s, адрес: %3$s</string>
+    <string name="chain_destination">Отправляется на: %1$s</string>
+    <string name="ev_flow_traced_to_any">Значение «%1$s» отслежено до вызова, который отправляет в %2$s. Этот вызов обслуживает несколько адресов; значение уходит на один из: %3$s</string>
+    <string name="chain_destination_any">Отправляется на один из: %1$s</string>
+    <string name="more_hosts">и другие</string>
+    <string name="analysis_progress_title">Проверка приложения</string>
+    <string name="analysis_stage_manifest">Чтение манифеста и сертификата</string>
+    <string name="analysis_stage_code">Чтение кода: файл %1$d из %2$d</string>
+    <string name="analysis_stage_resolving">Отслеживание данных в коде</string>
+    <string name="security_paused">Пауза: проверено %1$d из %2$d приложений. Результаты сохранены, продолжить можно в любой момент.</string>
+    <string name="chart_title">Результаты проверки</string>
+    <string name="chart_clear">Без важных находок</string>
+    <string name="chart_unchecked">Ещё не проверено</string>
+    <string name="chart_center">проверено</string>
+    <string name="chart_description">%1$d с сильными признаками, %2$d требуют внимания, %3$d без важных находок, %4$d ещё не проверено</string>
+</resources>

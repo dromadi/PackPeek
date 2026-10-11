@@ -18,7 +18,8 @@ class MainActivity : AppCompatActivity() {
     private val inbound = MutableStateFlow<Uri?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        // Keep the splash until settings load, instead of a blank screen with a spinner.
+        installSplashScreen().setKeepOnScreenCondition { viewModel.settings.value == null }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         if (savedInstanceState == null && intent?.action == Intent.ACTION_VIEW)
@@ -27,11 +28,6 @@ class MainActivity : AppCompatActivity() {
             val incoming by inbound.collectAsStateWithLifecycle()
             PackPeekRoot(viewModel, incoming) { inbound.value = null }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.refresh()
     }
 
     override fun onNewIntent(intent: Intent) {

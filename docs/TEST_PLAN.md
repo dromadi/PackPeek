@@ -1,5 +1,60 @@
 # Uji penerimaan perangkat
 
+## Tiga lapis pengujian
+
+Emulator tanpa akselerasi hardware (mesin build tanpa `/dev/kvm`) berjalan 10–20× lebih lambat dari HP. Karena itu pengujian dibagi menjadi tiga lapis, dari yang tercepat.
+
+| Lapis | Perintah | Waktu | Untuk |
+|---|---|---|---|
+| **1. Unit test (JVM)** | `./gradlew :app:testDebugUnitTest` | ±1 menit | Parser, aturan risiko, pemindai DEX, prune |
+| **2. Render layar (JVM, Robolectric)** | `./gradlew :app:testDebugUnitTest --tests '*ScreenRenderTest*'` → `app/build/screenshots/*.png` | ±12 detik untuk 6 layar | Tata letak terang/gelap, bahasa Indonesia, huruf besar, tanpa emulator |
+| **3. Emulator atau HP** | `tools/emulator/emu.sh` | menit | Hal yang butuh Android sungguhan: PackageManager, SAF, pemasangan, WorkManager |
+
+`tools/emulator/emu.sh` mempercepat lapis 3:
+- **boot dari snapshot**: di mesin tanpa KVM, 146 detik turun menjadi 31 detik;
+- animasi dimatikan;
+- dialog "isn't responding" ditutup otomatis;
+- **menunggu teks** (`emu.sh wait "Overview"`) dan **mengetuk berdasarkan teks** (`emu.sh tap "Check 10 apps"`), bukan `sleep` dan koordinat.
+
+```bash
+export ANDROID_HOME=/path/to/sdk
+tools/emulator/emu.sh start t26      # boot pertama: cold boot
+tools/emulator/emu.sh save           # simpan snapshot "ready" sekali
+tools/emulator/emu.sh install app/build/outputs/apk/debug/app-debug.apk
+tools/emulator/emu.sh launch com.packpeek.app.debug
+tools/emulator/emu.sh wait "Overview" && tools/emulator/emu.sh tap "Overview"
+tools/emulator/emu.sh shot overview.png
+```
+
+### Emulator di GitHub (Android 16, dengan akselerasi)
+
+Runner Linux GitHub Actions memiliki KVM, jadi emulator **Android 16 (API 36)** berjalan cepat di sana. Workflow `.github/workflows/emulator.yml` memasang PackPeek, menjalankan `tools/emulator/scenario.sh`, lalu menerbitkan hasilnya.
+
+**Kapan berjalan:** repo ini privat, jadi workflow hanya jalan bila diminta, agar kuota menit Actions hemat. Satu kali uji kira-kira 10–15 menit.
+- Commit yang pesannya mengandung **`[emulator]`** akan diuji di API 36.
+- Atau buka tab **Actions → Emulator test → Run workflow**, lalu pilih versi Android (36, 35, 34, 30, 26). Tombol ini baru muncul setelah workflow ada di branch `main`.
+
+**Melihat hasil dari HP:**
+- Buka branch **`emulator-results`** di GitHub, lalu `README.md`. Isinya daftar uji, yang terbaru di atas.
+- Ketuk salah satu uji untuk membuka `SUMMARY.md`. Halaman itu menampilkan tabel langkah (✅/❌) diikuti semua screenshot.
+- Hasil yang sama juga tersedia sebagai artifact zip di halaman run Actions.
+
+**Isi skenario:**
+1. Pasang aplikasi, lewati onboarding.
+2. Daftar aplikasi.
+3. Ringkasan → **Periksa aplikasimu**, tunggu sampai selesai, lalu ambil screenshot hasil dan Analisis aplikasi.
+4. Buka `undangan-sim.apk` lewat **Periksa berkas** (sampel tidak berbahaya). Langkah ini tidak wajib, karena tampilan pemilih berkas berbeda antarversi Android.
+5. Periksa apakah terjadi crash.
+
+Skenario yang sama bisa dijalankan pada emulator lokal:
+
+```bash
+tools/emulator/emu.sh start t26
+tools/emulator/scenario.sh app/build/outputs/apk/debug/app-debug.apk tools/undangan-sim/undangan-sim.apk hasil/
+```
+
+## Skenario
+
 Jalankan pada API 24, 29, 33, 34, 36 dan minimal satu HP fisik. Belum dinyatakan lulus hanya karena build berhasil. Catat perangkat, API, ABI, bahasa, hasil dan logcat.
 
 | Skenario | Hasil yang diharapkan |

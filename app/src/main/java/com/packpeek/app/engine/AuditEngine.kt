@@ -94,6 +94,7 @@ class AuditEngine(private val apps: AppRepository) {
                     PackageManager.GET_SERVICES or
                     PackageManager.GET_RECEIVERS or
                     PackageManager.GET_PROVIDERS or
+                    PackageManager.GET_CONFIGURATIONS or
                     signFlags
             val p =
                 if (app.fromFile)
@@ -196,6 +197,7 @@ class AuditEngine(private val apps: AppRepository) {
                                 digest(c.encoded, "MD5"),
                                 c.serialNumber.toString(16),
                                 runCatching { c.checkValidity() }.isFailure,
+                                c.notBefore.time,
                             )
                         }
                             .getOrNull()
@@ -225,9 +227,20 @@ class AuditEngine(private val apps: AppRepository) {
                     add(Finding(FindingCode.BACKUP))
                 if (info.flags and ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC != 0)
                     add(Finding(FindingCode.CLEARTEXT))
-                if (app.targetSdk < Build.VERSION.SDK_INT - 5) add(Finding(FindingCode.OLD_TARGET))
+                if (isOldTarget(app.targetSdk)) add(Finding(FindingCode.OLD_TARGET))
+                // Launcher entry points must be exported; counting them flags nearly every app.
+                val launchers =
+                    if (app.fromFile)
+                        runCatching { ManifestRoot.launcherActivities(File(app.basePath)) }
+                            .getOrDefault(emptySet())
+                    else apps.launcherActivities(app.packageName)
                 components
-                    .count { it.exported && it.permission.isBlank() && it.enabled }
+                    .count {
+                        it.exported &&
+                            it.permission.isBlank() &&
+                            it.enabled &&
+                            !(it.kind == "ACTIVITY" && it.name in launchers)
+                    }
                     .takeIf { it > 0 }
                     ?.let { add(Finding(FindingCode.EXPORTED, it)) }
                 permissions
@@ -239,14 +252,23 @@ class AuditEngine(private val apps: AppRepository) {
                     add(Finding(FindingCode.DEBUG_CERT))
             }
             val tech = technology(app)
-            val match =
+            val installed =
                 if (app.fromFile)
-                    runCatching {
-                            currentSigners(apps.packageInfo(app.packageName, signFlags)) ==
-                                currentSigners(p)
-                        }
-                        .getOrNull()
+                    runCatching { apps.packageInfo(app.packageName, signFlags) }.getOrNull()
                 else null
+            val match = installed?.let { currentSigners(it) == currentSigners(p) }
+            val missingFeatures =
+                if (app.fromFile)
+                    p.reqFeatures
+                        .orEmpty()
+                        .filter {
+                            it.name != null &&
+                                it.flags and FeatureInfo.FLAG_REQUIRED != 0 &&
+                                !apps.pm.hasSystemFeature(it.name)
+                        }
+                        .map { it.name }
+                        .distinct()
+                else emptyList()
             AuditReport(
                 permissions,
                 components,
@@ -258,6 +280,11 @@ class AuditEngine(private val apps: AppRepository) {
                 tech.abis,
                 tech.libraries,
                 match,
+                installed?.versionName,
+                installed?.let {
+                    if (Build.VERSION.SDK_INT >= 28) it.longVersionCode else it.versionCode.toLong()
+                },
+                missingFeatures,
             )
         }
 

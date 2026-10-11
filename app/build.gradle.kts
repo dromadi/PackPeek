@@ -11,7 +11,22 @@ val signingFile = rootProject.file("keystore.properties")
 val signing =
     Properties().apply { if (signingFile.exists()) signingFile.inputStream().use { load(it) } }
 
+val robolectricRuntime: Configuration by configurations.creating
+
 android {
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all { test ->
+            test.systemProperty("robolectric.graphicsMode", "NATIVE")
+            // Robolectric's Android framework jar comes through Gradle (cached, mirrored) instead
+            // of Robolectric's own downloader, so screen renders also work offline.
+            test.inputs.files(robolectricRuntime)
+            test.doFirst {
+                test.systemProperty("robolectric.offline", "true")
+                test.systemProperty("robolectric.dependency.dir", robolectricRuntime.singleFile.parentFile.absolutePath)
+            }
+        }
+    }
     namespace = "com.packpeek.app"
     compileSdk = 36
     buildToolsVersion = "36.0.0"
@@ -19,8 +34,8 @@ android {
         applicationId = "com.packpeek.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 20001
-        versionName = "2.0.0-alpha.1"
+        versionCode = 20020
+        versionName = "2.0.0-alpha.20"
         buildConfigField("boolean", "SHOW_RATE", "false")
         buildConfigField("String", "SUPPORT_EMAIL", "\"\"")
     }
@@ -58,7 +73,11 @@ android {
     }
     packaging {
         resources.excludes +=
-            setOf("META-INF/DEPENDENCIES", "META-INF/LICENSE*", "META-INF/NOTICE*")
+            setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE*",
+                "META-INF/NOTICE*",
+            )
     }
     lint {
         abortOnError = true
@@ -69,6 +88,19 @@ android {
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
 
 kapt { arguments { arg("room.schemaLocation", "$projectDir/schemas") } }
+
+// ARSCLib ships desktop copies of android.* and org.xmlpull.* classes. Android provides the real
+// ones, and R8 would otherwise optimise app code against the copies (AbstractMethodError at
+// startup). Its framework tables are only needed for decoding, which merging does not do.
+val arscLib by configurations.creating
+val filteredArscLib =
+    tasks.register<Jar>("filteredArscLib") {
+        archiveFileName.set("arsclib-filtered.jar")
+        destinationDirectory.set(layout.buildDirectory.dir("libs"))
+        from({ arscLib.map { zipTree(it) } }) {
+            exclude("android/**", "org/xmlpull/**", "frameworks/**")
+        }
+    }
 
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.12.00"))
@@ -91,5 +123,14 @@ dependencies {
     implementation("androidx.documentfile:documentfile:1.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("com.android.tools.build:apksig:8.13.2")
+    arscLib("io.github.reandroid:ARSCLib:1.4.0")
+    implementation(files(filteredArscLib))
     testImplementation("junit:junit:4.13.2")
+    // Screen renders on the JVM (Robolectric native graphics): checks the UI without an emulator.
+    testImplementation("org.robolectric:robolectric:4.17")
+    // Framework jar for @Config(sdk = [35]) with Robolectric 4.17.
+    robolectricRuntime("org.robolectric:android-all-instrumented:15-robolectric-13954326-i7") { isTransitive = false }
+    testImplementation(platform("androidx.compose:compose-bom:2025.12.00"))
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

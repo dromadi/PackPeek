@@ -8,6 +8,8 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +19,7 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.packpeek.app.BuildConfig
 import com.packpeek.app.R
@@ -27,6 +30,11 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val s = settings ?: return
     val c = LocalContext.current
+    val usageAccess by vm.usageAccess.collectAsStateWithLifecycle()
+    LifecycleResumeEffect(Unit) {
+        vm.refreshDeviceState()
+        onPauseOrDispose {}
+    }
     val sample =
         AppRecord(
             "com.example.app",
@@ -45,59 +53,124 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
             0,
         )
     LazyColumn(
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item { Text(stringResource(R.string.backups), style = MaterialTheme.typography.titleLarge) }
-        item { InfoRow(stringResource(R.string.backup_folder), folderName(c, s.folder), folder) }
         item {
-            ToggleSetting(stringResource(R.string.confirm_each_time), s.confirm) {
-                vm.flag("confirm", it)
+            RowGroup(title = stringResource(R.string.backups)) {
+                ActionRow(
+                    stringResource(R.string.backup_folder),
+                    folderName(c, s.folder),
+                    PackIcons.Folder,
+                    onClick = folder,
+                )
+                GroupDivider()
+                ChoiceRow(
+                    stringResource(R.string.split_format),
+                    s.naming.split.name,
+                    listOf(
+                        SplitFormat.APKS.name to R.string.split_format_apks,
+                        SplitFormat.XAPK.name to R.string.split_format_xapk,
+                        SplitFormat.ZIP.name to R.string.split_format_zip,
+                        SplitFormat.APK.name to R.string.split_format_apk,
+                    ),
+                    PackIcons.Layers,
+                ) {
+                    vm.text("split_format", it)
+                }
+                if (s.naming.split == SplitFormat.APK)
+                    Text(
+                        stringResource(R.string.merged_apk_warning),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(start = 56.dp, end = 16.dp, bottom = 12.dp),
+                    )
+                GroupDivider()
+                ChoiceRow(
+                    stringResource(R.string.keep_versions),
+                    s.keep.toString(),
+                    listOf(
+                        "0" to R.string.keep_all,
+                        "1" to R.string.keep_1,
+                        "3" to R.string.keep_3,
+                        "5" to R.string.keep_5,
+                    ),
+                    PackIcons.History,
+                    supporting =
+                        if (s.keep > 0) stringResource(R.string.keep_versions_explanation)
+                        else null,
+                ) {
+                    vm.number("keep", it.toInt())
+                }
+                GroupDivider()
+                SwitchRow(
+                    stringResource(R.string.confirm_each_time),
+                    s.confirm,
+                    icon = Icons.Rounded.CheckCircle,
+                ) {
+                    vm.flag("confirm", it)
+                }
             }
         }
         item {
-            Text(
-                stringResource(R.string.filename_parts),
-                style = MaterialTheme.typography.titleMedium,
-            )
-        }
-        item {
-            ToggleSetting(stringResource(R.string.app_label), s.naming.name) { vm.flag("name", it) }
-            ToggleSetting(stringResource(R.string.package_name), s.naming.pkg) {
-                vm.flag("pkg", it)
-            }
-            ToggleSetting(stringResource(R.string.version), s.naming.version) {
-                vm.flag("version", it)
-            }
-            ToggleSetting(stringResource(R.string.version_code), s.naming.code) {
-                vm.flag("code", it)
+            RowGroup(title = stringResource(R.string.risk_analysis)) {
+                ActionRow(
+                    stringResource(R.string.usage_access),
+                    stringResource(
+                        if (usageAccess) R.string.usage_access_on else R.string.usage_access_off
+                    ),
+                    PackIcons.Insights,
+                    onClick = { openUsageAccess(c) },
+                ) {
+                    Switch(checked = usageAccess, onCheckedChange = null)
+                }
             }
         }
         item {
-            InfoRow(stringResource(R.string.preview), FileNames.format(sample, s.naming))
-            Text(
-                stringResource(R.string.format_explanation),
-                style = MaterialTheme.typography.bodySmall,
-            )
+            RowGroup(title = stringResource(R.string.filename_parts)) {
+                SwitchRow(stringResource(R.string.app_label), s.naming.name) {
+                    vm.flag("name", it)
+                }
+                SwitchRow(stringResource(R.string.package_name), s.naming.pkg) {
+                    vm.flag("pkg", it)
+                }
+                SwitchRow(stringResource(R.string.version), s.naming.version) {
+                    vm.flag("version", it)
+                }
+                SwitchRow(stringResource(R.string.version_code), s.naming.code) {
+                    vm.flag("code", it)
+                }
+                GroupDivider()
+                InfoLine(stringResource(R.string.preview), FileNames.format(sample, s.naming))
+                InfoLine(
+                    stringResource(R.string.preview_split),
+                    FileNames.format(sample.copy(splitPaths = listOf("split.apk")), s.naming),
+                )
+                Text(
+                    stringResource(R.string.format_explanation),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                )
+            }
         }
         item {
-            HorizontalDivider()
-            Text(stringResource(R.string.appearance), style = MaterialTheme.typography.titleLarge)
-        }
-        item {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ChoiceMenu(
+            RowGroup(title = stringResource(R.string.appearance)) {
+                ChoiceRow(
                     stringResource(R.string.theme),
                     s.theme,
                     listOf(
                         "SYSTEM" to R.string.follow_system,
                         "LIGHT" to R.string.light_theme,
                         "DARK" to R.string.dark_theme,
+                        "AMOLED" to R.string.amoled_theme,
                     ),
+                    PackIcons.Palette,
                 ) {
                     vm.text("theme", it)
                 }
-                ChoiceMenu(
+                GroupDivider()
+                ChoiceRow(
                     stringResource(R.string.accent),
                     s.accent,
                     listOf(
@@ -109,42 +182,67 @@ fun SettingsScreen(vm: MainViewModel, folder: () -> Unit, about: () -> Unit) {
                         "RED" to R.string.red,
                         "GRAY" to R.string.gray,
                     ),
+                    PackIcons.Tune,
                 ) {
                     vm.text("accent", it)
                 }
-                ChoiceMenu(
+                GroupDivider()
+                ChoiceRow(
+                    stringResource(R.string.tap_opens),
+                    s.tap,
+                    listOf("FULL" to R.string.full_details, "QUICK" to R.string.quick_details),
+                    PackIcons.Apps,
+                ) {
+                    vm.text("tap", it)
+                }
+                GroupDivider()
+                ChoiceRow(
                     stringResource(R.string.language),
                     AppCompatDelegate.getApplicationLocales().toLanguageTags(),
                     listOf(
                         "" to R.string.follow_system,
                         "en" to R.string.english,
                         "id" to R.string.indonesian,
+                        "es" to R.string.spanish,
+                        "pt-BR" to R.string.portuguese_br,
+                        "ru" to R.string.russian,
+                        "hi" to R.string.hindi,
+                        "vi" to R.string.vietnamese,
+                        "tr" to R.string.turkish,
                     ),
+                    PackIcons.Language,
                 ) {
                     AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(it))
                 }
             }
         }
         item {
-            HorizontalDivider()
-            InfoRow(stringResource(R.string.about), "PackPeek ${BuildConfig.VERSION_NAME}", about)
+            var editing by remember { mutableStateOf(false) }
+            RowGroup(title = stringResource(R.string.section_lookup)) {
+                ActionRow(
+                    stringResource(R.string.vt_key_title),
+                    stringResource(if (s.virusTotalKey.isBlank()) R.string.vt_key_unset else R.string.vt_key_set),
+                    PackIcons.Policy,
+                    onClick = { editing = true },
+                )
+            }
+            if (editing) ApiKeyDialog(s.virusTotalKey, { editing = false }) { vm.text("vt_key", it.trim()) }
         }
         item {
-            Text(stringResource(R.string.privacy_local))
+            RowGroup {
+                ActionRow(
+                    stringResource(R.string.about),
+                    "PackPeek ${BuildConfig.VERSION_NAME}",
+                    Icons.Rounded.Info,
+                    onClick = about,
+                )
+            }
             Text(
-                stringResource(R.string.backup_disclaimer),
+                stringResource(R.string.privacy_local),
                 style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp),
             )
-        }
-    }
-}
-
-@Composable
-private fun ToggleSetting(label: String, value: Boolean, onChange: (Boolean) -> Unit) {
-    Surface(onClick = { onChange(!value) }, modifier = Modifier.fillMaxWidth()) {
-        Row(Modifier.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(label, Modifier.weight(1f))
-            Switch(checked = value, onCheckedChange = null)
         }
     }
 }
@@ -156,88 +254,122 @@ fun AboutScreen() {
     var licenses by remember { mutableStateOf(false) }
     val diagnosis =
         "PackPeek ${BuildConfig.VERSION_NAME}\nAndroid ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})\n${Build.MANUFACTURER} ${Build.MODEL}\n${Build.SUPPORTED_ABIS.joinToString()}"
+    val feedback = {
+        if (BuildConfig.SUPPORT_EMAIL.isNotBlank())
+            c.launchSafe(
+                Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:${BuildConfig.SUPPORT_EMAIL}"))
+                    .putExtra(Intent.EXTRA_SUBJECT, resources.getString(R.string.send_feedback))
+                    .putExtra(Intent.EXTRA_TEXT, diagnosis)
+            )
+        else c.copyText(diagnosis)
+    }
     LazyColumn(
-        contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.displaySmall)
-            Text(
-                BuildConfig.VERSION_NAME,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
-        item {
-            Text(stringResource(R.string.about_body))
-            Text(stringResource(R.string.alpha_notice), style = MaterialTheme.typography.bodySmall)
-        }
-        item { InfoRow(stringResource(R.string.privacy), stringResource(R.string.privacy_local)) }
-        item {
-            Button(
-                onClick = {
-                    if (BuildConfig.SUPPORT_EMAIL.isNotBlank())
-                        c.launchSafe(
-                            Intent(
-                                    Intent.ACTION_SENDTO,
-                                    Uri.parse("mailto:${BuildConfig.SUPPORT_EMAIL}"),
-                                )
-                                .putExtra(
-                                    Intent.EXTRA_SUBJECT,
-                                    resources.getString(R.string.send_feedback),
-                                )
-                                .putExtra(Intent.EXTRA_TEXT, diagnosis)
-                        )
-                    else c.copyText(diagnosis)
-                }
+            Column(
+                Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                Surface(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.size(80.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            PackIcons.Inventory2,
+                            null,
+                            Modifier.size(40.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    }
+                }
                 Text(
-                    stringResource(
-                        if (BuildConfig.SUPPORT_EMAIL.isBlank()) R.string.copy_diagnostics
-                        else R.string.send_feedback
-                    )
+                    stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+                Text(
+                    BuildConfig.VERSION_NAME,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
         }
         item {
-            OutlinedButton(
-                onClick = {
-                    c.launchSafe(
-                        Intent.createChooser(
-                            Intent(Intent.ACTION_SEND)
-                                .setType("text/plain")
-                                .putExtra(
-                                    Intent.EXTRA_TEXT,
-                                    resources.getString(R.string.share_app_text),
-                                ),
-                            resources.getString(R.string.share),
-                        )
-                    )
-                }
-            ) {
-                Text(stringResource(R.string.share_app))
+            RowGroup {
+                Text(
+                    stringResource(R.string.about_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp),
+                )
+                Text(
+                    stringResource(R.string.alpha_notice),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                )
             }
         }
-        if (BuildConfig.SHOW_RATE)
-            item {
-                OutlinedButton(
+        item {
+            RowGroup {
+                ActionRow(
+                    stringResource(R.string.privacy),
+                    stringResource(R.string.privacy_local),
+                    PackIcons.Shield,
+                )
+                GroupDivider()
+                ActionRow(
+                    stringResource(
+                        if (BuildConfig.SUPPORT_EMAIL.isBlank()) R.string.copy_diagnostics
+                        else R.string.send_feedback
+                    ),
+                    icon = Icons.Rounded.Email,
+                    onClick = feedback,
+                )
+                GroupDivider()
+                ActionRow(
+                    stringResource(R.string.share_app),
+                    icon = Icons.Rounded.Share,
                     onClick = {
                         c.launchSafe(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse(
-                                    "https://play.google.com/store/apps/details?id=com.packpeek.app"
-                                ),
+                            Intent.createChooser(
+                                Intent(Intent.ACTION_SEND)
+                                    .setType("text/plain")
+                                    .putExtra(
+                                        Intent.EXTRA_TEXT,
+                                        resources.getString(R.string.share_app_text),
+                                    ),
+                                resources.getString(R.string.share),
                             )
                         )
-                    }
-                ) {
-                    Text(stringResource(R.string.rate_app))
+                    },
+                )
+                if (BuildConfig.SHOW_RATE) {
+                    GroupDivider()
+                    ActionRow(
+                        stringResource(R.string.rate_app),
+                        icon = Icons.Rounded.Star,
+                        onClick = {
+                            c.launchSafe(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse(
+                                        "https://play.google.com/store/apps/details?id=com.packpeek.app"
+                                    ),
+                                )
+                            )
+                        },
+                    )
                 }
-            }
-        item {
-            TextButton(onClick = { licenses = !licenses }) {
-                Text(stringResource(R.string.licenses))
+                GroupDivider()
+                ActionRow(
+                    stringResource(R.string.licenses),
+                    icon = Icons.Rounded.Info,
+                    onClick = { licenses = !licenses },
+                )
             }
         }
         if (licenses)
@@ -248,4 +380,34 @@ fun AboutScreen() {
                 )
             }
     }
+}
+
+@Composable
+private fun ApiKeyDialog(current: String, close: () -> Unit, save: (String) -> Unit) {
+    var value by remember { mutableStateOf(current) }
+    AlertDialog(
+        onDismissRequest = close,
+        title = { Text(stringResource(R.string.vt_key_title)) },
+        text = {
+            Column {
+                Text(stringResource(R.string.vt_key_note), style = MaterialTheme.typography.bodySmall)
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = { value = it },
+                    label = { Text(stringResource(R.string.vt_key_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { save(value); close() }) { Text(stringResource(R.string.save)) }
+        },
+        dismissButton = {
+            Row {
+                if (current.isNotBlank()) TextButton(onClick = { save(""); close() }) { Text(stringResource(R.string.remove)) }
+                TextButton(onClick = close) { Text(stringResource(R.string.cancel)) }
+            }
+        },
+    )
 }

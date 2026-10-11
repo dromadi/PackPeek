@@ -5,6 +5,7 @@ import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.packpeek.app.model.NamingConfig
+import com.packpeek.app.model.SplitFormat
 import java.io.IOException
 import kotlinx.coroutines.flow.*
 
@@ -22,6 +23,13 @@ data class Settings(
     val onboarding: Boolean = false,
     val sort: String = "NAME_ASC",
     val naming: NamingConfig = NamingConfig(),
+    val favorites: Set<String> = emptySet(),
+    /** Successful backups kept per app; 0 keeps every backup. */
+    val keep: Int = 0,
+    /** What tapping an app in the list opens: FULL details or the QUICK sheet. */
+    val tap: String = "FULL",
+    /** The user's own VirusTotal API key for the optional hash lookup; empty when not set. */
+    val virusTotalKey: String = "",
 )
 
 class SettingsRepository(context: Context) {
@@ -42,12 +50,29 @@ class SettingsRepository(context: Context) {
                         p[booleanPreferencesKey("pkg")] ?: false,
                         p[booleanPreferencesKey("version")] ?: true,
                         p[booleanPreferencesKey("code")] ?: false,
+                        SplitFormat.of(p[stringPreferencesKey("split_format")]),
                     ),
+                    p[stringSetPreferencesKey("favorites")] ?: emptySet(),
+                    p[intPreferencesKey("keep")] ?: 0,
+                    p[stringPreferencesKey("tap")] ?: "FULL",
+                    p[stringPreferencesKey("vt_key")] ?: "",
                 )
             }
 
     suspend fun text(key: String, value: String) {
         store.edit { it[stringPreferencesKey(key)] = value }
+    }
+
+    suspend fun number(key: String, value: Int) {
+        store.edit { it[intPreferencesKey(key)] = value }
+    }
+
+    suspend fun toggleFavorite(pkg: String) {
+        store.edit {
+            val key = stringSetPreferencesKey("favorites")
+            val now = it[key] ?: emptySet()
+            it[key] = if (pkg in now) now - pkg else now + pkg
+        }
     }
 
     suspend fun flag(key: String, value: Boolean) {

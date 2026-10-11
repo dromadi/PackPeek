@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="crash_title">पिछली बार PackPeek बंद हो गया था</string>
+    <string name="crash_body">गड़बड़ी का विवरण सिर्फ़ इसी डिवाइस पर सेव है। इसे कॉपी करके डेवलपर को भेजें।</string>
+    <string name="crash_copy">एरर लॉग कॉपी करें</string>
+    <string name="split_format">Split ऐप फ़ॉर्मैट</string>
+    <string name="split_format_apks">.apks (SAI, PackPeek)</string>
+    <string name="split_format_xapk">.xapk (APKPure, XAPK इंस्टॉलर)</string>
+    <string name="split_format_zip">.zip (सामान्य आर्काइव)</string>
+    <string name="preview_split">Split ऐप्स के लिए पूर्वावलोकन</string>
+    <string name="split_format_apk">.apk मर्ज किया हुआ (प्रायोगिक)</string>
+    <string name="merged_apk_warning">⚠ मर्ज किया गया .apk PackPeek की कुंजी से दोबारा साइन होता है: यह मूल ऐप को अपडेट नहीं कर सकता (पहले अनइंस्टॉल करें, उसका डेटा मिट जाएगा), Play Store इसे अपडेट नहीं करेगा, कुछ ऐप्स (बैंकिंग, गेम, Meta) चलने से मना कर देते हैं, और इसमें सिर्फ़ इस डिवाइस के लिए ज़रूरी हिस्से होते हैं।</string>
+    <string name="error_merge">Split APK मर्ज नहीं हो सके। ऐप बहुत बड़ा या असमर्थित हो सकता है; इसकी जगह .apks, .xapk या .zip चुनें।</string>
+    <string name="folder_root">%1$s स्टोरेज</string>
+    <string name="folder_selected">चुना गया फ़ोल्डर</string>
+    <string name="favorite_apps">पसंदीदा</string>
+    <string name="favorite">पसंदीदा में जोड़ें</string>
+    <string name="unfavorite">पसंदीदा से हटाएँ</string>
+    <string name="signer_changed_title">सिग्नेचर बदल गया</string>
+    <string name="signer_changed_body">यह ऐप अब वर्शन %1$s (%2$s) के आपके बैकअप से अलग सर्टिफ़िकेट से साइन है। ऐसा तब होता है जब डेवलपर कुंजी बदलता है, लेकिन इसका मतलब बदला हुआ या नकली बिल्ड भी हो सकता है। देखें कि इसे कहाँ से इंस्टॉल किया गया था।</string>
+    <string name="signer_changed_badge">⚠ साइनर पिछले बैकअप से अलग है</string>
+    <string name="reinstall">फिर से इंस्टॉल करें</string>
+    <string name="keep_versions">हर ऐप के बैकअप</string>
+    <string name="keep_all">सभी रखें</string>
+    <string name="keep_1">सबसे नया 1</string>
+    <string name="keep_3">सबसे नए 3</string>
+    <string name="keep_5">सबसे नए 5</string>
+    <string name="keep_versions_explanation">हर सफल बैकअप के बाद, इस संख्या से ज़्यादा पुरानी उसी ऐप की बैकअप फ़ाइलें फ़ोल्डर से मिटा दी जाती हैं।</string>
+    <string name="internal_storage">इंटरनल स्टोरेज</string>
+    <string name="no_folder_hint">बैकअप के लिए एक फ़ोल्डर चुनें</string>
+    <string name="choose">चुनें</string>
+    <string name="selected_count">%1$d चुने गए</string>
+    <string name="clear_selection_short">चयन हटाएँ</string>
+    <string name="tag_split">Split</string>
+    <string name="tag_system">सिस्टम</string>
+    <string name="backup_progress">ऐप %1$d / %2$d · %3$d%%</string>
+    <string name="dont_ask_again">दोबारा न पूछें</string>
+    <string name="backup_done">बैकअप पूरा हुआ</string>
+    <string name="backup_partial">बैकअप कुछ गड़बड़ियों के साथ पूरा हुआ</string>
+    <string name="result_summary">%2$d में से %1$d सेव हुए · %3$s</string>
+    <string name="app_info">ऐप की जानकारी</string>
+    <string name="score_short">स्कोर</string>
+    <string name="history_empty_title">अभी कोई बैकअप नहीं</string>
+    <string name="history_empty_body">ऐप्स टैब से कोई ऐप निकालें; उसके वर्शन यहाँ दिखेंगे।</string>
+    <string name="search_apps_short">ऐप्स खोजें</string>
+    <plurals name="version_count">
+        <item quantity="one">%1$d वर्शन</item>
+        <item quantity="other">%1$d वर्शन</item>
+    </plurals>
+    <plurals name="app_count_short">
+        <item quantity="one">%1$d ऐप</item>
+        <item quantity="other">%1$d ऐप्स</item>
+    </plurals>
+    <plurals name="backup_summary">
+        <item quantity="one">%1$d ऐप · %2$s</item>
+        <item quantity="other">%1$d ऐप्स · %2$s</item>
+    </plurals>
+    <string name="saved_file">सेव किया गया: %1$s</string>
+    <string name="min_android">न्यूनतम Android</string>
+    <string name="target_android">टारगेट Android</string>
+    <string name="first_installed">पहली बार इंस्टॉल</string>
+    <string name="cpu_architecture">CPU आर्किटेक्चर</string>
+    <string name="no_native_code">कोई नेटिव कोड नहीं</string>
+    <string name="show_all_groups">सभी दिखाएँ (%1$d)</string>
+    <string name="show_fewer">कम दिखाएँ</string>
+    <string name="abi_note">कई आर्किटेक्चर के लिए नेटिव कोड वाले ऐप्स हर आर्किटेक्चर में दिखते हैं।</string>
+    <string name="signer_note">एक ही कुंजी से साइन किए गए ऐप्स एक ही डेवलपर या बिल्ड सिस्टम से आते हैं। \"Android Debug\" टेस्ट बिल्ड दर्शाता है।</string>
+    <string name="show_all_apps">सभी ऐप्स दिखाएँ</string>
+    <string name="quick_details">संक्षिप्त विवरण</string>
+    <string name="full_details">पूरा विवरण</string>
+    <string name="activities">Activities</string>
+    <string name="services">Services</string>
+    <string name="receivers">Receivers</string>
+    <string name="providers">Providers</string>
+    <string name="tap_opens">ऐप पर टैप करने से खुलता है</string>
+    <string name="needs_review">समीक्षा ज़रूरी</string>
+    <string name="security_check_title">अपने ऐप्स जाँचें</string>
+    <string name="security_check_body">PackPeek आपके इंस्टॉल किए हर ऐप का मैनिफ़ेस्ट और कोड पढ़कर सबूत खोजता है: ऐप क्या कर सकता है, उसका कोड क्या कॉल करता है, और क्या डेटा किसी छिपी जगह भेजा जाता है। सब कुछ इसी फ़ोन पर होता है।</string>
+    <plurals name="security_check_button">
+        <item quantity="one">%1$d ऐप जाँचें</item>
+        <item quantity="other">%1$d ऐप्स जाँचें</item>
+    </plurals>
+    <string name="security_checking">%2$d में से %1$d की जाँच हो रही है…</string>
+    <plurals name="security_strong">
+        <item quantity="one">%1$d ऐप में मज़बूत संकेत</item>
+        <item quantity="other">%1$d ऐप्स में मज़बूत संकेत</item>
+    </plurals>
+    <plurals name="security_attention">
+        <item quantity="one">कोई मज़बूत संकेत नहीं · %1$d ऐप पर ध्यान दें</item>
+        <item quantity="other">कोई मज़बूत संकेत नहीं · %1$d ऐप्स पर ध्यान दें</item>
+    </plurals>
+    <string name="security_clear">कोई मज़बूत संकेत नहीं मिला</string>
+    <string name="security_checked">%2$d में से %1$d इंस्टॉल किए गए ऐप्स जाँचे गए (मैनिफ़ेस्ट, कोड और डिवाइस की स्थिति)। यह इस बात की गारंटी नहीं है कि कोई ऐप सुरक्षित है।</string>
+    <string name="security_continue">जारी रखें</string>
+    <string name="security_again">फिर से जाँचें</string>
+    <string name="active_all_clear">किसी भी ऐप के लिए एक्सेसिबिलिटी, नोटिफ़िकेशन एक्सेस या डिवाइस एडमिन चालू नहीं है।</string>
+    <string name="app_analysis">ऐप विश्लेषण</string>
+    <string name="tech_after_check">तकनीक की पहचान ऊपर की ऐप जाँच के दौरान होती है।</string>
+    <string name="reading_groups">सर्टिफ़िकेट और नेटिव कोड पढ़े जा रहे हैं…</string>
+    <plurals name="other_groups">
+        <item quantity="one">%1$d अन्य समूह</item>
+        <item quantity="other">%1$d अन्य समूह</item>
+    </plurals>
+    <string name="deep_button_title">गहन विश्लेषण</string>
+    <string name="deep_button_body">कोड में डेटा के रास्ते ट्रेस करें, छिपे टेक्स्ट डिकोड करें और छिपी कोड फ़ाइलें खोलें। इसमें एक मिनट तक लग सकता है।</string>
+    <string name="deep_running">कोड का विश्लेषण हो रहा है… इसमें एक मिनट तक लग सकता है।</string>
+    <string name="deep_failed">गहन विश्लेषण इस ऐप का कोड नहीं पढ़ सका।</string>
+    <string name="deep_done">%1$d सेकंड में पूरा · %2$d डेटा रास्ते · %3$d छिपे टेक्स्ट · %4$d छिपी कोड फ़ाइलें</string>
+    <string name="section_chains">डेटा के रास्ते</string>
+    <string name="chains_note">कोड पथ, जहाँ कोड डेटा पढ़ता है वहाँ से जहाँ भेजता है वहाँ तक, तीन कॉल गहराई तक ट्रैक किए गए, अन्य घटकों को सौंपना भी शामिल। पथ दिखाता है कि पढ़ना और भेजना कोड में जुड़े हैं, यह नहीं कि वही मान भेजा जाता है।</string>
+    <string name="chains_none">तीन कॉल की गहराई तक भी निजी डेटा से भेजने तक कोई रास्ता नहीं मिला।</string>
+    <string name="chain_read">%1$s से पढ़ता है</string>
+    <string name="chain_send">%1$s से भेजता है</string>
+    <string name="via_start">यहाँ से शुरू</string>
+    <string name="via_call">कॉल करता है</string>
+    <string name="via_intent">Intent के ज़रिए दूसरा कंपोनेंट शुरू करता है</string>
+    <string name="via_object">ऑब्जेक्ट के रूप में चलता है (thread या callback)</string>
+    <string name="section_decoded">छिपे टेक्स्ट</string>
+    <string name="decoded_note">कोड में सरसरी नज़र से छिपाए गए टेक्स्ट, ऐप चलाए बिना डिकोड किए गए।</string>
+    <string name="decoded_none">कोई छिपा पता या कोड नहीं मिला।</string>
+    <string name="tech_base64">Base64 से डिकोड किया गया</string>
+    <string name="tech_joined">टुकड़ों से जोड़ा गया</string>
+    <string name="tech_char_array">कैरेक्टर ऐरे से बनाया गया</string>
+    <string name="tech_xor">XOR कुंजी %1$s से डिकोड किया गया</string>
+    <string name="tech_reversed">उल्टा किया गया टेक्स्ट</string>
+    <string name="section_payloads">छिपा कोड</string>
+    <string name="payloads_note">पैकेज के अंदर रखी कोड फ़ाइलें, जिन्हें अक्सर ड्रॉपर बाद में लोड करते हैं; इनका विश्लेषण उन्हीं नियमों से होता है।</string>
+    <string name="payloads_none">कोई छिपी कोड फ़ाइल नहीं।</string>
+    <string name="payload_dex">छिपी DEX फ़ाइल · %1$d क्लास</string>
+    <string name="payload_archive">छिपा APK/JAR · %1$d क्लास</string>
+    <string name="payload_encrypted">एन्क्रिप्टेड लगता है (एन्ट्रॉपी %1$s बिट/बाइट); सामग्री अज्ञात</string>
+    <string name="payload_can">इसका कोड: %1$s</string>
+    <string name="payload_nothing">इसका कोड ऐसी कोई संवेदनशील कॉल नहीं करता जिसकी PackPeek जाँच करता है।</string>
+    <string name="section_code">संदिग्ध कोड</string>
+    <string name="code_note">सबूत के पीछे के मेथड की छोटी लिस्टिंग। ⚠ संवेदनशील कॉल को दर्शाता है।</string>
+    <string name="section_actions">आप क्या कर सकते हैं</string>
+    <string name="action_uninstall">अनइंस्टॉल करें</string>
+    <string name="action_app_info">ऐप की जानकारी: अनुमतियाँ वापस लें</string>
+    <string name="action_accessibility">एक्सेसिबिलिटी सेटिंग्स</string>
+    <string name="action_notification_access">नोटिफ़िकेशन एक्सेस</string>
+    <string name="action_admin">सुरक्षा सेटिंग्स (डिवाइस एडमिन)</string>
+    <string name="action_call_forwarding">कॉल फ़ॉरवर्डिंग जाँचें (*#21#)</string>
+    <string name="action_secure_accounts">अपने खाते सुरक्षित करें</string>
+    <string name="secure_accounts_body">1. ऐप दोबारा न खोलें; उसे अनइंस्टॉल करें (कहा जाए तो पहले डिवाइस एडमिन बंद करें)।\n2. WhatsApp, ईमेल, मोबाइल बैंकिंग और ई-वॉलेट के पासवर्ड बदलें, हो सके तो किसी दूसरे फ़ोन से।\n3. दो-चरणीय सत्यापन फिर से चालू करें और दूसरे डिवाइस से लॉग आउट करें।\n4. अगर OTP कोड पढ़े गए हो सकते हैं, तो अपने बैंक को उसके आधिकारिक नंबर पर कॉल करें।\n5. कॉल फ़ॉरवर्डिंग जाँचने के लिए *#21# और उसे रद्द करने के लिए ##002# डायल करें।</string>
+    <string name="action_dont_install">यह फ़ाइल इंस्टॉल न करें। इसे Downloads से और जिस चैट में मिली थी वहाँ से मिटा दें।</string>
+    <string name="section_report">सबूत रिपोर्ट</string>
+    <string name="report_note">नतीजे अपने बैंक, पुलिस, परिवार या किसी सुरक्षा टीम के साथ शेयर करें।</string>
+    <string name="report_share_text">टेक्स्ट के रूप में शेयर करें</string>
+    <string name="report_share_pdf">PDF के रूप में शेयर करें</string>
+    <string name="section_lookup">ऑनलाइन जाँच (वैकल्पिक)</string>
+    <string name="lookup_note">फ़ाइल के फ़िंगरप्रिंट (SHA-256) की तुलना VirusTotal के डेटाबेस से करता है। सिर्फ़ फ़िंगरप्रिंट भेजा जाता है, कभी फ़ाइल या आपकी ऐप सूची नहीं।</string>
+    <string name="lookup_button">फ़िंगरप्रिंट जाँचें</string>
+    <string name="lookup_browser">ब्राउज़र में खोलें</string>
+    <string name="lookup_running">जाँच हो रही है…</string>
+    <string name="lookup_no_key">यहाँ जाँच के लिए सेटिंग्स में अपनी मुफ़्त VirusTotal API कुंजी जोड़ें, या नतीजा ब्राउज़र में खोलें।</string>
+    <string name="lookup_not_found">VirusTotal ने यह फ़ाइल पहले कभी नहीं देखी। इसका मतलब यह नहीं कि यह सुरक्षित है: नए स्कैम APK अक्सर अभी अज्ञात होते हैं।</string>
+    <string name="lookup_found">%2$d में से %1$d सुरक्षा इंजन इस फ़ाइल को चिह्नित करते हैं</string>
+    <string name="lookup_suspicious">%1$d और इसे संदिग्ध बताते हैं</string>
+    <string name="lookup_label">इस नाम से ज्ञात: %1$s</string>
+    <string name="lookup_clean">कोई सुरक्षा इंजन इस फ़ाइल को चिह्नित नहीं करता (%1$d ने जाँचा)। नए स्कैम APK अक्सर अभी पकड़े नहीं जाते।</string>
+    <string name="lookup_key_error">VirusTotal ने API कुंजी अस्वीकार कर दी। सेटिंग्स में इसे जाँचें।</string>
+    <string name="lookup_quota">VirusTotal की मुफ़्त सीमा पूरी हो गई। एक मिनट बाद फिर से कोशिश करें।</string>
+    <string name="lookup_network">VirusTotal तक नहीं पहुँच सके। कनेक्शन जाँचें।</string>
+    <string name="copy_sha">SHA-256 कॉपी करें</string>
+    <string name="vt_key_title">VirusTotal API कुंजी (वैकल्पिक)</string>
+    <string name="vt_key_set">सेट है · सिर्फ़ \"फ़िंगरप्रिंट जाँचें\" टैप करने पर इस्तेमाल होती है</string>
+    <string name="vt_key_unset">सेट नहीं · virustotal.com पर मुफ़्त कुंजी पाएँ</string>
+    <string name="vt_key_hint">API कुंजी</string>
+    <string name="vt_key_note">सिर्फ़ गहन विश्लेषण की वैकल्पिक फ़िंगरप्रिंट जाँच के लिए इस्तेमाल होती है। सिर्फ़ SHA-256 भेजा जाता है।</string>
+    <string name="save">सेव करें</string>
+    <string name="remove">हटाएँ</string>
+    <string name="report_title">PackPeek सबूत रिपोर्ट</string>
+    <string name="report_created">बनाई गई: %1$s</string>
+    <string name="report_app">ऐप: %1$s (%2$s), वर्शन %3$s</string>
+    <string name="report_from_file">APK फ़ाइल के रूप में जाँचा गया; इंस्टॉल नहीं है</string>
+    <string name="report_installed">इंस्टॉल है · स्रोत: %1$s</string>
+    <string name="report_counts">%1$d मज़बूत संकेत · %2$d पर ध्यान ज़रूरी · %3$d नोट</string>
+    <string name="report_disclaimer">ये परिणाम साबित नहीं करते कि कोई ऐप हानिकारक या सुरक्षित है। सबूत के स्तर: T1 मैनिफ़ेस्ट में लिखा, T2 कोड में मिला, T3 पढ़ना और भेजना एक ही कोड पथ में (मान स्वयं ट्रैक होने पर चिह्नित), T4 इस डिवाइस पर देखा गया।</string>
+    <string name="report_findings">नतीजे</string>
+    <string name="report_deep">गहन विश्लेषण</string>
+    <string name="report_lookup">VirusTotal</string>
+    <string name="report_footer">PackPeek से इसी डिवाइस पर बनाई गई; ऐप चलाया नहीं गया।</string>
+    <string-array name="risk_otp_theft">
+        <item>OTP चोरी / खाता हथियाने का पैटर्न</item>
+        <item>ऐप SMS पा सकता है, जिनमें बैंक और WhatsApp के वन-टाइम कोड भी शामिल हैं, और इंटरनेट तक पहुँच सकता है। नकली निमंत्रण, ट्रैफ़िक चालान और पार्सल वाले APK खाते हथियाने के लिए यही मेल इस्तेमाल करते हैं।</item>
+        <item>यह पैटर्न इसलिए दिखा क्योंकि SMS एक्सेस के साथ छिपाने या अविश्वसनीय स्रोत के संकेत भी हैं (छिपा आइकन, ऐप स्टोर के बाहर से आई फ़ाइल, डीबग या बिल्कुल नया सर्टिफ़िकेट, लुभाने वाला नाम), या ऐसा कोड है जो SMS की सामग्री बाहर भेजता है, कोई छिपा गंतव्य है या कॉल फ़ॉरवर्डिंग है।</item>
+        <item>ऐप के कोड का अभी विश्लेषण नहीं हुआ है, इसलिए यह साबित नहीं है कि SMS पढ़े या कहीं भेजे जाते हैं। यह आकलन सिर्फ़ मैनिफ़ेस्ट और संदर्भ पर आधारित है।</item>
+        <item>यह फ़ाइल इंस्टॉल न करें। अगर इंस्टॉल है: SMS अनुमति वापस लें, इसे अनइंस्टॉल करें, फिर ज़रूरी खातों (WhatsApp, बैंक, ईमेल) के पासवर्ड बदलें और दो-चरणीय सत्यापन फिर से चालू करें।</item>
+    </string-array>
+    <string-array name="risk_screen_spying">
+        <item>स्क्रीन जासूसी पैटर्न</item>
+        <item>एक्सेसिबिलिटी सर्विस दूसरे ऐप्स की स्क्रीन पढ़ सकती है, जिसमें संदेश, बैलेंस और टाइप किया गया टेक्स्ट शामिल है, और ऐप इसे इंटरनेट पर भेज सकता है।</item>
+        <item>यह पैटर्न इसलिए दिखा क्योंकि स्क्रीन पढ़ने वाली एक्सेसिबिलिटी के साथ दूसरे संकेत भी हैं, जैसे छिपा आइकन, ओवरले, डिवाइस एडमिन, नोटिफ़िकेशन लिसनर या अविश्वसनीय स्रोत।</item>
+        <item>यह साबित नहीं है कि स्क्रीन की सामग्री कहीं भेजी जाती है। ऐप के कोड का अभी विश्लेषण नहीं हुआ है।</item>
+        <item>अगर आप जानबूझकर इसका इस्तेमाल नहीं करते, तो सेटिंग्स → एक्सेसिबिलिटी में इस ऐप की एक्सेसिबिलिटी सर्विस बंद करें। अगर आप इसे नहीं पहचानते, तो अनइंस्टॉल करें।</item>
+    </string-array>
+    <string-array name="risk_accessibility">
+        <item>एक्सेसिबिलिटी सर्विस</item>
+        <item>चालू होने पर यह स्क्रीन की सामग्री पढ़ सकती है और उपयोगकर्ता की ओर से टैप कर सकती है।</item>
+        <item>स्क्रीन रीडर, पासवर्ड मैनेजर, ऑटोमेशन टूल और वैकल्पिक लॉन्चर के लिए सामान्य है।</item>
+        <item>यह साबित नहीं कि स्क्रीन का डेटा डिवाइस से बाहर जाता है। कोड का अभी विश्लेषण नहीं हुआ।</item>
+        <item>इसे तभी चालू करें जब आप जानते हों कि यह किसलिए है। सेटिंग्स → एक्सेसिबिलिटी देखें।</item>
+    </string-array>
+    <string-array name="risk_notifications">
+        <item>नोटिफ़िकेशन लिसनर</item>
+        <item>चालू होने पर ऐप हर नोटिफ़िकेशन पढ़ सकता है, जिसमें संदेश का टेक्स्ट और वन-टाइम कोड भी शामिल हैं।</item>
+        <item>स्मार्टवॉच, रिमाइंडर ऐप्स और नोटिफ़िकेशन मैनेजर के लिए सामान्य है।</item>
+        <item>यह साबित नहीं कि नोटिफ़िकेशन सेव या भेजे जाते हैं।</item>
+        <item>इसकी अनुमति सिर्फ़ भरोसेमंद ऐप्स को दें। सेटिंग्स → नोटिफ़िकेशन → नोटिफ़िकेशन एक्सेस देखें।</item>
+    </string-array>
+    <string-array name="risk_device_admin">
+        <item>डिवाइस एडमिन</item>
+        <item>डिवाइस एडमिन स्क्रीन लॉक कर सकता है, स्क्रीन लॉक बदल सकता है या डेटा मिटा भी सकता है, और चालू रहते इसे अनइंस्टॉल करना मुश्किल होता है।</item>
+        <item>ऑफ़िस (MDM), फ़ाइंड-माई-डिवाइस और पैरेंटल कंट्रोल ऐप्स के लिए सामान्य है।</item>
+        <item>यह साबित नहीं कि इन नीतियों का इस्तेमाल होता है।</item>
+        <item>ज़रूरत न हो तो सेटिंग्स → सुरक्षा → डिवाइस एडमिन ऐप्स में इसे बंद करें।</item>
+    </string-array>
+    <string-array name="risk_sms">
+        <item>SMS एक्सेस</item>
+        <item>ऐप SMS पा या पढ़ सकता है, जिनमें वन-टाइम कोड भी शामिल हैं।</item>
+        <item>SMS ऐप्स, सत्यापन कोड अपने-आप भरने वाले कुछ बैंकिंग ऐप्स और स्पैम ब्लॉकर के लिए सामान्य है।</item>
+        <item>यह साबित नहीं कि SMS पढ़े या कहीं भेजे जाते हैं। कोड का अभी विश्लेषण नहीं हुआ।</item>
+        <item>अगर ऐप की सुविधाओं को SMS की ज़रूरत नहीं है, तो सेटिंग्स → ऐप्स में SMS अनुमति वापस लें।</item>
+    </string-array>
+    <string-array name="risk_sms_send">
+        <item>SMS भेजना</item>
+        <item>ऐप आपके नंबर से SMS भेज सकता है, जिससे पैसे कट सकते हैं या आपके संपर्कों तक लिंक फैल सकते हैं।</item>
+        <item>SMS ऐप्स और कुछ सत्यापन ऐप्स के लिए सामान्य है।</item>
+        <item>यह साबित नहीं कि कोई SMS भेजा गया।</item>
+        <item>ज़रूरत न हो तो SMS अनुमति वापस लें और भेजे गए संदेश जाँचें।</item>
+    </string-array>
+    <string-array name="risk_contacts_calls">
+        <item>संपर्क और कॉल इतिहास</item>
+        <item>ऐप आपकी संपर्क सूची या कॉल इतिहास पढ़ सकता है।</item>
+        <item>मैसेजिंग, फ़ोन और संपर्क बैकअप ऐप्स के लिए सामान्य है।</item>
+        <item>यह साबित नहीं कि संपर्क डेटा डिवाइस से बाहर जाता है।</item>
+        <item>अगर ऐप के उद्देश्य से इनका संबंध नहीं है, तो संपर्क या कॉल लॉग की अनुमति वापस लें।</item>
+    </string-array>
+    <string-array name="risk_phone_identity">
+        <item>फ़ोन की पहचान और खाते</item>
+        <item>ऐप फ़ोन की स्थिति, आपका नंबर या डिवाइस पर मौजूद खाते पढ़ सकता है।</item>
+        <item>कॉलिंग ऐप्स, गेम और डिवाइस पहचानने वाले एनालिटिक्स SDK में आम है।</item>
+        <item>यह साबित नहीं कि यह डेटा भेजा जाता है।</item>
+        <item>अगर ऐप कॉल नहीं करता, तो \"फ़ोन\" अनुमति वापस लें।</item>
+    </string-array>
+    <string-array name="risk_camera_mic">
+        <item>कैमरा और माइक्रोफ़ोन</item>
+        <item>अनुमति मिलने पर ऐप कैमरा इस्तेमाल कर सकता है या ऑडियो रिकॉर्ड कर सकता है।</item>
+        <item>फ़ोटो, वीडियो, कॉलिंग और QR ऐप्स के लिए सामान्य है। Android 12+ कैमरा या माइक्रोफ़ोन इस्तेमाल होने पर हरा संकेतक दिखाता है।</item>
+        <item>यह साबित नहीं कि बैकग्राउंड में रिकॉर्डिंग होती है।</item>
+        <item>कैमरा और माइक्रोफ़ोन के लिए \"सिर्फ़ ऐप इस्तेमाल करते समय\" या \"हर बार पूछें\" चुनें।</item>
+    </string-array>
+    <string-array name="risk_location">
+        <item>लोकेशन</item>
+        <item>ऐप जान सकता है कि आप कहाँ हैं; बैकग्राउंड लोकेशन के साथ, बंद होने पर भी।</item>
+        <item>मैप, राइड-हेलिंग, मौसम और फ़ाइंड-माई-डिवाइस ऐप्स के लिए सामान्य है।</item>
+        <item>यह साबित नहीं कि लोकेशन भेजी या सेव की जाती है।</item>
+        <item>जहाँ हो सके, अनुमानित लोकेशन या \"सिर्फ़ ऐप इस्तेमाल करते समय\" चुनें।</item>
+    </string-array>
+    <string-array name="risk_screen_capture">
+        <item>स्क्रीन रिकॉर्डिंग</item>
+        <item>Android का संकेत स्वीकार करने के बाद ऐप पूरी स्क्रीन रिकॉर्ड या कास्ट कर सकता है।</item>
+        <item>स्क्रीन रिकॉर्डर, मीटिंग में स्क्रीन शेयरिंग और गेम स्ट्रीमिंग के लिए सामान्य है।</item>
+        <item>रिकॉर्डिंग शुरू होने पर Android हर बार पूछता है; यह साबित नहीं कि कुछ रिकॉर्ड हुआ।</item>
+        <item>अनपेक्षित स्क्रीन रिकॉर्डिंग संकेतों को अस्वीकार करें, खासकर बैंकिंग ऐप्स खोलते समय।</item>
+    </string-array>
+    <string-array name="risk_overlay">
+        <item>दूसरे ऐप्स के ऊपर दिखाना</item>
+        <item>ऐप दूसरे ऐप्स के ऊपर विंडो बना सकता है, जिसका दुरुपयोग नकली लॉगिन स्क्रीन के लिए हो सकता है।</item>
+        <item>चैट बबल, स्क्रीन रिकॉर्डर और ब्लू-लाइट फ़िल्टर के लिए सामान्य है।</item>
+        <item>यह साबित नहीं कि यह दूसरे ऐप्स को ढकता है।</item>
+        <item>ज़रूरत न हो तो सेटिंग्स → ऐप्स → खास एक्सेस → दूसरे ऐप्स के ऊपर दिखाएँ में इसे वापस लें।</item>
+    </string-array>
+    <string-array name="risk_persistence">
+        <item>बैकग्राउंड में चलता है</item>
+        <item>फ़ोन चालू होने के बाद ऐप फिर से शुरू हो सकता है, या बैटरी ऑप्टिमाइज़ेशन से छूट पाता है।</item>
+        <item>मैसेजिंग, अलार्म और सिंक ऐप्स के लिए सामान्य है।</item>
+        <item>यह साबित नहीं कि यह लगातार चलता रहता है।</item>
+        <item>अगर ऐप को बैकग्राउंड में चलने की ज़रूरत नहीं है, तो बैटरी छूट हटा दें।</item>
+    </string-array>
+    <string-array name="risk_hidden_icon">
+        <item>होम स्क्रीन पर आइकन नहीं</item>
+        <item>ऐप, ऐप ड्रॉअर में नहीं दिखता, इसलिए इसे भूलना आसान है और अनइंस्टॉल के लिए ढूँढना मुश्किल।</item>
+        <item>कीबोर्ड, विजेट, वॉलपेपर और दूसरे ऐप्स से खुलने वाले प्लग-इन के लिए सामान्य है।</item>
+        <item>पता नहीं कि आइकन जानबूझकर छिपाया गया है या नहीं।</item>
+        <item>पक्का करें कि आप जानते हैं यह ऐप क्या है। अगर आप इसे नहीं पहचानते, तो सेटिंग्स → ऐप्स से अनइंस्टॉल करें।</item>
+    </string-array>
+    <string-array name="risk_install_apps">
+        <item>दूसरे ऐप्स इंस्टॉल करता है</item>
+        <item>ऐप दूसरे APK इंस्टॉल करने को कह सकता है, जिसका इस्तेमाल अतिरिक्त ऐप्स डाउनलोड करने में हो सकता है।</item>
+        <item>ऐप स्टोर, फ़ाइल मैनेजर, ब्राउज़र और PackPeek जैसे बैकअप टूल के लिए सामान्य है।</item>
+        <item>Android हर इंस्टॉल से पहले फिर भी पूछता है; यह साबित नहीं कि इसका इस्तेमाल हुआ।</item>
+        <item>जिन ऐप्स पर भरोसा नहीं है, उन्हें \"अज्ञात ऐप्स इंस्टॉल करें\" की अनुमति न दें।</item>
+    </string-array>
+    <string-array name="risk_all_files">
+        <item>सभी फ़ाइलों का एक्सेस</item>
+        <item>ऐप स्टोरेज की हर फ़ाइल पढ़ और बदल सकता है, जिसमें फ़ोटो और दस्तावेज़ भी शामिल हैं।</item>
+        <item>फ़ाइल मैनेजर, एंटीवायरस और बैकअप टूल के लिए सामान्य है।</item>
+        <item>यह साबित नहीं कि फ़ाइलें डिवाइस से बाहर जाती हैं।</item>
+        <item>अगर ऐप फ़ाइलें मैनेज नहीं करता, तो \"सभी फ़ाइलों का एक्सेस\" वापस लें।</item>
+    </string-array>
+    <string-array name="risk_cleartext">
+        <item>बिना एन्क्रिप्शन वाला ट्रैफ़िक अनुमत</item>
+        <item>ऐप बिना एन्क्रिप्शन (HTTP) के संचार कर सकता है, इसलिए उसी Wi-Fi पर मौजूद दूसरे लोग डेटा पढ़ सकते हैं।</item>
+        <item>कभी-कभी प्रिंटर या CCTV कैमरे जैसे लोकल डिवाइस के लिए ज़रूरी होता है।</item>
+        <item>यह साबित नहीं कि संवेदनशील डेटा बिना एन्क्रिप्शन के भेजा जाता है।</item>
+        <item>सार्वजनिक Wi-Fi पर इस ऐप से लॉगिन या भुगतान करने से बचें।</item>
+    </string-array>
+    <string-array name="risk_network_usage">
+        <item>नेटवर्क डेटा का इस्तेमाल</item>
+        <item>दिखाता है कि पिछले 30 दिनों में ऐप ने कितना डेटा इस्तेमाल किया, उसके खुले न होने पर भी।</item>
+        <item>सिंक, मैसेजिंग और अपडेट के लिए बैकग्राउंड डेटा सामान्य है। कम इस्तेमाल होने वाले ऐप का बहुत ज़्यादा डेटा देखने लायक है।</item>
+        <item>ये आँकड़े नहीं बताते कि डेटा क्या था या कहाँ गया।</item>
+        <item>मात्रा गलत लगे तो सेटिंग्स → ऐप्स → मोबाइल डेटा में बैकग्राउंड डेटा सीमित करें।</item>
+    </string-array>
+    <string-array name="risk_untrusted_signer">
+        <item>असामान्य साइनिंग सर्टिफ़िकेट</item>
+        <item>ऐप डीबग सर्टिफ़िकेट या बहुत हाल में बने सर्टिफ़िकेट से साइन है, जो आधिकारिक स्टोर के बाहर जल्दी में बनाए गए APK में आम है।</item>
+        <item>खुद बनाए ऐप्स, टेस्ट बिल्ड या PackPeek की मर्ज की गई .apk फ़ाइलों के लिए सामान्य है।</item>
+        <item>इससे यह साबित नहीं होता कि ऐप हानिकारक है।</item>
+        <item>इंस्टॉल करने से पहले पक्का करें कि फ़ाइल जहाँ से आई है उस पर आपको भरोसा है।</item>
+    </string-array>
+    <string name="context_default_sms">यह आपका चुना हुआ डिफ़ॉल्ट SMS ऐप है, इसलिए SMS एक्सेस इसके उद्देश्य से मेल खाता है।</string>
+    <string name="context_system_app">यह बिल्ट-इन सिस्टम ऐप है; यह क्षमता आमतौर पर सिस्टम के कामों का हिस्सा होती है।</string>
+    <string name="concerns">चिंताएँ</string>
+    <string name="concerns_none">इस जाँच में कोई चिंता नहीं मिली।</string>
+    <string name="concerns_disclaimer">ये नतीजे यह नहीं बताते कि ऐप सुरक्षित है या हानिकारक। सबूत का स्तर और \"अभी साबित नहीं\" देखें।</string>
+    <string name="severity_strong">मज़बूत संकेत</string>
+    <string name="severity_attention">ध्यान ज़रूरी</string>
+    <string name="severity_info">जानकारी</string>
+    <plurals name="severity_strong_count">
+        <item quantity="one">%1$d मज़बूत संकेत</item>
+        <item quantity="other">%1$d मज़बूत संकेत</item>
+    </plurals>
+    <plurals name="severity_attention_count">
+        <item quantity="one">%1$d पर ध्यान ज़रूरी</item>
+        <item quantity="other">%1$d पर ध्यान ज़रूरी</item>
+    </plurals>
+    <plurals name="severity_info_count">
+        <item quantity="one">%1$d नोट</item>
+        <item quantity="other">%1$d नोट</item>
+    </plurals>
+    <string name="risk_found">क्या मिला</string>
+    <string name="risk_impact">आप पर असर</string>
+    <string name="risk_context">संदर्भ</string>
+    <string name="risk_unproven">अभी साबित नहीं</string>
+    <string name="risk_action">सुझाई गई कार्रवाई</string>
+    <string name="level_declared">T1 घोषित</string>
+    <string name="level_code">T2 कोड में</string>
+    <string name="level_flow">T3 कोड पथ</string>
+    <string name="level_observed">T4 देखा गया</string>
+    <string name="levels_explained">T1: मैनिफ़ेस्ट में लिखा है। T2: कोड में फ़ंक्शन मिला। T3: पढ़ना और भेजना एक ही कोड पथ में; मान स्वयं ट्रैक होने पर चिह्नित। T4: इस डिवाइस पर देखा गया।</string>
+    <string name="ev_permission">%1$s माँगता है</string>
+    <string name="ev_component">कंपोनेंट %1$s</string>
+    <string name="ev_config_retrieve">कॉन्फ़िगरेशन: दूसरे ऐप्स की स्क्रीन की सामग्री पढ़ सकता है</string>
+    <string name="ev_config_gestures">कॉन्फ़िगरेशन: टैप और जेस्चर कर सकता है</string>
+    <string name="ev_config_all_events">कॉन्फ़िगरेशन: हर तरह के स्क्रीन इवेंट पाता है</string>
+    <string name="ev_accessibility_enabled">एक्सेसिबिलिटी सर्विस चालू है</string>
+    <string name="ev_notification_enabled">नोटिफ़िकेशन लिसनर चालू है</string>
+    <string name="ev_admin_active">डिवाइस एडमिन सक्रिय है</string>
+    <string name="ev_default_sms">डिफ़ॉल्ट SMS ऐप के रूप में चुना गया</string>
+    <string name="ev_granted">%1$s की अनुमति दी गई है</string>
+    <string name="ev_overlay_allowed">दूसरे ऐप्स के ऊपर दिखाने की अनुमति है</string>
+    <string name="ev_battery_exempt">बैटरी ऑप्टिमाइज़ेशन से छूट</string>
+    <string name="ev_sideloaded">ऐप स्टोर के बाहर से इंस्टॉल किया गया</string>
+    <string name="ev_file">APK फ़ाइल, इंस्टॉल नहीं है</string>
+    <string name="ev_no_launcher">होम स्क्रीन पर कोई activity नहीं दिखती</string>
+    <string name="ev_debug_cert">डीबग सर्टिफ़िकेट से साइन किया गया</string>
+    <string name="ev_new_cert">सर्टिफ़िकेट हाल में बना (%1$s दिन पहले)</string>
+    <string name="ev_lure_label">लुभाने वाला ऐप नाम: \"%1$s\"</string>
+    <string name="ev_cleartext">usesCleartextTraffic चालू है</string>
+    <string name="ev_network">30 दिन: खुले रहने पर %1$s, बैकग्राउंड में %2$s</string>
+    <string name="coverage">जाँच का दायरा</string>
+    <plurals name="coverage_apks">
+        <item quantity="one">%1$d APK का मैनिफ़ेस्ट जाँचा गया</item>
+        <item quantity="other">%1$d APK के मैनिफ़ेस्ट जाँचे गए</item>
+    </plurals>
+    <string name="coverage_unreadable">पढ़ा नहीं जा सका: %1$s</string>
+    <plurals name="coverage_configs">
+        <item quantity="one">%1$d कॉन्फ़िगरेशन फ़ाइल पढ़ी नहीं जा सकी</item>
+        <item quantity="other">%1$d कॉन्फ़िगरेशन फ़ाइलें पढ़ी नहीं जा सकीं</item>
+    </plurals>
+    <string name="coverage_device">डिवाइस की स्थिति पढ़ी गई (चालू सर्विस, दी गई अनुमतियाँ)</string>
+    <string name="coverage_file">फ़ाइल इंस्टॉल नहीं है, इसलिए डिवाइस की स्थिति उपलब्ध नहीं है</string>
+    <string name="coverage_usage_on">डेटा उपयोग Usage access के ज़रिए पढ़ा गया</string>
+    <string name="coverage_usage_off">डेटा उपयोग नहीं पढ़ा गया क्योंकि Usage access की अनुमति नहीं है</string>
+    <string name="grant_usage_access">अनुमति दें</string>
+    <string name="install_risk_title">मज़बूत संकेत मिला</string>
+    <string name="install_risk_body">जाँच में ऐसे पैटर्न मिले जो अक्सर डेटा चुराने वाले ऐप्स इस्तेमाल करते हैं:\n\n%1$s\n\nफिर भी इंस्टॉल करें?</string>
+    <string name="install_anyway">फिर भी इंस्टॉल करें</string>
+    <string name="risk_badge_ok">कोई नहीं</string>
+    <string name="risk_badge_label">चिंताएँ</string>
+    <string name="old_score_title">पिछला कॉन्फ़िगरेशन स्कोर</string>
+    <string name="active_on_device">इस डिवाइस पर सक्रिय</string>
+    <string name="active_on_device_note">ये सर्विस स्क्रीन या नोटिफ़िकेशन पढ़ सकती हैं, या डिवाइस को नियंत्रित कर सकती हैं। पक्का करें कि आप हर ऐप को पहचानते हैं।</string>
+    <string name="active_accessibility">एक्सेसिबिलिटी सर्विस</string>
+    <string name="active_notifications">नोटिफ़िकेशन लिसनर</string>
+    <string name="active_admins">डिवाइस एडमिन</string>
+    <string name="active_default_sms">डिफ़ॉल्ट SMS ऐप</string>
+    <string name="usage_access">Usage access</string>
+    <string name="usage_access_on">अनुमति है: हर ऐप का डेटा उपयोग देखे गए सबूत के रूप में दिखता है</string>
+    <string name="usage_access_off">अनुमति नहीं है। वैकल्पिक: हर ऐप का डेटा उपयोग दिखाता है (उसकी सामग्री या गंतव्य नहीं)।</string>
+    <string name="risk_analysis">जोखिम विश्लेषण</string>
+    <string-array name="risk_data_theft">
+        <item>निजी डेटा किसी छिपे गंतव्य पर भेजा जाता है</item>
+        <item>ऐप का अपना कोड निजी डेटा (जैसे SMS, संपर्क, सूचनाएँ या स्क्रीन का टेक्स्ट) पढ़ता है और उसी कोड पथ में डेटा किसी Telegram बॉट, Discord webhook या भेजने वाले कोड में लिखे सार्वजनिक IP पते पर भेजता है। धोखाधड़ी वाले ऐप ये रास्ते इसलिए अपनाते हैं क्योंकि इनमें ऐसे नामित सर्वर की ज़रूरत नहीं होती जिसे ट्रेस किया जा सके।</item>
+        <item>सामान्य ऐप डेटा अपने नामित सर्वर पर भेजते हैं, बॉट या webhook पर नहीं। डेवलपर कभी-कभी क्रैश रिपोर्ट के लिए बॉट का उपयोग करते हैं, लेकिन वे निजी डेटा नहीं पढ़ते। सीधा IP केवल अविश्वसनीय स्रोत की फ़ाइल या ऐप के लिए मज़बूत संकेत है; अन्यथा इस पर ध्यान देना चाहिए।</item>
+        <item></item>
+        <item>यह फ़ाइल इंस्टॉल न करें। अगर इंस्टॉल है: इसे अनइंस्टॉल करें, उन खातों के पासवर्ड बदलें जिनके कोड या संदेश यह पढ़ सकता था, और दो-चरणीय सत्यापन फिर से चालू करें।</item>
+    </string-array>
+    <string-array name="risk_hidden_destination">
+        <item>कोड में छिपा गंतव्य</item>
+        <item>कोड में Telegram बॉट, Discord webhook या बिना डोमेन नाम वाले सार्वजनिक IP पते का पता है। वहाँ भेजे गए डेटा को किसी कंपनी से जोड़ना कठिन है। स्थानीय पते (घरेलू नेटवर्क, डिवाइस स्वयं) नहीं गिने जाते।</item>
+        <item>कुछ ऐप सूचनाओं के लिए बॉट या webhook का उपयोग करते हैं, या अपने सर्वर से IP के ज़रिए जुड़ते हैं। निजी डेटा तक पहुँच के साथ होने पर यह चिंता का विषय है।</item>
+        <item></item>
+        <item>देखें कि क्या ऐप को अपने उद्देश्य के लिए चैट सेवाओं या सीधे IP पतों से बात करने की ज़रूरत है। जाने-माने डेवलपर के ऐप्स चुनें।</item>
+    </string-array>
+    <string-array name="risk_call_forwarding">
+        <item>कॉल फ़ॉरवर्डिंग कोड</item>
+        <item>कोड में ऐसे फ़ोन कोड हैं जो आपकी कॉल फ़ॉरवर्ड करते हैं (जैसे **21*) या यह USSD अनुरोध भेजता है। खाता चोर कॉल फ़ॉरवर्ड करते हैं ताकि वॉइस OTP कोड आपकी जगह उन तक पहुँचें।</item>
+        <item>फ़ोन, कैरियर और कॉल मैनेजमेंट ऐप्स इन कोड का वैध इस्तेमाल कर सकते हैं।</item>
+        <item></item>
+        <item>अपनी कॉल फ़ॉरवर्डिंग सेटिंग्स जाँचें (*#21# डायल करें)। जो फ़ॉरवर्डिंग आपने सेट नहीं की उसे हटाएँ, और अगर आप ऐप को नहीं पहचानते तो उसे अनइंस्टॉल करें।</item>
+    </string-array>
+    <string-array name="risk_dynamic_code">
+        <item>अतिरिक्त कोड लोड करता है</item>
+        <item>ऐप ऐसा कोड लोड या चला सकता है जो जाँचे गए हिस्से में नहीं है: पैकेज के अंदर छिपा DEX/APK, एन्क्रिप्ट करने वाला पैकर, या क्लास लोडर।</item>
+        <item>बड़े ऐप्स प्लग-इन और अपडेट के लिए डायनैमिक लोडिंग इस्तेमाल करते हैं, और कुछ कंपनियाँ अपने कोड को पैकर से सुरक्षित रखती हैं।</item>
+        <item></item>
+        <item>इस ऐप के लिए इस जाँच के नतीजे को अधूरा मानें। अगर ऐप ऐप स्टोर के बाहर से भी आया है, तो सावधान रहें।</item>
+    </string-array>
+    <string-array name="risk_clipboard">
+        <item>क्लिपबोर्ड पढ़ता है</item>
+        <item>ऐप आपके कॉपी किए गए टेक्स्ट को पढ़ सकता है, जिसमें पासवर्ड, OTP कोड या खाता नंबर हो सकते हैं।</item>
+        <item>डाउनलोड और लिंक शेयर करने वाले ऐप्स कॉपी किया गया लिंक लेने के लिए अक्सर क्लिपबोर्ड पढ़ते हैं। Android 10 से ऐप्स इसे सिर्फ़ स्क्रीन पर रहते हुए पढ़ सकते हैं, और Android 12+ एक सूचना दिखाता है।</item>
+        <item></item>
+        <item>यह ऐप खुला हो तब पासवर्ड या OTP कोड कॉपी करने से बचें।</item>
+    </string-array>
+    <string-array name="risk_web_login">
+        <item>WebView कुकीज़ पढ़ता है</item>
+        <item>ऐप अपने बिल्ट-इन ब्राउज़र की कुकीज़ पढ़ता है। कुकीज़ आपको लॉग इन रख सकती हैं, इसलिए जिसके पास वे हों वह उस वेबसाइट पर आपकी तरह काम कर सकता है।</item>
+        <item>जो ऐप्स ऐप के अंदर किसी वेबसाइट पर लॉगिन करने देते हैं (जैसे अपनी पोस्ट डाउनलोड करने के लिए), उन्हें उस सेशन के लिए कुकीज़ चाहिए।</item>
+        <item></item>
+        <item>ज़रूरी खातों में सिर्फ़ उनके आधिकारिक ऐप या ब्राउज़र में लॉगिन करें। अगर पक्का न हो, तो लॉग आउट करके पासवर्ड बदलें।</item>
+    </string-array>
+    <string-array name="risk_ad_sdks">
+        <item>विज्ञापन और एनालिटिक्स SDK</item>
+        <item>तीसरे पक्ष का कोड जो विज्ञापन दिखाता है या मापता है कि आप ऐप कैसे इस्तेमाल करते हैं। ये SDK डिवाइस आइडेंटिफ़ायर और उपयोग डेटा इकट्ठा कर सकते हैं।</item>
+        <item>मुफ़्त ऐप्स में बहुत आम; आमतौर पर ऐप की निजता नीति में शामिल होते हैं।</item>
+        <item>हर SDK असल में कौन-सा डेटा इकट्ठा करता है, यह कोड जाँच से नहीं दिखता।</item>
+        <item>Google Play में डेटा सुरक्षा सेक्शन देखें, और चाहें तो सेटिंग्स → निजता → विज्ञापन में अपना विज्ञापन ID रीसेट करें।</item>
+    </string-array>
+    <string-array name="risk_destinations">
+        <item>कोड में पते</item>
+        <item>ऐप के अपने कोड में लिखे वेब पते: जहाँ ऐप के कनेक्ट होने की संभावना है।</item>
+        <item>इंटरनेट से जुड़े हर ऐप में ये होते हैं। अनजान डोमेन अपने-आप में संदिग्ध नहीं हैं।</item>
+        <item>इन पतों से संपर्क होता है या नहीं, और क्या भेजा जाता है, यह सिर्फ़ कोड से नहीं दिखता।</item>
+        <item>ऐसे पते देखें जो ऐप के डेवलपर से मेल नहीं खाते, और बिना एन्क्रिप्शन वाले http पर ध्यान दें।</item>
+    </string-array>
+    <string name="cap_sms_read">SMS</string>
+    <string name="cap_contacts">संपर्क</string>
+    <string name="cap_call_log">कॉल इतिहास</string>
+    <string name="cap_clipboard">क्लिपबोर्ड</string>
+    <string name="cap_notification_read">नोटिफ़िकेशन</string>
+    <string name="cap_screen_read">स्क्रीन टेक्स्ट</string>
+    <string name="cap_cookies">लॉगिन कुकीज़</string>
+    <string name="cap_phone_id">फ़ोन नंबर या डिवाइस ID</string>
+    <string name="cap_accounts">खाते</string>
+    <string name="cap_location">लोकेशन</string>
+    <string name="cap_network">इंटरनेट</string>
+    <string name="cap_sms_send">SMS</string>
+    <string name="cap_telegram">Telegram बॉट</string>
+    <string name="cap_discord">Discord webhook</string>
+    <string name="ev_code_call">%1$s कॉल करता है</string>
+    <string name="ev_code_string">इसमें टेक्स्ट %1$s है</string>
+    <string name="ev_flow">%1$s पढ़ता है और उसी कोड पथ में %2$s को भेजता है (मान ट्रैक नहीं हुआ)</string>
+    <string name="ev_destination">%1$s से कनेक्ट होता है</string>
+    <string name="ev_destination_cleartext">%1$s (बिना एन्क्रिप्शन का http)</string>
+    <string name="ev_destination_ip">%1$s (IP पता, कोई डोमेन नाम नहीं)</string>
+    <string name="ev_origin_app">ऐप का अपना कोड</string>
+    <string name="ev_origin_library">लाइब्रेरी: %1$s</string>
+    <string name="ev_hidden_code">छिपी कोड फ़ाइल: %1$s</string>
+    <string name="ev_packer">कोड पैकर: %1$s</string>
+    <string name="unproven_flow">इस डेटा से पढ़ा गया मान उस कॉल तक ट्रैक किया गया जो उसे बाहर भेजती है (T3)। यह अभी भी साबित नहीं है कि यह पथ आपके डिवाइस पर चला है; केवल चलते हुए ऐप को देखकर ही यह पता चल सकता है।</string>
+    <string name="unproven_calls">कोड इसके लिए ज़रूरी फ़ंक्शन कॉल करता है (T2), लेकिन डेटा बाहर भेजने वाला कोई रास्ता नहीं मिला। कभी न चलने वाले या बाद में लोड होने वाले कोड की संभावना से इनकार नहीं किया जा सकता।</string>
+    <string name="unproven_none">ऐप का अपना कोड जाँचा गया और वह इसके लिए ज़रूरी फ़ंक्शन कॉल नहीं करता। लाइब्रेरी या बाद में लोड होने वाला कोड फिर भी इसका इस्तेमाल कर सकता है।</string>
+    <string name="unproven_gaps">ऐप के कुछ हिस्सों का विश्लेषण नहीं हो सका (जाँच का दायरा देखें), इसलिए कोड का नतीजा अधूरा हो सकता है।</string>
+    <string name="evidence_strength">सबसे मज़बूत सबूत: %1$s</string>
+    <string name="strength_t1">सिर्फ़ मैनिफ़ेस्ट में लिखा है</string>
+    <string name="strength_t2">कोड ये कॉल करता है</string>
+    <string name="strength_t3">पढ़ना और भेजना एक ही कोड पथ में</string>
+    <string name="strength_t4">इस डिवाइस पर देखा गया</string>
+    <string name="coverage_code">कोड (DEX) का विश्लेषण हुआ: %1$d DEX फ़ाइलें, %2$d क्लास, %3$d ऐप के अपने कोड में</string>
+    <string name="coverage_code_failed">ऐप कोड (DEX) का विश्लेषण नहीं हो सका</string>
+    <string name="coverage_gap_hidden">छिपे कोड का विश्लेषण नहीं हुआ: %1$s</string>
+    <string name="coverage_gap_packer">कोड पैकर (%1$s) से सुरक्षित है; असली कोड एन्क्रिप्टेड है</string>
+    <string name="coverage_gap_cross">%1$s लॉजिक DEX के बाहर चलता है और उसका विश्लेषण नहीं होता</string>
+    <string name="coverage_gap_unreadable">%1$s में कोड पढ़ा नहीं जा सका</string>
+    <string name="coverage_gap_limit">कोड विश्लेषण अपनी समय या आकार सीमा पर रुक गया; नतीजे आंशिक हैं</string>
+    <string name="coverage_gap_tracking">मान ट्रैकिंग का समय खत्म हो गया; क्षमताएँ और पते पूरे हैं, लेकिन कुछ डेटा पथ ट्रैक किए गए के रूप में चिह्नित नहीं हैं</string>
+    <string name="find_target_body">टारगेट SDK, API 31 (Android 12) से नीचे है। कुछ नई सुरक्षाएँ लागू नहीं हो सकतीं।</string>
+    <string name="find_exported_body">बिना कंपोनेंट अनुमति वाले चालू एक्सपोर्टेड कंपोनेंट: %1$d। लॉन्चर एंट्री पॉइंट गिने नहीं जाते।</string>
+    <string name="format_explanation">सामान्य ऐप्स हमेशा .apk के रूप में सेव होते हैं। Split ऐप्स ऊपर चुना गया फ़ॉर्मैट इस्तेमाल करते हैं। पहले से मौजूद नामों में संख्या जोड़ दी जाती है।</string>
+    <string name="report_share_quick">सबूत रिपोर्ट साझा करें (PDF)</string>
+    <string name="ev_flow_traced">%1$s का मान %2$s को भेजने वाली कॉल तक ट्रैक किया गया</string>
+    <string name="unproven_flow_untraced">इस डेटा को पढ़ना और भेजना एक ही कोड पथ में होता है (T3), लेकिन पढ़ा गया मान भेजे गए डेटा तक ट्रैक नहीं हुआ, इसलिए दोनों असंबंधित हो सकते हैं। क्या भेजा जाता है, यह केवल चलते हुए ऐप को देखकर पता चल सकता है।</string>
+    <string name="install_fail_no_result">Android ने इस इंस्टॉलेशन का परिणाम नहीं बताया। जाँचें कि ऐप इंस्टॉल है या नहीं, फिर दोबारा आज़माएँ।</string>
+    <string name="ready_target_min">• API %1$d को लक्षित करता है; Android का यह संस्करण API %2$d से नीचे के नए ऐप अस्वीकार करता है।</string>
+    <string-array name="risk_shell_command">
+        <item>शेल कमांड चलाता है</item>
+        <item>कोड सिस्टम कमांड शुरू करता है (Runtime.exec या ProcessBuilder)। कमांड डिवाइस की जानकारी या लॉग पढ़ सकते हैं, और रूट किए गए डिवाइस पर इससे कहीं ज़्यादा कर सकते हैं।</item>
+        <item>क्रैश रिपोर्टर और डिवाइस-जानकारी SDK अक्सर getprop या logcat जैसे हानिरहित कमांड चलाते हैं। यह सबसे ज़्यादा तब मायने रखता है जब ऐप का अपना कोड ऐसा करता है।</item>
+        <item></item>
+        <item>जाँचें कि ऐप को अपने काम के लिए इसकी ज़रूरत है या नहीं। सावधान रहें अगर यह रूट एक्सेस भी माँगता है या ऐप स्टोर के बाहर से आया है।</item>
+    </string-array>
+    <string name="strength_t3_traced">पढ़ने से भेजने तक ट्रैक किया गया मान</string>
+    <string name="ev_flow_traced_to">%1$s का मान %2$s को भेजने वाली कॉल तक ट्रैक किया गया, पता: %3$s</string>
+    <string name="chain_destination">भेजा जाता है: %1$s</string>
+    <string name="ev_flow_traced_to_any">%1$s का मान %2$s को भेजने वाली कॉल तक ट्रैक किया गया। वह कॉल कई पतों के लिए इस्तेमाल होती है; मान इनमें से किसी एक पर जाता है: %3$s</string>
+    <string name="chain_destination_any">इनमें से किसी एक पर भेजा जाता है: %1$s</string>
+    <string name="more_hosts">और अन्य</string>
+    <string name="analysis_progress_title">ऐप की जाँच हो रही है</string>
+    <string name="analysis_stage_manifest">मैनिफ़ेस्ट और सर्टिफ़िकेट पढ़ा जा रहा है</string>
+    <string name="analysis_stage_code">कोड पढ़ा जा रहा है: फ़ाइल %1$d / %2$d</string>
+    <string name="analysis_stage_resolving">कोड में डेटा का रास्ता खोजा जा रहा है</string>
+    <string name="security_paused">रुका हुआ: %2$d में से %1$d ऐप जाँचे गए। नतीजे सहेजे गए हैं, कभी भी जारी रखें।</string>
+    <string name="chart_title">जाँच के नतीजे</string>
+    <string name="chart_clear">कोई ख़ास नतीजा नहीं</string>
+    <string name="chart_unchecked">अभी जाँचा नहीं गया</string>
+    <string name="chart_center">जाँचे गए</string>
+    <string name="chart_description">%1$d में मज़बूत संकेत, %2$d पर ध्यान ज़रूरी, %3$d में कोई ख़ास नतीजा नहीं, %4$d अभी जाँचे नहीं गए</string>
+</resources>

@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Setiap array: judul, dampak, konteks, yang belum terbukti, tindakan yang disarankan. -->
+    <string-array name="risk_otp_theft">
+        <item>Pola pencurian OTP / pengambilalihan akun</item>
+        <item>Aplikasi dapat menerima SMS, termasuk kode OTP bank dan WhatsApp, dan memiliki akses internet. Gabungan ini dipakai modus APK palsu (undangan, surat tilang, resi) untuk mengambil alih akun.</item>
+        <item>Pola ini muncul karena kemampuan SMS terdapat bersama tanda penyamaran atau sumber tidak tepercaya (ikon disembunyikan, berkas dari luar toko, sertifikat debug atau baru, nama yang memancing), atau bersama kode yang mengirim isi SMS ke luar, tujuan tersembunyi, atau pengalihan panggilan.</item>
+        <item>Kode aplikasi belum diperiksa, jadi belum terbukti SMS benar-benar dibaca atau dikirim ke luar. Penilaian ini berasal dari manifest dan konteks saja.</item>
+        <item>Jangan pasang berkas ini. Bila sudah terpasang: cabut izin SMS, uninstall aplikasinya, lalu ganti kata sandi dan aktifkan ulang verifikasi dua langkah pada akun penting (WhatsApp, bank, email).</item>
+    </string-array>
+    <string-array name="risk_screen_spying">
+        <item>Pola pengintaian layar</item>
+        <item>Layanan aksesibilitas dapat membaca isi layar aplikasi lain, termasuk pesan, saldo, dan teks yang diketik, lalu aplikasi bisa mengirimnya lewat internet.</item>
+        <item>Pola ini muncul karena aksesibilitas yang membaca layar terdapat bersama tanda lain, misalnya ikon disembunyikan, overlay, admin perangkat, pembaca notifikasi, atau sumber tidak tepercaya.</item>
+        <item>Belum terbukti isi layar benar-benar dikirim. Kode aplikasi belum diperiksa.</item>
+        <item>Matikan layanan aksesibilitas aplikasi ini di Setelan → Aksesibilitas, kecuali kamu sengaja memakainya. Uninstall bila kamu tidak mengenali aplikasinya.</item>
+    </string-array>
+    <string-array name="risk_accessibility">
+        <item>Layanan aksesibilitas</item>
+        <item>Saat aktif, layanan ini bisa membaca isi layar dan melakukan ketukan atas nama pengguna.</item>
+        <item>Aksesibilitas wajar untuk pembaca layar, pengelola kata sandi, otomatisasi, atau peluncur alternatif.</item>
+        <item>Belum terbukti data dari layar dikirim ke luar. Kode belum diperiksa.</item>
+        <item>Aktifkan hanya bila kamu tahu fungsinya. Periksa di Setelan → Aksesibilitas.</item>
+    </string-array>
+    <string-array name="risk_notifications">
+        <item>Pembaca notifikasi</item>
+        <item>Saat aktif, aplikasi bisa membaca semua notifikasi, termasuk isi pesan dan kode OTP.</item>
+        <item>Wajar untuk jam pintar, aplikasi pengingat, atau pengelola notifikasi.</item>
+        <item>Belum terbukti isi notifikasi disimpan atau dikirim.</item>
+        <item>Aktifkan hanya untuk aplikasi yang kamu percaya. Periksa di Setelan → Notifikasi → Akses notifikasi.</item>
+    </string-array>
+    <string-array name="risk_device_admin">
+        <item>Admin perangkat</item>
+        <item>Admin perangkat dapat mengunci layar, mengubah kata sandi layar, bahkan menghapus data, dan sulit di-uninstall selama aktif.</item>
+        <item>Wajar untuk aplikasi kantor (MDM), pencari HP, atau kontrol orang tua.</item>
+        <item>Belum terbukti kebijakan ini dipakai.</item>
+        <item>Nonaktifkan di Setelan → Keamanan → Aplikasi admin perangkat bila tidak diperlukan.</item>
+    </string-array>
+    <string-array name="risk_sms">
+        <item>Akses SMS</item>
+        <item>Aplikasi dapat menerima atau membaca SMS, termasuk kode OTP.</item>
+        <item>Wajar untuk aplikasi SMS, beberapa aplikasi bank untuk verifikasi otomatis, atau pemblokir spam.</item>
+        <item>Belum terbukti SMS dibaca atau dikirim ke luar. Kode belum diperiksa.</item>
+        <item>Bila aplikasi tidak memerlukan SMS untuk fungsinya, cabut izin SMS di Setelan → Aplikasi.</item>
+    </string-array>
+    <string-array name="risk_sms_send">
+        <item>Mengirim SMS</item>
+        <item>Aplikasi dapat mengirim SMS dari nomormu, yang bisa menimbulkan biaya atau menyebarkan tautan ke kontak.</item>
+        <item>Wajar untuk aplikasi SMS dan beberapa aplikasi verifikasi.</item>
+        <item>Belum terbukti SMS pernah dikirim.</item>
+        <item>Cabut izin SMS bila tidak diperlukan, dan periksa riwayat SMS terkirim.</item>
+    </string-array>
+    <string-array name="risk_contacts_calls">
+        <item>Kontak dan riwayat panggilan</item>
+        <item>Aplikasi dapat membaca daftar kontak atau riwayat panggilan.</item>
+        <item>Wajar untuk aplikasi pesan, telepon, atau pencadangan kontak.</item>
+        <item>Belum terbukti data kontak dikirim ke luar.</item>
+        <item>Cabut izin kontak atau log panggilan bila tidak berkaitan dengan fungsi aplikasi.</item>
+    </string-array>
+    <string-array name="risk_phone_identity">
+        <item>Identitas telepon dan akun</item>
+        <item>Aplikasi dapat membaca status telepon, nomor, atau daftar akun di perangkat.</item>
+        <item>Umum pada aplikasi panggilan, game, dan SDK analitik untuk membedakan perangkat.</item>
+        <item>Belum terbukti data ini dikirim.</item>
+        <item>Cabut izin \"Telepon\" bila aplikasi tidak melakukan panggilan.</item>
+    </string-array>
+    <string-array name="risk_camera_mic">
+        <item>Kamera dan mikrofon</item>
+        <item>Aplikasi dapat memakai kamera atau merekam suara saat izinnya diberikan.</item>
+        <item>Wajar untuk aplikasi foto, video, panggilan, dan pemindai QR. Android 12+ menampilkan indikator hijau saat kamera atau mikrofon aktif.</item>
+        <item>Belum terbukti perekaman terjadi di latar belakang.</item>
+        <item>Pilih \"Hanya saat aplikasi digunakan\" atau \"Tanya setiap saat\" untuk izin kamera dan mikrofon.</item>
+    </string-array>
+    <string-array name="risk_location">
+        <item>Lokasi</item>
+        <item>Aplikasi dapat mengetahui lokasimu; dengan lokasi latar belakang, juga saat aplikasi tidak dibuka.</item>
+        <item>Wajar untuk peta, ojek online, cuaca, dan pencari HP.</item>
+        <item>Belum terbukti lokasi dikirim atau disimpan.</item>
+        <item>Pilih lokasi perkiraan atau \"Hanya saat aplikasi digunakan\" bila memungkinkan.</item>
+    </string-array>
+    <string-array name="risk_screen_capture">
+        <item>Perekaman layar</item>
+        <item>Aplikasi dapat merekam atau menyiarkan seluruh layar setelah kamu menyetujui dialog Android.</item>
+        <item>Wajar untuk perekam layar, berbagi layar saat rapat, dan siaran game.</item>
+        <item>Android selalu meminta persetujuan setiap kali perekaman dimulai; belum terbukti pernah direkam.</item>
+        <item>Tolak permintaan rekam layar yang muncul tiba-tiba, terutama saat membuka aplikasi bank.</item>
+    </string-array>
+    <string-array name="risk_overlay">
+        <item>Tampil di atas aplikasi lain</item>
+        <item>Aplikasi dapat menampilkan jendela di atas aplikasi lain, yang bisa dipakai untuk layar login palsu.</item>
+        <item>Wajar untuk gelembung chat, perekam layar, dan filter cahaya biru.</item>
+        <item>Belum terbukti dipakai untuk menutupi aplikasi lain.</item>
+        <item>Cabut di Setelan → Aplikasi → Akses khusus → Tampilkan di atas aplikasi lain bila tidak diperlukan.</item>
+    </string-array>
+    <string-array name="risk_persistence">
+        <item>Berjalan di latar belakang</item>
+        <item>Aplikasi dapat aktif kembali setelah HP dinyalakan, atau dikecualikan dari penghemat baterai.</item>
+        <item>Wajar untuk aplikasi pesan, alarm, dan sinkronisasi.</item>
+        <item>Belum terbukti aplikasi berjalan terus-menerus.</item>
+        <item>Hapus pengecualian baterai bila aplikasi tidak perlu berjalan di latar belakang.</item>
+    </string-array>
+    <string-array name="risk_hidden_icon">
+        <item>Tidak ada ikon di layar utama</item>
+        <item>Aplikasi tidak muncul di daftar aplikasi, sehingga mudah terlupa atau sulit ditemukan untuk di-uninstall.</item>
+        <item>Wajar untuk keyboard, widget, wallpaper, dan plugin yang dibuka dari aplikasi lain.</item>
+        <item>Belum diketahui apakah ikon disembunyikan dengan sengaja.</item>
+        <item>Pastikan kamu tahu apa aplikasi ini. Uninstall lewat Setelan → Aplikasi bila tidak dikenali.</item>
+    </string-array>
+    <string-array name="risk_install_apps">
+        <item>Memasang aplikasi lain</item>
+        <item>Aplikasi dapat meminta pemasangan APK lain, yang bisa dipakai untuk mengunduh aplikasi tambahan.</item>
+        <item>Wajar untuk toko aplikasi, pengelola berkas, browser, dan alat backup seperti PackPeek.</item>
+        <item>Android tetap meminta persetujuan setiap pemasangan; belum terbukti pernah dipakai.</item>
+        <item>Jangan izinkan \"Instal aplikasi tidak dikenal\" untuk aplikasi yang tidak kamu percaya.</item>
+    </string-array>
+    <string-array name="risk_all_files">
+        <item>Akses semua berkas</item>
+        <item>Aplikasi dapat membaca dan mengubah semua berkas di penyimpanan, termasuk foto dan dokumen.</item>
+        <item>Wajar untuk pengelola berkas, antivirus, dan alat backup.</item>
+        <item>Belum terbukti berkas dikirim ke luar.</item>
+        <item>Cabut \"Akses semua berkas\" bila aplikasi tidak mengelola berkas.</item>
+    </string-array>
+    <string-array name="risk_cleartext">
+        <item>Lalu lintas tidak terenkripsi diizinkan</item>
+        <item>Aplikasi boleh berkomunikasi tanpa enkripsi (HTTP), sehingga data bisa dibaca orang lain di jaringan Wi-Fi yang sama.</item>
+        <item>Kadang dibutuhkan untuk perangkat lokal seperti printer atau kamera CCTV.</item>
+        <item>Belum terbukti ada data sensitif yang dikirim tanpa enkripsi.</item>
+        <item>Hindari login atau transaksi lewat aplikasi ini di Wi-Fi publik.</item>
+    </string-array>
+    <string-array name="risk_network_usage">
+        <item>Pemakaian data jaringan</item>
+        <item>Menunjukkan berapa banyak data yang dipakai aplikasi selama 30 hari terakhir, termasuk saat tidak dibuka.</item>
+        <item>Data latar belakang wajar untuk sinkronisasi, pesan, dan pembaruan. Jumlah besar pada aplikasi yang jarang dipakai patut diperhatikan.</item>
+        <item>Angka ini tidak menunjukkan isi maupun tujuan data.</item>
+        <item>Batasi data latar belakang di Setelan → Aplikasi → Data seluler bila jumlahnya tidak wajar.</item>
+    </string-array>
+    <string-array name="risk_untrusted_signer">
+        <item>Sertifikat penanda tangan tidak biasa</item>
+        <item>Aplikasi ditandatangani sertifikat debug atau sertifikat yang baru dibuat, yang umum pada APK buatan cepat dan tidak dari toko resmi.</item>
+        <item>Wajar untuk aplikasi buatan sendiri, versi uji, atau hasil .apk gabungan PackPeek.</item>
+        <item>Tidak membuktikan aplikasi berbahaya.</item>
+        <item>Pastikan sumber berkas dapat dipercaya sebelum memasang.</item>
+    </string-array>
+
+    <string name="context_default_sms">Aplikasi ini adalah aplikasi SMS bawaan pilihanmu, jadi akses SMS sesuai fungsinya.</string>
+    <string name="context_system_app">Ini aplikasi sistem bawaan perangkat; kemampuan ini biasanya bagian dari fungsi sistem.</string>
+
+    <string name="concerns">Kekhawatiran</string>
+    <string name="concerns_none">Tidak ada kekhawatiran dari pemeriksaan ini.</string>
+    <string name="concerns_disclaimer">Hasil ini tidak menyatakan aplikasi aman atau berbahaya. Lihat tingkat bukti dan bagian \"Yang belum terbukti\".</string>
+    <string name="severity_strong">Indikator kuat</string>
+    <string name="severity_attention">Perlu perhatian</string>
+    <string name="severity_info">Informasi</string>
+    <plurals name="severity_strong_count"><item quantity="other">%1$d indikator kuat</item></plurals>
+    <plurals name="severity_attention_count"><item quantity="other">%1$d perlu perhatian</item></plurals>
+    <plurals name="severity_info_count"><item quantity="other">%1$d informasi</item></plurals>
+    <string name="risk_found">Apa yang ditemukan</string>
+    <string name="risk_impact">Dampak bagi kamu</string>
+    <string name="risk_context">Konteks</string>
+    <string name="risk_unproven">Yang belum terbukti</string>
+    <string name="risk_action">Tindakan yang disarankan</string>
+    <string name="level_declared">T1 Dideklarasikan</string>
+    <string name="level_code">T2 Dalam kode</string>
+    <string name="level_flow">T3 Jalur kode</string>
+    <string name="level_observed">T4 Teramati</string>
+    <string name="levels_explained">T1: tertulis di manifest. T2: fungsi ditemukan dalam kode. T3: membaca dan mengirim di satu jalur kode; ditandai bila nilainya sendiri berhasil dilacak. T4: teramati di perangkat ini.</string>
+
+    <string name="ev_permission">Meminta izin %1$s</string>
+    <string name="ev_component">Komponen %1$s</string>
+    <string name="ev_config_retrieve">Konfigurasi: dapat membaca isi layar aplikasi lain</string>
+    <string name="ev_config_gestures">Konfigurasi: dapat melakukan ketukan dan gestur</string>
+    <string name="ev_config_all_events">Konfigurasi: menerima semua jenis kejadian layar</string>
+    <string name="ev_accessibility_enabled">Layanan aksesibilitas sedang AKTIF</string>
+    <string name="ev_notification_enabled">Pembaca notifikasi sedang AKTIF</string>
+    <string name="ev_admin_active">Admin perangkat sedang AKTIF</string>
+    <string name="ev_default_sms">Dipilih sebagai aplikasi SMS bawaan</string>
+    <string name="ev_granted">Izin %1$s sudah diberikan</string>
+    <string name="ev_overlay_allowed">Izin tampil di atas aplikasi lain sudah diberikan</string>
+    <string name="ev_battery_exempt">Dikecualikan dari penghemat baterai</string>
+    <string name="ev_sideloaded">Dipasang dari luar toko aplikasi</string>
+    <string name="ev_file">Berkas APK, belum terpasang</string>
+    <string name="ev_no_launcher">Tidak ada activity yang tampil di layar utama</string>
+    <string name="ev_debug_cert">Ditandatangani sertifikat debug</string>
+    <string name="ev_new_cert">Sertifikat baru dibuat (%1$s hari lalu)</string>
+    <string name="ev_lure_label">Nama aplikasi memancing: \"%1$s\"</string>
+    <string name="ev_cleartext">usesCleartextTraffic diaktifkan</string>
+    <string name="ev_network">30 hari: %1$s saat dibuka, %2$s di latar belakang</string>
+
+    <string name="coverage">Cakupan pemeriksaan</string>
+    <plurals name="coverage_apks"><item quantity="other">Manifest dari %1$d APK diperiksa</item></plurals>
+    <string name="coverage_unreadable">Tidak dapat dibaca: %1$s</string>
+    <plurals name="coverage_configs"><item quantity="other">%1$d berkas konfigurasi tidak dapat dibaca</item></plurals>
+    <string name="coverage_device">Status perangkat dibaca (layanan aktif, izin diberikan)</string>
+    <string name="coverage_file">Berkas belum terpasang, jadi status perangkat tidak tersedia</string>
+    <string name="coverage_usage_on">Pemakaian data dibaca lewat Akses penggunaan</string>
+    <string name="coverage_usage_off">Pemakaian data tidak dibaca karena Akses penggunaan belum diizinkan</string>
+    <string name="grant_usage_access">Izinkan</string>
+
+    <string name="install_risk_title">Indikator kuat ditemukan</string>
+    <string name="install_risk_body">Pemeriksaan menemukan pola yang sering dipakai aplikasi pencuri data:\n\n%1$s\n\nYakin ingin memasang?</string>
+    <string name="install_anyway">Tetap pasang</string>
+    <string name="risk_badge_ok">Tidak ada</string>
+    <string name="risk_badge_label">kekhawatiran</string>
+    <string name="old_score_title">Skor konfigurasi lama</string>
+
+    <string name="active_on_device">Aktif di perangkat ini</string>
+    <string name="active_on_device_note">Layanan berikut dapat membaca layar, notifikasi, atau mengendalikan perangkat. Pastikan kamu mengenali setiap aplikasi.</string>
+    <string name="active_accessibility">Layanan aksesibilitas</string>
+    <string name="active_notifications">Pembaca notifikasi</string>
+    <string name="active_admins">Admin perangkat</string>
+    <string name="active_default_sms">Aplikasi SMS bawaan</string>
+    <string name="usage_access">Akses penggunaan</string>
+    <string name="usage_access_on">Diizinkan: pemakaian data per aplikasi ditampilkan sebagai bukti teramati</string>
+    <string name="usage_access_off">Belum diizinkan. Opsional: menampilkan pemakaian data per aplikasi (bukan isi atau tujuan data).</string>
+    <string name="risk_analysis">Analisis risiko</string>
+    <string-array name="risk_data_theft">
+        <item>Data pribadi dikirim ke tujuan tersembunyi</item>
+        <item>Kode aplikasi sendiri membaca data pribadi (misalnya SMS, kontak, notifikasi, atau teks di layar) dan, di jalur kode yang sama, mengirim data ke bot Telegram, webhook Discord, atau alamat IP publik yang tertulis di kode pengirimnya. Aplikasi penipuan memakai jalur ini karena tidak perlu server bernama yang bisa dilacak.</item>
+        <item>Aplikasi biasa mengirim data ke server bernama miliknya, bukan ke bot obrolan atau webhook. Pengembang kadang memakai bot untuk laporan error, tetapi itu tidak membaca data pribadi. Alamat IP langsung baru menjadi indikator kuat untuk berkas atau aplikasi dari sumber yang tidak tepercaya; selain itu cukup perlu perhatian.</item>
+        <item></item>
+        <item>Jangan pasang berkas ini. Bila sudah terpasang: uninstall, ganti kata sandi akun yang kode atau pesannya bisa terbaca, lalu aktifkan ulang verifikasi dua langkah.</item>
+    </string-array>
+    <string-array name="risk_hidden_destination">
+        <item>Tujuan tersembunyi di dalam kode</item>
+        <item>Kode berisi alamat bot Telegram, webhook Discord, atau alamat IP publik tanpa nama domain. Data yang dikirim ke sana sulit dilacak ke perusahaan mana pun. Alamat lokal (jaringan rumah, perangkat itu sendiri) tidak dihitung.</item>
+        <item>Sebagian aplikasi memakai bot atau webhook untuk notifikasi, atau menghubungi servernya sendiri lewat IP. Menjadi kekhawatiran bila bersamaan dengan akses ke data pribadi.</item>
+        <item></item>
+        <item>Periksa apakah aplikasi memang perlu terhubung ke layanan obrolan atau alamat IP langsung. Utamakan aplikasi dari pengembang yang dikenal.</item>
+    </string-array>
+    <string-array name="risk_call_forwarding">
+        <item>Kode pengalihan panggilan</item>
+        <item>Kode berisi kode telepon untuk mengalihkan panggilan (misalnya **21*) atau mengirim permintaan USSD. Pencuri akun mengalihkan panggilan agar OTP lewat telepon sampai ke mereka, bukan ke kamu.</item>
+        <item>Aplikasi telepon, operator, dan pengelola panggilan bisa memakai kode ini secara sah.</item>
+        <item></item>
+        <item>Cek pengaturan pengalihan panggilan (tekan *#21#). Hapus pengalihan yang tidak kamu buat, dan uninstall aplikasi bila tidak dikenal.</item>
+    </string-array>
+    <string-array name="risk_dynamic_code">
+        <item>Memuat kode tambahan</item>
+        <item>Aplikasi dapat memuat atau menjalankan kode yang tidak ikut diperiksa: DEX/APK tersembunyi di dalam paket, packer yang mengenkripsi kode, atau class loader.</item>
+        <item>Aplikasi besar memakai pemuatan dinamis untuk plug-in dan pembaruan, dan sebagian perusahaan melindungi kodenya dengan packer.</item>
+        <item></item>
+        <item>Anggap hasil pemeriksaan untuk aplikasi ini belum lengkap. Lebih berhati-hati bila aplikasinya juga berasal dari luar toko aplikasi.</item>
+    </string-array>
+    <string-array name="risk_shell_command">
+        <item>Menjalankan perintah shell</item>
+        <item>Kode memulai perintah sistem (Runtime.exec atau ProcessBuilder). Perintah bisa membaca informasi perangkat atau log, dan pada perangkat yang di-root bisa jauh lebih banyak.</item>
+        <item>Pelapor crash dan SDK info perangkat sering menjalankan perintah tidak berbahaya seperti getprop atau logcat. Paling penting bila kode aplikasi sendiri yang melakukannya.</item>
+        <item></item>
+        <item>Periksa apakah aplikasi memang membutuhkannya. Waspada bila aplikasi juga meminta akses root atau berasal dari luar toko aplikasi.</item>
+    </string-array>
+    <string-array name="risk_clipboard">
+        <item>Membaca clipboard</item>
+        <item>Aplikasi dapat membaca teks yang kamu salin, termasuk kata sandi, kode OTP, atau nomor rekening.</item>
+        <item>Aplikasi pengunduh dan berbagi tautan sering membaca clipboard untuk mengambil tautan yang disalin. Sejak Android 10, aplikasi hanya bisa membacanya saat tampil di layar, dan Android 12+ menampilkan pemberitahuan.</item>
+        <item></item>
+        <item>Hindari menyalin kata sandi atau OTP saat aplikasi ini terbuka.</item>
+    </string-array>
+    <string-array name="risk_web_login">
+        <item>Membaca cookie WebView</item>
+        <item>Aplikasi membaca cookie dari browser bawaannya. Cookie bisa menjaga status login, sehingga siapa pun yang memegangnya bisa bertindak sebagai kamu di situs itu.</item>
+        <item>Aplikasi yang memintamu login ke situs di dalam aplikasi (misalnya untuk mengunduh postinganmu sendiri) memerlukan cookie untuk sesi tersebut.</item>
+        <item></item>
+        <item>Login ke akun penting hanya lewat aplikasi resmi atau browser. Logout dan ganti kata sandi bila ragu.</item>
+    </string-array>
+    <string-array name="risk_ad_sdks">
+        <item>SDK iklan dan analitik</item>
+        <item>Kode pihak ketiga yang menampilkan iklan atau mengukur cara kamu memakai aplikasi. SDK ini dapat mengumpulkan ID perangkat dan data pemakaian.</item>
+        <item>Sangat umum pada aplikasi gratis; biasanya dijelaskan di kebijakan privasi aplikasi.</item>
+        <item>Data apa saja yang benar-benar dikumpulkan setiap SDK tidak terlihat dari pemeriksaan kode.</item>
+        <item>Periksa bagian Keamanan data di Google Play, dan reset ID iklan di Setelan → Privasi → Iklan bila mau.</item>
+    </string-array>
+    <string-array name="risk_destinations">
+        <item>Alamat di dalam kode</item>
+        <item>Alamat web yang tertulis di kode aplikasi sendiri: tempat yang kemungkinan dihubungi aplikasi.</item>
+        <item>Setiap aplikasi yang terhubung ke internet memilikinya. Domain yang tidak dikenal belum tentu mencurigakan.</item>
+        <item>Apakah alamat ini benar-benar dihubungi, dan apa yang dikirim, tidak terlihat dari kode saja.</item>
+        <item>Perhatikan alamat yang tidak cocok dengan pengembang aplikasi, dan alamat http tanpa enkripsi.</item>
+    </string-array>
+    <string name="cap_sms_read">SMS</string>
+    <string name="cap_contacts">kontak</string>
+    <string name="cap_call_log">riwayat panggilan</string>
+    <string name="cap_clipboard">clipboard</string>
+    <string name="cap_notification_read">notifikasi</string>
+    <string name="cap_screen_read">teks di layar</string>
+    <string name="cap_cookies">cookie login</string>
+    <string name="cap_phone_id">nomor telepon atau ID perangkat</string>
+    <string name="cap_accounts">akun</string>
+    <string name="cap_location">lokasi</string>
+    <string name="cap_network">internet</string>
+    <string name="cap_sms_send">SMS</string>
+    <string name="cap_telegram">bot Telegram</string>
+    <string name="cap_discord">webhook Discord</string>
+    <string name="ev_code_call">Memanggil %1$s</string>
+    <string name="ev_code_string">Berisi teks %1$s</string>
+    <string name="ev_flow">Membaca %1$s dan mengirim ke %2$s di jalur kode yang sama (nilainya belum dilacak)</string>
+    <string name="ev_destination">Terhubung ke %1$s</string>
+    <string name="ev_destination_cleartext">%1$s (http tanpa enkripsi)</string>
+    <string name="ev_destination_ip">%1$s (alamat IP, tanpa nama domain)</string>
+    <string name="ev_origin_app">kode aplikasi sendiri</string>
+    <string name="ev_origin_library">library: %1$s</string>
+    <string name="ev_hidden_code">Berkas kode tersembunyi: %1$s</string>
+    <string name="ev_packer">Packer kode: %1$s</string>
+    <string name="unproven_flow">Nilai yang dibaca dari data ini dilacak sampai ke panggilan yang mengirimnya ke luar (T3). Tetap belum terbukti jalur itu pernah berjalan di HP-mu; hanya pengamatan saat aplikasi berjalan yang bisa menunjukkannya.</string>
+    <string name="unproven_calls">Kode memanggil fungsi yang dibutuhkan (T2), tetapi tidak ditemukan jalur yang mengirim data itu ke luar. Kode yang tidak pernah dijalankan, atau kode yang dimuat belakangan, tidak bisa dikesampingkan.</string>
+    <string name="unproven_none">Kode aplikasi sendiri sudah diperiksa dan tidak memanggil fungsi yang dibutuhkan. Library atau kode yang dimuat belakangan masih mungkin memakainya.</string>
+    <string name="unproven_gaps">Sebagian aplikasi tidak bisa dianalisis (lihat Cakupan pemeriksaan), jadi hasil kode mungkin belum lengkap.</string>
+    <string name="evidence_strength">Bukti terkuat: %1$s</string>
+    <string name="strength_t1">hanya tertulis di manifest</string>
+    <string name="strength_t2">kode memanggil fungsi tersebut</string>
+    <string name="strength_t3">membaca dan mengirim di satu jalur kode</string>
+    <string name="strength_t4">teramati di perangkat ini</string>
+    <string name="coverage_code">Kode (DEX) dianalisis: %1$d berkas DEX, %2$d kelas, %3$d di kode aplikasi sendiri</string>
+    <string name="coverage_code_failed">Kode aplikasi (DEX) tidak bisa dianalisis</string>
+    <string name="coverage_gap_hidden">Kode tersembunyi tidak dianalisis: %1$s</string>
+    <string name="coverage_gap_packer">Kode dilindungi packer (%1$s); kode aslinya terenkripsi</string>
+    <string name="coverage_gap_cross">Logika %1$s berjalan di luar DEX dan tidak dianalisis</string>
+    <string name="coverage_gap_unreadable">Kode di %1$s tidak bisa dibaca</string>
+    <string name="coverage_gap_limit">Analisis kode berhenti di batas waktu atau ukuran; hasilnya sebagian</string>
+    <string name="coverage_gap_tracking">Pelacakan nilai kehabisan waktu; kemampuan dan alamat lengkap, tetapi sebagian jalur data belum ditandai terlacak</string>
+    <string name="ev_flow_traced">Nilai %1$s dilacak sampai ke panggilan yang mengirim ke %2$s</string>
+    <string name="unproven_flow_untraced">Membaca data ini dan mengirim terjadi di jalur kode yang sama (T3), tetapi nilai yang dibaca belum terlacak sampai ke yang dikirim, jadi keduanya bisa saja tidak berhubungan. Hanya pengamatan saat aplikasi berjalan yang bisa menunjukkan apa yang dikirim.</string>
+    <string name="strength_t3_traced">nilai terlacak dari pembacaan sampai pengiriman</string>
+    <string name="analysis_progress_title">Memeriksa aplikasi</string>
+    <string name="analysis_stage_manifest">Membaca manifest dan sertifikat</string>
+    <string name="analysis_stage_code">Membaca kode: berkas %1$d dari %2$d</string>
+    <string name="analysis_stage_resolving">Menelusuri aliran data di kode</string>
+    <string name="security_paused">Dijeda: %1$d dari %2$d aplikasi sudah diperiksa. Hasilnya tersimpan, jadi bisa dilanjutkan kapan saja.</string>
+    <string name="chart_title">Hasil pemeriksaan</string>
+    <string name="chart_clear">Tanpa temuan penting</string>
+    <string name="chart_unchecked">Belum diperiksa</string>
+    <string name="chart_center">diperiksa</string>
+    <string name="chart_description">%1$d dengan indikator kuat, %2$d perlu perhatian, %3$d tanpa temuan penting, %4$d belum diperiksa</string>
+</resources>

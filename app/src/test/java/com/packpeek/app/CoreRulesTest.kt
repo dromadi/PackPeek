@@ -1,7 +1,14 @@
 package com.packpeek.app
 
+import com.packpeek.app.data.BackupRecord
+import com.packpeek.app.data.PrunePlan
+import com.packpeek.app.data.inFolder
+import com.packpeek.app.data.prunePlan
+import com.packpeek.app.data.signerChanges
+import com.packpeek.app.data.subjectName
 import com.packpeek.app.engine.ManifestRoot
 import com.packpeek.app.model.*
+import com.packpeek.app.ui.sizeText
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -39,6 +46,26 @@ class CoreRulesTest {
             listOf(app(), app("Split", splits = listOf("config.apk"))).map {
                 FileNames.format(it, NamingConfig())
             },
+        )
+    }
+
+    @Test
+    fun splitFormatOnlyChangesSplitApps() {
+        val xapk = NamingConfig(split = SplitFormat.XAPK)
+        assertEquals("Example_v1.0.apk", FileNames.format(app(), xapk))
+        assertEquals(
+            "Split_v1.0.xapk",
+            FileNames.format(app("Split", splits = listOf("config.apk")), xapk),
+        )
+        assertEquals(SplitFormat.APKS, SplitFormat.of(null))
+        assertEquals(SplitFormat.APKS, SplitFormat.of("UNKNOWN"))
+        assertEquals(SplitFormat.ZIP, SplitFormat.of("ZIP"))
+        assertEquals(
+            "Split_v1.0.apk",
+            FileNames.format(
+                app("Split", splits = listOf("config.apk")),
+                NamingConfig(split = SplitFormat.APK),
+            ),
         )
     }
 
@@ -97,9 +124,113 @@ class CoreRulesTest {
             filterApps(
                 listOf(one, two),
                 AppQuery(text = "EXAMPLE", framework = "Flutter"),
-                mapOf(one.packageName to "Flutter", two.packageName to "Unity"),
+                mapOf(one.packageName to listOf("Flutter"), two.packageName to listOf("Unity")),
             ),
         )
+    }
+
+    @Test
+    fun frameworkFilterMatchesAnyDetectedFramework() {
+        val hybrid = app(pkg = "hybrid.app")
+        assertEquals(
+            listOf(hybrid),
+            filterApps(
+                listOf(hybrid, app(pkg = "native.app")),
+                AppQuery(framework = "React Native"),
+                mapOf(
+                    hybrid.packageName to listOf("Flutter", "React Native"),
+                    "native.app" to listOf("Android"),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun oldTargetDoesNotDependOnDevice() {
+        assertTrue(isOldTarget(30))
+        assertFalse(isOldTarget(31))
+        assertFalse(isOldTarget(36))
+    }
+
+    @Test
+    fun favoriteFilterUsesSavedPackages() {
+        val star = app(pkg = "star.app")
+        assertEquals(
+            listOf(star),
+            filterApps(
+                listOf(star, app(pkg = "plain.app")),
+                AppQuery(kind = "FAVORITE"),
+                favorites = setOf("star.app"),
+            ),
+        )
+    }
+
+    private fun record(id: Long, pkg: String, created: Long, signer: String) =
+        BackupRecord(
+            id = id,
+            jobId = "job",
+            packageName = pkg,
+            label = pkg,
+            version = "1",
+            format = "apk",
+            created = created,
+            state = "SUCCESS",
+            signer = signer,
+        )
+
+    private val folder = "content://com.android.externalstorage.documents/tree/primary%3ABackup"
+
+    private fun doc(name: String) = "$folder/document/primary%3ABackup%2F$name"
+
+    private fun stored(id: Long, uri: String) = record(id, "a", id, "s").copy(uri = uri)
+
+    @Test
+    fun pruneKeepsNewestOnly() {
+        val rows = (5L downTo 1L).map { stored(it, doc("v$it.apk")) }
+        val plan = prunePlan(rows, 3, folder)
+        assertEquals(listOf(2L, 1L), plan.delete.map { it.id })
+        assertTrue(plan.forget.isEmpty())
+        assertEquals(PrunePlan(emptyList(), emptyList()), prunePlan(rows, 0, folder))
+        assertTrue(prunePlan(rows, 9, folder).delete.isEmpty())
+    }
+
+    /** The user deleted the old file by hand; the new backup reused its name and URI. */
+    @Test
+    fun pruneNeverDeletesAUriStillUsedByAKeptBackup() {
+        val shared = doc("App_v1.apk")
+        val plan = prunePlan(listOf(stored(2, shared), stored(1, shared)), 1, folder)
+        assertTrue(plan.delete.isEmpty())
+        assertEquals(listOf(1L), plan.forget.map { it.id })
+    }
+
+    @Test
+    fun pruneLeavesBackupsInAnotherFolder() {
+        val other = "content://com.android.externalstorage.documents/tree/primary%3AOld/document/primary%3AOld%2Fa.apk"
+        val plan = prunePlan(listOf(stored(3, doc("a3.apk")), stored(2, other), stored(1, "")), 1, folder)
+        assertTrue(plan.delete.isEmpty())
+        assertEquals(listOf(1L), plan.forget.map { it.id })
+        assertFalse(inFolder(doc("x.apk"), ""))
+        assertFalse(inFolder("$folder-evil/document/x", folder))
+    }
+
+    @Test
+    fun signerChangeFlagsOnlyTheChangedBackup() {
+        val rows =
+            listOf(
+                record(1, "a", 10, "k1"),
+                record(2, "a", 20, "k1"),
+                record(3, "a", 30, "k2"),
+                record(4, "b", 15, "k9"),
+                record(5, "a", 25, ""),
+            )
+        assertEquals(setOf(3L), signerChanges(rows))
+    }
+
+    @Test
+    fun sizesUseDecimalUnits() {
+        assertEquals("78.9 MB", sizeText(78_940_000).replace(',', '.'))
+        assertEquals("1.50 GB", sizeText(1_500_000_000).replace(',', '.'))
+        assertEquals("999 B", sizeText(999))
     }
 
     @Test
@@ -156,11 +287,55 @@ class CoreRulesTest {
     }
 
     @Test
+    fun launcherActivitiesAreQualified() {
+        assertEquals(
+            setOf("io.github.omniextract.claude.MainActivity"),
+            ManifestRoot.parse(fixture()).launchers,
+        )
+    }
+
+    @Test
     fun malformedBinaryXmlFailsClosed() {
-        listOf(byteArrayOf(), byteArrayOf(3, 0, 8, 0), fixture().copyOf(30), ByteArray(100))
-            .forEach { assertTrue(runCatching { ManifestRoot.decode(it) }.isFailure) }
+        val truncated = fixture().let { it.copyOf(it.size - 4) }
+        listOf(
+                byteArrayOf(),
+                byteArrayOf(3, 0, 8, 0),
+                fixture().copyOf(30),
+                ByteArray(100),
+                truncated,
+            )
+            .forEach {
+                val failure = runCatching { ManifestRoot.decode(it) }.exceptionOrNull()
+                assertEquals(ErrorCode.ARCHIVE, (failure as? AppFailure)?.code)
+            }
     }
 
     private fun fixture() =
         javaClass.getResourceAsStream("/omniextract_manifest.bin")!!.use { it.readBytes() }
+
+    @Test
+    fun androidVersionsHaveReadableNames() {
+        assertEquals("Android 16 (Baklava, API 36)", AndroidVersions.label(36))
+        assertEquals("Android 7.0 (Nougat, API 24)", AndroidVersions.label(24))
+        assertEquals("Android 1.0 (API 1)", AndroidVersions.label(1))
+        assertEquals("API 99", AndroidVersions.label(99))
+        assertEquals("Android 12L", AndroidVersions.short(32))
+    }
+
+    @Test
+    fun certificateSubjectsShowTheirCommonName() {
+        assertEquals("Android Debug", subjectName("CN=Android Debug,O=Android,C=US"))
+        assertEquals("Google Inc.", subjectName("C=US,O=Google Inc.,L=Mountain View"))
+        assertEquals("Acme, Inc", subjectName("CN=\"Acme, Inc\",O=Acme"))
+        assertEquals("plain", subjectName("plain"))
+    }
+
+    @Test
+    fun overviewGroupFiltersTheList() {
+        val a = app(pkg = "a.app")
+        val b = app(pkg = "b.app")
+        val group = AppGroup("Certificates: Android Debug", setOf("b.app"))
+        assertEquals(listOf(b), filterApps(listOf(a, b), AppQuery(group = group)))
+        assertEquals(2, filterApps(listOf(a, b), AppQuery()).size)
+    }
 }

@@ -2,11 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Only for the optional VirusTotal lookup in deep analysis: sends a SHA-256 with the user's own key, on tap. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Optional, granted by the user in Settings: per-app network usage as observed evidence. -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
     <application android:name=".PackPeekApp" android:label="@string/app_name" android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher" android:allowBackup="false" android:fullBackupContent="false"
+        android:roundIcon="@mipmap/ic_launcher" android:largeHeap="true" android:allowBackup="false" android:fullBackupContent="false"
         android:dataExtractionRules="@xml/data_extraction_rules" android:supportsRtl="true"
         android:theme="@style/Theme.PackPeek" android:localeConfig="@xml/locales_config"
         android:enableOnBackInvokedCallback="true" android:usesCleartextTraffic="false">
@@ -15,6 +19,16 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" /><category android:name="android.intent.category.DEFAULT" /><category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="content" android:mimeType="application/vnd.android.package-archive" />
+            </intent-filter>
+            <!-- APKS, XAPK and APKM files arrive as ZIP or generic binaries; non-APK content is rejected on import. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" /><category android:name="android.intent.category.DEFAULT" /><category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/x-zip-compressed" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/vnd.apkm" />
+                <data android:mimeType="application/xapk-package-archive" />
             </intent-filter>
         </activity>
         <activity android:name=".engine.InstallStatusActivity" android:exported="false" android:excludeFromRecents="true" android:theme="@style/Theme.PackPeek.Transparent" />

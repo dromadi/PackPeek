@@ -1,4 +1,4 @@
-# PackPeek 2.0.0-alpha.1
+# PackPeek 2.0.0-alpha.5
 
 Penulisan ulang OmniExtract berdasarkan `Grand_Design_PackPeek.xlsx` milik pengguna. Source ini ditulis baru, bukan pemulihan source asli APK. Kode pesaing tidak disalin. Fokus pada tahap 1; tanpa iklan, billing, akun, atau analitik.
 
@@ -10,6 +10,8 @@ Gunakan JDK 17 lengkap, Android SDK Platform 36, Build Tools 36.0.0, dan Android
 ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
 ./gradlew :app:assembleRelease
 ```
+
+Pengujian dibagi tiga lapis (unit test, render layar di JVM tanpa emulator, dan emulator/HP); lihat `docs/TEST_PLAN.md`.
 
 Windows: `gradlew.bat`. Tentukan SDK melalui `ANDROID_HOME` atau `local.properties` lokal. Build awal memerlukan internet untuk dependensi.
 
@@ -26,13 +28,16 @@ Salin `keystore.properties.example` ke `keystore.properties`, isi secara lokal u
 - Folder SAF, DataStore, background WorkManager dan Room untuk riwayat serta statistik.
 - Detail izin, komponen, sertifikat, tanda tangan dan teknologi; skor konfigurasi transparan.
 - Pemeriksaan APK/APKS lokal dan pemasangan melalui persetujuan sistem Android.
-- Dasbor, ekspor ikon PNG 512 px, quick actions, tema terang/gelap, enam aksen, bahasa EN/ID.
+- Dasbor, ekspor ikon PNG 512 px, quick actions, tema terang/gelap/AMOLED, enam aksen, ekspor daftar aplikasi CSV.
+- Diagnosis gagal pasang, kartu "Siap dipasang?", pilihan bagian split, XAPK/APKM/bundletool `.apks`, antrean pemasangan banyak berkas.
+- Indeks folder backup: status terhadap aplikasi terpasang, aplikasi tanpa backup, pulihkan/perbarui dan hapus.
+- Bahasa: Inggris, Indonesia, Spanyol, Portugis (Brasil), Rusia, Hindi, Vietnam, Turki. Terjemahan selain EN/ID belum ditinjau penutur asli.
 
 ## Memakai alpha
 
 Pilih folder melalui onboarding/pengaturan. Ketuk Ekstrak pada satu kartu atau centang beberapa lalu Ekstrak pilihan. Hasil dapat dibagikan melalui dialog hasil/Riwayat. Periksa berkas membuka APK/APKS tanpa memasang. Setelah mengizinkan sumber tidak dikenal untuk installer, kembali dan ketuk Pasang lagi.
 
-Backup berisi paket instalasi, bukan data aplikasi, akun, progres permainan, atau OBB. APKS di sini berupa ZIP base + split, bukan jaminan kompatibilitas semua arsip Bundletool/XAPK/APKM.
+Backup berisi paket instalasi, bukan data aplikasi, akun, progres permainan, atau OBB. Aplikasi split dapat disimpan sebagai `.apks`, `.xapk`, `.zip`, atau `.apk` gabungan eksperimental. `.apk` gabungan ditandatangani ulang dengan kunci PackPeek, sehingga bukan lagi build asli pengembang: tidak dapat meng-update aplikasi asli dan sebagian aplikasi menolak berjalan. APKS di sini berupa ZIP base + split, bukan jaminan kompatibilitas semua arsip Bundletool/XAPK/APKM.
 
 ## Batas dan keputusan
 
@@ -41,9 +46,9 @@ Backup berisi paket instalasi, bukan data aplikasi, akun, progres permainan, ata
 - Impor dibatasi 4 GiB, 10.000 entri ZIP, 512 APK, manifest 2 MiB. Traversal, base ganda, split duplikat dan package/versi berbeda ditolak.
 - Package ID baru tidak dapat membaca preferensi privat OmniExtract lama. Adaptor SharedPreferences hanya bekerja dalam sandbox package yang sama; folder dipilih ulang.
 - Email dukungan belum diberikan: tombol menyalin diagnostik; isi `SUPPORT_EMAIL` nanti. `SHOW_RATE=false` menyembunyikan rating Play.
-- QUERY_ALL_PACKAGES untuk inventaris; REQUEST_INSTALL_PACKAGES untuk instalasi; izin foreground/notifikasi untuk backup. Tidak ada izin Internet atau akses semua file.
+- QUERY_ALL_PACKAGES untuk inventaris; REQUEST_INSTALL_PACKAGES untuk instalasi; izin foreground/notifikasi untuk backup. Sejak alpha.10 ada izin `INTERNET`, hanya untuk cek VirusTotal opsional dengan kunci milik pengguna; yang dikirim hanya SHA-256, bukan berkasnya. Tanpa kunci, tidak ada koneksi. Tidak ada akses semua file.
 - Baseline Profile, pengujian perangkat API 24/29/33/34/36, uji TalkBack dan signing produksi belum dinyatakan selesai. Alpha bukan rilis stabil final grand design.
 
-Lihat `docs/BUILD_REPORT.md` dan `docs/GRAND_DESIGN_STATUS.md` untuk hasil aktual serta pekerjaan lanjutan.
+Lihat `docs/BUILD_REPORT.md` dan `docs/GRAND_DESIGN_STATUS.md` untuk hasil aktual serta pekerjaan lanjutan, `docs/IDE_FITUR.md` untuk daftar ide pengembangan, dan `docs/ANALISIS_RISIKO.md` untuk arah analisis risiko berbasis bukti.
 
 Referensi resmi: https://developer.android.com/build/releases/agp-8-13-0-release-notes ; https://developer.android.com/develop/background-work/background-tasks/persistent/how-to/long-running ; https://developer.android.com/reference/android/content/pm/PackageInstaller

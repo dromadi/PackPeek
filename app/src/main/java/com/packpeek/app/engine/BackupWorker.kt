@@ -12,6 +12,7 @@ import androidx.work.*
 import com.packpeek.app.MainActivity
 import com.packpeek.app.PackPeekApp
 import com.packpeek.app.R
+import com.packpeek.app.data.prunePlan
 import com.packpeek.app.model.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
@@ -54,11 +55,21 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
                             setProgress(workDataOf("percent" to percent, "label" to record.label))
                             val now = android.os.SystemClock.elapsedRealtime()
                             if (now - lastNotification >= 1000) {
-                                setForeground(notification(percent, record.label))
+                                // Re-posting under the same id updates the foreground notification
+                                // without restarting the service, which Android 12+ may refuse in
+                                // the background and which would fail the record being copied.
+                                runCatching {
+                                    val info = notification(percent, record.label)
+                                    applicationContext
+                                        .getSystemService(NotificationManager::class.java)
+                                        .notify(info.notificationId, info.notification)
+                                }
                                 lastNotification = now
                             }
                         }
                     dao.finish(record.id, "SUCCESS", result.uri, result.name, result.bytes)
+                    dao.setSigner(record.id, app.apps.signerDigest(record.packageName))
+                    prune(record.packageName, settings.keep, job.folder)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -73,20 +84,52 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
             return Result.success()
         } catch (e: CancellationException) {
             withContext(NonCancellable) {
-                dao.cancelPending(jobId)
-                dao.jobState(jobId, "CANCELLED")
+                val work = WorkManager.getInstance(applicationContext)
+                if (work.getWorkInfoByIdFlow(id).first()?.state == WorkInfo.State.CANCELLED) {
+                    dao.cancelPending(jobId)
+                    dao.jobState(jobId, "CANCELLED")
+                } else {
+                    // Stopped by the system (quota, Doze, process limits): WorkManager runs this
+                    // work again, and finished records are skipped on the next attempt.
+                    dao.requeue(jobId)
+                    dao.jobState(jobId, "QUEUED")
+                }
             }
             throw e
         } catch (e: Exception) {
             withContext(NonCancellable) {
-                dao.records(jobId)
-                    .filter { it.state in listOf("RUNNING", "QUEUED") }
-                    .forEach { dao.finish(it.id, "FAILED", error = "UNKNOWN") }
+                dao.failPending(jobId)
                 dao.jobState(jobId, "FAILED")
             }
             return Result.failure()
         }
     }
+
+    /**
+     * Applies the keep-N setting (see [prunePlan]). A record leaves history only once its file
+     * is gone; a file whose size no longer matches the backup was replaced and is not deleted.
+     */
+    private suspend fun prune(pkg: String, keep: Int, folder: String) {
+        val plan = prunePlan(dao.successes(pkg), keep, folder)
+        plan.forget.forEach { dao.prune(it.id) }
+        for (old in plan.delete) {
+            val doc = DocumentFile.fromSingleUri(applicationContext, Uri.parse(old.uri))
+            val outcome =
+                runCatching {
+                        when {
+                            doc == null || !doc.exists() -> PruneOutcome.GONE
+                            old.bytes > 0 && doc.length() != old.bytes -> PruneOutcome.REPLACED
+                            doc.delete() -> PruneOutcome.GONE
+                            else -> PruneOutcome.KEPT
+                        }
+                    }
+                    .getOrDefault(PruneOutcome.KEPT)
+            // KEPT: deletion failed (e.g. folder access revoked), so history keeps the record.
+            if (outcome != PruneOutcome.KEPT) dao.prune(old.id)
+        }
+    }
+
+    private enum class PruneOutcome { GONE, REPLACED, KEPT }
 
     private fun notification(progress: Int, label: String): ForegroundInfo {
         val c = applicationContext

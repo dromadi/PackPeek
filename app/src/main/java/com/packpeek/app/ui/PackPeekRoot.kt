@@ -10,10 +10,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -21,51 +32,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.*
 import com.packpeek.app.R
+import com.packpeek.app.data.BackupJob
+import com.packpeek.app.data.BackupRecord
 import com.packpeek.app.data.Settings
 import com.packpeek.app.model.*
-
-@Composable
-fun PackPeekTheme(settings: Settings?, content: @Composable () -> Unit) {
-    val dark =
-        when (settings?.theme) {
-            "LIGHT" -> false
-            "DARK" -> true
-            else -> isSystemInDarkTheme()
-        }
-    val c = LocalContext.current
-    val accents =
-        mapOf(
-            "TEAL" to (0xFF006A5CL to 0xFF76E4C5L),
-            "BLUE" to (0xFF205EABL to 0xFFA6C8FFL),
-            "PURPLE" to (0xFF6840A3L to 0xFFD6B9FFL),
-            "ORANGE" to (0xFF904D00L to 0xFFFFBA73L),
-            "RED" to (0xFFA63440L to 0xFFFFB2B9L),
-            "GRAY" to (0xFF465C68L to 0xFFADC9D9L),
-        )
-    val pair = accents[settings?.accent] ?: accents.getValue("TEAL")
-    val scheme =
-        if (settings?.accent == "DYNAMIC" && Build.VERSION.SDK_INT >= 31) {
-            if (dark) dynamicDarkColorScheme(c) else dynamicLightColorScheme(c)
-        } else if (dark)
-            darkColorScheme(
-                primary = Color(pair.second),
-                onPrimary = Color(0xFF08251F),
-                background = Color(0xFF101619),
-                surface = Color(0xFF101619),
-            )
-        else
-            lightColorScheme(
-                primary = Color(pair.first),
-                background = Color(0xFFF7F9F8),
-                surface = Color(0xFFF7F9F8),
-            )
-    MaterialTheme(colorScheme = scheme, content = content)
-}
 
 @Composable
 fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
@@ -89,6 +66,27 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
             rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
                 it?.let { uri -> vm.import(uri) { nav.navigate("detail") } }
             }
+        val multiPicker =
+            rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) {
+                vm.installMany(it)
+            }
+        fun canInstall(): Boolean {
+            if (Build.VERSION.SDK_INT < 26 || c.packageManager.canRequestPackageInstalls())
+                return true
+            c.launchSafe(
+                android.content.Intent(
+                    android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:${c.packageName}"),
+                )
+            )
+            return false
+        }
+        fun pickInstallFiles() {
+            if (canInstall()) multiPicker.launch(arrayOf("*/*"))
+        }
+        fun installFiles(uris: List<Uri>) {
+            if (canInstall()) vm.installMany(uris)
+        }
         val notifyPermission =
             rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
         fun backup(items: List<AppRecord>) {
@@ -115,60 +113,78 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
         val work by vm.workInfo.collectAsStateWithLifecycle()
         val importing by vm.importing.collectAsStateWithLifecycle()
         val installing by vm.installing.collectAsStateWithLifecycle()
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            stringResource(
-                                when (route) {
-                                    "apps" -> R.string.app_name
-                                    "history" -> R.string.history
-                                    "dashboard" -> R.string.overview
-                                    "settings" -> R.string.settings
-                                    "about" -> R.string.about
-                                    else -> R.string.app_details
-                                }
-                            )
-                        )
-                    },
-                    navigationIcon = {
-                        if (route !in listOf("apps", "history", "dashboard"))
-                            IconButton(onClick = { nav.popBackStack() }) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.ArrowBack,
-                                    stringResource(R.string.back),
-                                )
-                            }
-                    },
-                    actions = {
-                        if (route == "apps") {
-                            TextButton(
-                                onClick = { filePicker.launch(arrayOf("*/*")) },
-                                enabled = !importing && !installing,
-                            ) {
-                                Text(stringResource(R.string.analyze_file))
-                            }
-                            IconButton(onClick = vm::refresh) {
-                                Icon(Icons.Default.Refresh, stringResource(R.string.refresh))
-                            }
-                        }
-                        if (route != "settings")
-                            IconButton(
-                                onClick = { nav.navigate("settings") { launchSingleTop = true } }
-                            ) {
-                                Icon(Icons.Default.Settings, stringResource(R.string.settings))
-                            }
-                    },
+        val queue by vm.queue.collectAsStateWithLifecycle()
+        val queueRunning by vm.queueRunning.collectAsStateWithLifecycle()
+        val snackbar = remember { SnackbarHostState() }
+        val resources = LocalResources.current
+        // A single successful extract gets a quick "Saved · Share" bar instead of a dialog.
+        val quick = latest?.let { quickResult(it, records) }
+        var announced by remember { mutableStateOf<BackupRecord?>(null) }
+        LaunchedEffect(quick?.id) {
+            if (quick != null) {
+                announced = quick
+                vm.dismissResult()
+            }
+        }
+        // Keyed on the announced record, so dismissing the job does not cancel the bar.
+        LaunchedEffect(announced?.id) {
+            val record = announced ?: return@LaunchedEffect
+            val result =
+                snackbar.showSnackbar(
+                    resources.getString(R.string.saved_file, record.fileName),
+                    actionLabel = resources.getString(R.string.share),
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Long,
                 )
+            if (result == SnackbarResult.ActionPerformed) shareFiles(c, listOf(Uri.parse(record.uri)))
+        }
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbar) },
+            topBar = {
+                if (route != "apps")
+                    TopAppBar(
+                        title = {
+                            Text(
+                                stringResource(
+                                    when (route) {
+                                        "history" -> R.string.history
+                                        "dashboard" -> R.string.overview
+                                        "settings" -> R.string.settings
+                                        "about" -> R.string.about
+                                        "deep" -> R.string.deep_button_title
+                                        else -> R.string.app_details
+                                    }
+                                )
+                            )
+                        },
+                        navigationIcon = {
+                            if (route !in listOf("history", "dashboard"))
+                                IconButton(onClick = { nav.popBackStack() }) {
+                                    Icon(
+                                        Icons.AutoMirrored.Rounded.ArrowBack,
+                                        stringResource(R.string.back),
+                                    )
+                                }
+                        },
+                        actions = {
+                            if (route in listOf("history", "dashboard"))
+                                IconButton(
+                                    onClick = {
+                                        nav.navigate("settings") { launchSingleTop = true }
+                                    }
+                                ) {
+                                    Icon(Icons.Rounded.Settings, stringResource(R.string.settings))
+                                }
+                        },
+                    )
             },
             bottomBar = {
                 if (route in listOf("apps", "history", "dashboard"))
                     NavigationBar {
                         listOf(
-                                Triple("apps", R.string.apps, Icons.Default.Home),
-                                Triple("history", R.string.history, Icons.Default.Check),
-                                Triple("dashboard", R.string.overview, Icons.Default.Info),
+                                Triple("apps", R.string.apps, PackIcons.Apps),
+                                Triple("history", R.string.history, PackIcons.History),
+                                Triple("dashboard", R.string.overview, PackIcons.Insights),
                             )
                             .forEach { (key, title, icon) ->
                                 NavigationBarItem(
@@ -188,25 +204,68 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
             },
         ) { padding ->
             Column(Modifier.padding(padding).fillMaxSize()) {
-                if (latest?.state in listOf("QUEUED", "RUNNING"))
-                    Surface(color = MaterialTheme.colorScheme.primaryContainer) {
-                        Column(Modifier.fillMaxWidth().padding(12.dp)) {
+                if (latest?.state in listOf("QUEUED", "RUNNING")) {
+                    val percent = work?.progress?.getInt("percent", 0) ?: 0
+                    val done = records.count { it.state in listOf("SUCCESS", "FAILED") }
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+                    ) {
+                        Column(Modifier.padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 12.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    work?.progress?.getString("label")
-                                        ?: stringResource(R.string.backup_running),
-                                    Modifier.weight(1f),
-                                )
+                                Icon(PackIcons.Download, null, Modifier.size(20.dp))
+                                Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                                    Text(
+                                        work?.progress?.getString("label")
+                                            ?: stringResource(R.string.backup_running),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        maxLines = 1,
+                                    )
+                                    Text(
+                                        stringResource(
+                                            R.string.backup_progress,
+                                            (done + 1).coerceAtMost(records.size.coerceAtLeast(1)),
+                                            records.size.coerceAtLeast(1),
+                                            percent,
+                                        ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
                                 TextButton(onClick = vm::cancelBackup) {
                                     Text(stringResource(R.string.cancel))
                                 }
                             }
                             LinearProgressIndicator(
-                                progress = { (work?.progress?.getInt("percent", 0) ?: 0) / 100f },
-                                modifier = Modifier.fillMaxWidth(),
+                                progress = { percent / 100f },
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp, end = 8.dp),
                             )
                         }
                     }
+                }
+                if (queueRunning) {
+                    val done = queue.count { it.result != null || it.error != null }
+                    val current = queue.getOrNull(done)
+                    Surface(color = MaterialTheme.colorScheme.tertiaryContainer) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                stringResource(
+                                    R.string.queue_progress,
+                                    (done + 1).coerceAtMost(queue.size),
+                                    queue.size,
+                                    current?.label?.ifBlank { current.name } ?: "",
+                                ),
+                                Modifier.weight(1f),
+                            )
+                            TextButton(onClick = vm::cancelQueue) {
+                                Text(stringResource(R.string.cancel))
+                            }
+                        }
+                    }
+                }
                 if (importing || installing) LinearProgressIndicator(Modifier.fillMaxWidth())
                 NavHost(
                     navController = nav,
@@ -219,15 +278,36 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                             ::backup,
                             { nav.navigate("detail") },
                             { folderPicker.launch(null) },
+                            { filePicker.launch(arrayOf("*/*")) },
+                            { nav.navigate("settings") { launchSingleTop = true } },
+                            ::pickInstallFiles,
                         )
                     }
-                    composable("detail") { DetailScreen(vm, ::backup) }
-                    composable("history") { HistoryScreen(vm) { nav.navigate("detail") } }
+                    composable("detail") { DetailScreen(vm, ::backup) { nav.navigate("deep") } }
+                    composable("deep") { DeepScreen(vm) { nav.navigate("settings") { launchSingleTop = true } } }
+                    composable("history") {
+                        HistoryScreen(
+                            vm,
+                            { nav.navigate("detail") },
+                            { uri -> installFiles(listOf(uri)) },
+                            ::backup,
+                        )
+                    }
                     composable("dashboard") {
-                        DashboardScreen(vm) {
-                            vm.inspect(it)
-                            nav.navigate("detail")
-                        }
+                        DashboardScreen(
+                            vm,
+                            {
+                                vm.inspect(it)
+                                nav.navigate("detail")
+                            },
+                            {
+                                vm.showGroup(it)
+                                nav.navigate("apps") {
+                                    popUpTo("apps") { inclusive = false }
+                                    launchSingleTop = true
+                                }
+                            },
+                        )
                     }
                     composable("settings") {
                         SettingsScreen(vm, { folderPicker.launch(null) }, { nav.navigate("about") })
@@ -237,63 +317,120 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
             }
         }
         val error by vm.error.collectAsStateWithLifecycle()
-        if (error != null)
+        // Dialog content composes separately from this scope and can run once more after the
+        // state is cleared, so every dialog works on a captured non-null value, never `!!`.
+        error?.let { code ->
             AlertDialog(
                 onDismissRequest = { vm.error.value = null },
                 title = { Text(stringResource(R.string.attention)) },
-                text = { Text(stringResource(errorText(error!!))) },
+                text = { Text(stringResource(errorText(code))) },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            val folder = error == ErrorCode.FOLDER
                             vm.error.value = null
-                            if (folder) folderPicker.launch(null)
+                            if (code == ErrorCode.FOLDER) folderPicker.launch(null)
                         }
                     ) {
                         Text(
                             stringResource(
-                                if (error == ErrorCode.FOLDER) R.string.choose_folder
+                                if (code == ErrorCode.FOLDER) R.string.choose_folder
                                 else R.string.close
                             )
                         )
                     }
                 },
             )
+        }
         val confirmation by vm.confirmation.collectAsStateWithLifecycle()
-        if (confirmation != null)
+        val current = settings
+        val pending = confirmation
+        if (pending != null && current != null)
             AlertDialog(
                 onDismissRequest = { vm.confirmation.value = null },
+                icon = { Icon(PackIcons.Download, null) },
                 title = { Text(stringResource(R.string.confirm_backup)) },
                 text = {
                     Column {
-                        Text(stringResource(R.string.backup_count, confirmation!!.size))
                         Text(
-                            folderName(c, settings!!.folder),
-                            style = MaterialTheme.typography.bodySmall,
+                            pluralStringResource(
+                                R.plurals.backup_summary,
+                                pending.size,
+                                pending.size,
+                                sizeText(pending.sumOf { it.size }),
+                            ),
+                            style = MaterialTheme.typography.bodyLarge,
                         )
-                        LazyColumn(Modifier.heightIn(max = 300.dp)) {
-                            items(confirmation!!) { app ->
-                                Column(Modifier.padding(vertical = 8.dp)) {
-                                    Text(app.label)
-                                    Text(
-                                        FileNames.format(app, settings!!.naming),
-                                        style = MaterialTheme.typography.bodySmall,
-                                    )
-                                    Text(
-                                        sizeText(app.size),
-                                        style = MaterialTheme.typography.labelSmall,
-                                    )
+                        Row(
+                            Modifier.padding(top = 6.dp, bottom = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                PackIcons.Folder,
+                                null,
+                                Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                folderName(c, current.folder),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 6.dp),
+                            )
+                        }
+                        if (current.naming.split == SplitFormat.APK && pending.any { it.split })
+                            Surface(
+                                color = MaterialTheme.colorScheme.errorContainer,
+                                shape = MaterialTheme.shapes.small,
+                                modifier = Modifier.padding(bottom = 10.dp),
+                            ) {
+                                Text(
+                                    stringResource(R.string.merged_apk_warning),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.padding(10.dp),
+                                )
+                            }
+                        HorizontalDivider()
+                        LazyColumn(Modifier.heightIn(max = 260.dp)) {
+                            items(pending) { app ->
+                                Row(
+                                    Modifier.padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    AppIcon(app, Modifier.size(36.dp))
+                                    Column(Modifier.padding(start = 12.dp)) {
+                                        Text(
+                                            FileNames.format(app, current.naming),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            maxLines = 2,
+                                        )
+                                        Text(
+                                            sizeText(app.size),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
                                 }
                             }
                         }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(settings!!.confirm, { vm.flag("confirm", it) })
-                            Text(stringResource(R.string.confirm_each_time))
+                        HorizontalDivider()
+                        Row(
+                            Modifier.fillMaxWidth()
+                                .clickable { vm.flag("confirm", !current.confirm) }
+                                .padding(top = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Checkbox(!current.confirm, null)
+                            Text(
+                                stringResource(R.string.dont_ask_again),
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(start = 4.dp),
+                            )
                         }
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { vm.startBackup(confirmation!!.toList()) }) {
+                    Button(onClick = { vm.startBackup(pending) }) {
                         Text(stringResource(R.string.extract))
                     }
                 },
@@ -303,95 +440,185 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
                     }
                 },
             )
+        val job = latest
         if (
-            latest != null &&
-                latest!!.state in listOf("COMPLETED", "FAILED", "CANCELLED") &&
-                !latest!!.dismissed
-        )
+            job != null &&
+                job.state in listOf("COMPLETED", "FAILED", "CANCELLED") &&
+                !job.dismissed &&
+                quickResult(job, records) == null
+        ) {
+            val succeeded = records.filter { it.state == "SUCCESS" }
+            val failed = records.count { it.state == "FAILED" }
             AlertDialog(
                 onDismissRequest = vm::dismissResult,
+                icon = {
+                    Icon(
+                        when {
+                            job.state == "CANCELLED" -> Icons.Rounded.Close
+                            failed > 0 -> Icons.Rounded.Warning
+                            else -> Icons.Rounded.CheckCircle
+                        },
+                        null,
+                    )
+                },
                 title = {
                     Text(
                         stringResource(
-                            if (latest!!.state == "CANCELLED") R.string.backup_cancelled
-                            else R.string.backup_result
+                            when {
+                                job.state == "CANCELLED" -> R.string.backup_cancelled
+                                failed > 0 -> R.string.backup_partial
+                                else -> R.string.backup_done
+                            }
                         )
                     )
                 },
                 text = {
-                    LazyColumn(Modifier.heightIn(max = 340.dp)) {
-                        item {
-                            Text(
-                                stringResource(
-                                    R.string.result_counts,
-                                    records.count { it.state == "SUCCESS" },
-                                    records.count { it.state == "FAILED" },
-                                    records.count { it.state == "CANCELLED" },
-                                )
+                    Column {
+                        Text(
+                            stringResource(
+                                R.string.result_summary,
+                                succeeded.size,
+                                records.size,
+                                sizeText(succeeded.sumOf { it.bytes }),
+                            ),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Row(
+                            Modifier.padding(top = 6.dp, bottom = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                PackIcons.Folder,
+                                null,
+                                Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Text(
-                                sizeText(
-                                    records.filter { it.state == "SUCCESS" }.sumOf { it.bytes }
-                                )
-                            )
-                            Text(
-                                folderName(c, latest!!.folder),
-                                style = MaterialTheme.typography.bodySmall,
+                                folderName(c, job.folder),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 6.dp),
                             )
                         }
-                        items(records) { r ->
-                            Column(Modifier.padding(vertical = 6.dp)) {
-                                Text(r.label)
-                                Text(
-                                    if (r.state == "SUCCESS") r.fileName
-                                    else
-                                        stringResource(
-                                            if (r.state == "CANCELLED") R.string.cancelled
+                        HorizontalDivider()
+                        LazyColumn(Modifier.heightIn(max = 280.dp)) {
+                            items(records) { r ->
+                                val ok = r.state == "SUCCESS"
+                                Row(
+                                    Modifier.padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Icon(
+                                        when (r.state) {
+                                            "SUCCESS" -> Icons.Rounded.CheckCircle
+                                            "CANCELLED" -> Icons.Rounded.Close
+                                            else -> Icons.Rounded.Warning
+                                        },
+                                        null,
+                                        Modifier.size(20.dp),
+                                        tint =
+                                            if (ok) MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.error,
+                                    )
+                                    Column(Modifier.padding(start = 12.dp)) {
+                                        Text(r.label, style = MaterialTheme.typography.bodyMedium)
+                                        Text(
+                                            if (ok) r.fileName
                                             else
-                                                errorText(
-                                                    runCatching { ErrorCode.valueOf(r.error) }
-                                                        .getOrDefault(ErrorCode.UNKNOWN)
-                                                )
-                                        ),
-                                    style = MaterialTheme.typography.bodySmall,
-                                )
+                                                stringResource(
+                                                    if (r.state == "CANCELLED") R.string.cancelled
+                                                    else
+                                                        errorText(
+                                                            runCatching {
+                                                                    ErrorCode.valueOf(r.error)
+                                                                }
+                                                                .getOrDefault(ErrorCode.UNKNOWN)
+                                                        )
+                                                ),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        HorizontalDivider()
+                        Row(Modifier.padding(top = 4.dp)) {
+                            TextButton(onClick = { openFolder(c, job.folder) }) {
+                                Icon(PackIcons.Folder, null, Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(stringResource(R.string.open_folder))
+                            }
+                            TextButton(
+                                enabled = succeeded.isNotEmpty(),
+                                onClick = {
+                                    shareFiles(c, succeeded.map { Uri.parse(it.uri) })
+                                },
+                            ) {
+                                Icon(Icons.Rounded.Share, null, Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(stringResource(R.string.share))
                             }
                         }
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = vm::dismissResult) { Text(stringResource(R.string.done)) }
-                },
-                dismissButton = {
-                    Row {
-                        TextButton(onClick = { openFolder(c, latest!!.folder) }) {
-                            Text(stringResource(R.string.open_folder))
-                        }
-                        TextButton(
-                            enabled = records.any { it.state == "SUCCESS" },
-                            onClick = {
-                                shareFiles(
-                                    c,
-                                    records
-                                        .filter { it.state == "SUCCESS" }
-                                        .map { Uri.parse(it.uri) },
-                                )
-                            },
-                        ) {
-                            Text(stringResource(R.string.share))
-                        }
-                    }
+                    Button(onClick = vm::dismissResult) { Text(stringResource(R.string.done)) }
                 },
             )
+        }
+        val crash by vm.lastCrash.collectAsStateWithLifecycle()
+        crash?.let { log ->
+            AlertDialog(
+                onDismissRequest = vm::clearCrash,
+                title = { Text(stringResource(R.string.crash_title)) },
+                text = {
+                    Column {
+                        Text(stringResource(R.string.crash_body))
+                        Text(
+                            log.lineSequence().take(12).joinToString("\n"),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier =
+                                Modifier.heightIn(max = 240.dp)
+                                    .verticalScroll(rememberScrollState()),
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            c.copyText(log)
+                            vm.clearCrash()
+                        }
+                    ) {
+                        Text(stringResource(R.string.crash_copy))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = vm::clearCrash) { Text(stringResource(R.string.close)) }
+                },
+            )
+        }
+        val installResult by vm.installResult.collectAsStateWithLifecycle()
+        if (!queueRunning) installResult?.let { InstallResultDialog(it, vm) }
+        if (!queueRunning && queue.isNotEmpty()) QueueSummaryDialog(queue, vm::dismissQueue)
+        val appList by vm.appListShared.collectAsStateWithLifecycle()
+        LaunchedEffect(appList) {
+            appList?.let {
+                shareFiles(c, listOf(it), "text/csv")
+                vm.appListShared.value = null
+            }
+        }
         val icon by vm.iconSaved.collectAsStateWithLifecycle()
-        if (icon != null)
+        val saved = icon
+        if (saved != null)
             AlertDialog(
                 onDismissRequest = { vm.iconSaved.value = null },
                 title = { Text(stringResource(R.string.icon_saved)) },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            shareFiles(c, listOf(icon!!), "image/png")
+                            shareFiles(c, listOf(saved), "image/png")
                             vm.iconSaved.value = null
                         }
                     ) {
@@ -407,50 +634,314 @@ fun PackPeekRoot(vm: MainViewModel, incoming: Uri?, consumed: () -> Unit) {
     }
 }
 
+/** The one record of a finished, fully successful single-app job not yet acknowledged. */
+private fun quickResult(job: BackupJob, records: List<BackupRecord>): BackupRecord? =
+    records.singleOrNull()?.takeIf {
+        job.state == "COMPLETED" && !job.dismissed && it.jobId == job.id && it.state == "SUCCESS"
+    }
+
 @Composable
-private fun Onboarding(folder: () -> Unit, finish: () -> Unit, location: String) {
-    var step by rememberSaveable { mutableIntStateOf(0) }
-    val titles = listOf(R.string.onboarding_one, R.string.onboarding_two, R.string.onboarding_three)
-    val texts =
-        listOf(
-            R.string.onboarding_one_body,
-            R.string.onboarding_two_body,
-            R.string.onboarding_three_body,
-        )
-    Column(
-        Modifier.fillMaxSize()
-            .safeDrawingPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(28.dp),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Spacer(Modifier.height(40.dp))
-        Text(stringResource(titles[step]), style = MaterialTheme.typography.displaySmall)
-        Spacer(Modifier.height(20.dp))
-        Text(stringResource(texts[step]), style = MaterialTheme.typography.bodyLarge)
-        Spacer(Modifier.height(28.dp))
-        Text(stringResource(R.string.privacy_local), style = MaterialTheme.typography.bodyMedium)
-        Spacer(Modifier.height(32.dp))
-        Text("${step+1} / 3", style = MaterialTheme.typography.labelLarge)
-        if (step == 2) {
-            OutlinedButton(onClick = folder, modifier = Modifier.fillMaxWidth()) { Text(location) }
+private fun InstallResultDialog(result: InstallResult, vm: MainViewModel) {
+    val c = LocalContext.current
+    val installed =
+        remember(result) {
+            result.packageName.isNotBlank() &&
+                runCatching { vm.owner.apps.packageInfo(result.packageName) }.isSuccess
+        }
+    val launch =
+        remember(result) {
+            if (result.success && result.packageName.isNotBlank())
+                c.packageManager.getLaunchIntentForPackage(result.packageName)
+            else null
+        }
+    val canUninstall =
+        installed &&
+            result.failure in
+                listOf(InstallFailure.SIGNATURE, InstallFailure.DOWNGRADE, InstallFailure.CONFLICT)
+    AlertDialog(
+        onDismissRequest = vm::dismissInstallResult,
+        title = {
             Text(
-                stringResource(R.string.backup_disclaimer),
-                style = MaterialTheme.typography.bodySmall,
+                stringResource(
+                    if (result.success) R.string.install_success else R.string.install_failed_title
+                )
             )
+        },
+        text = {
+            SelectionContainer {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (result.success) Text(stringResource(R.string.install_success_body))
+                    else {
+                        Text(stringResource(installFailureText(result.failure!!)))
+                        if (result.detail.isNotBlank())
+                            Text(
+                                stringResource(R.string.install_system_message, result.detail),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (launch != null)
+                TextButton(
+                    onClick = {
+                        vm.dismissInstallResult()
+                        c.launchSafe(launch)
+                    }
+                ) {
+                    Text(stringResource(R.string.open_app))
+                }
+            else if (canUninstall)
+                TextButton(
+                    onClick = {
+                        vm.dismissInstallResult()
+                        c.launchSafe(
+                            android.content.Intent(
+                                android.content.Intent.ACTION_DELETE,
+                                Uri.parse("package:${result.packageName}"),
+                            )
+                        )
+                    }
+                ) {
+                    Text(stringResource(R.string.uninstall_current))
+                }
+            else
+                TextButton(onClick = vm::dismissInstallResult) {
+                    Text(stringResource(R.string.close))
+                }
+        },
+        dismissButton = {
+            if (launch != null || canUninstall)
+                TextButton(onClick = vm::dismissInstallResult) {
+                    Text(stringResource(R.string.close))
+                }
+        },
+    )
+}
+
+@Composable
+private fun QueueSummaryDialog(queue: List<QueueEntry>, dismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = dismiss,
+        title = { Text(stringResource(R.string.queue_summary_title)) },
+        text = {
+            LazyColumn(Modifier.heightIn(max = 360.dp)) {
+                item {
+                    Text(
+                        stringResource(
+                            R.string.queue_counts,
+                            queue.count { it.result?.success == true },
+                            queue.count { it.result?.success == false || it.error != null },
+                        )
+                    )
+                }
+                items(queue) { e ->
+                    Column(Modifier.padding(vertical = 6.dp)) {
+                        Text(e.label.ifBlank { e.name })
+                        Text(
+                            when {
+                                e.result?.success == true -> stringResource(R.string.install_success)
+                                e.result != null ->
+                                    stringResource(installFailureText(e.result.failure!!))
+                                e.error != null -> stringResource(errorText(e.error))
+                                else -> stringResource(R.string.cancelled)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color =
+                                if (e.result?.success == true) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = dismiss) { Text(stringResource(R.string.done)) } },
+    )
+}
+
+fun installFailureText(failure: InstallFailure): Int =
+    when (failure) {
+        InstallFailure.ABORTED -> R.string.install_fail_aborted
+        InstallFailure.BLOCKED -> R.string.install_fail_blocked
+        InstallFailure.CONFLICT -> R.string.install_fail_conflict
+        InstallFailure.INCOMPATIBLE -> R.string.install_fail_incompatible
+        InstallFailure.INVALID -> R.string.install_fail_invalid
+        InstallFailure.STORAGE -> R.string.install_fail_storage
+        InstallFailure.SIGNATURE -> R.string.install_fail_signature
+        InstallFailure.DOWNGRADE -> R.string.install_fail_downgrade
+        InstallFailure.ABI -> R.string.install_fail_abi
+        InstallFailure.SDK -> R.string.install_fail_sdk
+        InstallFailure.TARGET -> R.string.install_fail_target
+        InstallFailure.MISSING_SPLIT -> R.string.install_fail_missing_split
+        InstallFailure.FEATURE -> R.string.install_fail_feature
+        InstallFailure.NO_RESULT -> R.string.install_fail_no_result
+        InstallFailure.UNKNOWN -> R.string.install_fail_unknown
+    }
+
+/** One introduction page: what PackPeek does for the user, shown with an illustration. */
+private class IntroPage(
+    val hero: ImageVector,
+    val around: List<ImageVector>,
+    val title: Int,
+    val body: Int,
+    val points: List<Pair<ImageVector, Int>>,
+)
+
+private val introPages =
+    listOf(
+        IntroPage(
+            PackIcons.Apps,
+            listOf(PackIcons.Android, PackIcons.Policy, PackIcons.Inventory2),
+            R.string.intro_1_title,
+            R.string.intro_1_body,
+            listOf(
+                PackIcons.Apps to R.string.intro_1_point_1,
+                PackIcons.Policy to R.string.intro_1_point_2,
+                PackIcons.Inventory2 to R.string.intro_1_point_3,
+            ),
+        ),
+        IntroPage(
+            PackIcons.GppMaybe,
+            listOf(Icons.Rounded.Email, Icons.AutoMirrored.Rounded.Send, PackIcons.Layers),
+            R.string.intro_2_title,
+            R.string.intro_2_body,
+            listOf(
+                Icons.Rounded.Email to R.string.intro_2_point_1,
+                PackIcons.Layers to R.string.intro_2_point_2,
+                Icons.Rounded.Share to R.string.intro_2_point_3,
+            ),
+        ),
+        IntroPage(
+            Icons.Rounded.Lock,
+            listOf(PackIcons.Shield, PackIcons.Language, PackIcons.Folder),
+            R.string.intro_3_title,
+            R.string.intro_3_body,
+            listOf(
+                PackIcons.Shield to R.string.intro_3_point_1,
+                PackIcons.Language to R.string.intro_3_point_2,
+            ),
+        ),
+    )
+
+@Composable
+internal fun Onboarding(folder: () -> Unit, finish: () -> Unit, location: String, firstStep: Int = 0) {
+    val pager = rememberPagerState(initialPage = firstStep) { introPages.size }
+    val scope = rememberCoroutineScope()
+    val last = pager.currentPage == introPages.lastIndex
+    Surface(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+            Row(Modifier.padding(start = 24.dp, end = 12.dp, top = 8.dp).heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f),
+                )
+                if (!last) TextButton(onClick = finish) { Text(stringResource(R.string.skip)) }
+            }
+            HorizontalPager(pager, Modifier.weight(1f), verticalAlignment = Alignment.Top) { index ->
+                val page = introPages[index]
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp)) {
+                    IntroHero(page.hero, page.around)
+                    Spacer(Modifier.height(28.dp))
+                    Text(stringResource(page.title), style = MaterialTheme.typography.headlineMedium)
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        stringResource(page.body),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(20.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        page.points.forEach { (icon, text) -> IntroPoint(icon, stringResource(text)) }
+                    }
+                    if (index == introPages.lastIndex) {
+                        Spacer(Modifier.height(20.dp))
+                        OutlinedCard(onClick = folder, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+                            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(PackIcons.Folder, null, tint = MaterialTheme.colorScheme.primary)
+                                Spacer(Modifier.width(16.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text(stringResource(R.string.backup_folder), style = MaterialTheme.typography.titleSmall)
+                                    Text(
+                                        location,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                                Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        Text(
+                            stringResource(R.string.intro_folder_hint) + " " + stringResource(R.string.backup_disclaimer),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp, start = 4.dp),
+                        )
+                    }
+                }
+            }
+            Row(Modifier.padding(horizontal = 24.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    repeat(introPages.size) {
+                        val on = it == pager.currentPage
+                        Box(
+                            Modifier.size(width = if (on) 24.dp else 8.dp, height = 8.dp)
+                                .background(if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                        )
+                    }
+                }
+                Button(
+                    onClick = { if (last) finish() else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } },
+                    contentPadding = PaddingValues(horizontal = 32.dp, vertical = 14.dp),
+                ) {
+                    Text(stringResource(if (last) R.string.start else R.string.next))
+                }
+            }
         }
-        Button(
-            onClick = { if (step < 2) step++ else finish() },
-            modifier = Modifier.fillMaxWidth(),
+    }
+}
+
+/** A large icon on a soft gradient, with the page's smaller themes around it. */
+@Composable
+private fun IntroHero(icon: ImageVector, around: List<ImageVector>) {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        Modifier.fillMaxWidth()
+            .height(220.dp)
+            .clip(MaterialTheme.shapes.extraLarge)
+            .background(Brush.linearGradient(listOf(colors.primaryContainer, colors.tertiaryContainer))),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(Modifier.size(176.dp).background(colors.surface.copy(alpha = 0.35f), CircleShape))
+        Box(Modifier.size(108.dp).background(colors.surface, CircleShape), contentAlignment = Alignment.Center) {
+            Icon(icon, null, Modifier.size(52.dp), tint = colors.primary)
+        }
+        val places = listOf(-108 to -56, 112 to -44, 92 to 64)
+        around.zip(places).forEach { (small, place) ->
+            Box(
+                Modifier.offset(place.first.dp, place.second.dp).size(48.dp).background(colors.surface, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(small, null, Modifier.size(24.dp), tint = colors.secondary)
+            }
+        }
+    }
+}
+
+@Composable
+private fun IntroPoint(icon: ImageVector, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
+            contentAlignment = Alignment.Center,
         ) {
-            Text(stringResource(if (step == 2) R.string.start else R.string.next))
+            Icon(icon, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSecondaryContainer)
         }
-        if (step > 0) TextButton(onClick = { step-- }) { Text(stringResource(R.string.back)) }
-        if (step < 2) TextButton(onClick = finish) { Text(stringResource(R.string.skip)) }
+        Spacer(Modifier.width(16.dp))
+        Text(text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
     }
 }
