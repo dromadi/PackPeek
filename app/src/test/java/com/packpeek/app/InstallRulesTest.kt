@@ -139,11 +139,20 @@ class InstallRulesTest {
     }
 
     @Test
+    fun timeoutAlsoAppliesWhenSessionJustDisappeared() {
+        assertEquals(InstallWait.NO_RESULT, InstallErrors.settle(0, false, InstallErrors.TIMEOUT_MS))
+        assertEquals(InstallWait.NO_RESULT, InstallErrors.settle(1_000, true, InstallErrors.TIMEOUT_MS))
+    }
+
+    @Test
     fun resultsAreMatchedBySession() {
         assertTrue(InstallResult("a.b", sessionId = 7).answers(7, "a.b"))
         assertFalse(InstallResult("a.b", sessionId = 8).answers(7, "a.b"))
-        // Without a session id, the package name decides.
-        assertTrue(InstallResult("a.b").answers(7, "a.b"))
+        // Missing IDs and results from earlier attempts must not complete a newer session.
+        assertFalse(InstallResult("a.b").answers(7, "a.b"))
+        assertFalse(InstallResult("").answers(7, "a.b"))
+        assertFalse(InstallResult("c.d", sessionId = 7).answers(7, "a.b"))
+        assertTrue(InstallResult("", sessionId = 7).answers(7, "a.b"))
         assertFalse(InstallResult("c.d").answers(7, "a.b"))
     }
 

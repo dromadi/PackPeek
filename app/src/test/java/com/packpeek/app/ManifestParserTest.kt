@@ -330,6 +330,30 @@ class ManifestParserTest {
         failsAsArchive(wrongHeaderSize)
     }
 
+    @Test
+    fun stringPoolHeaderOffsetsAndTerminatorsStayInsideTheirChunk() {
+        val good = compile(nested)
+        fun corrupt(edit: (ByteBuffer) -> Unit) = good.copyOf().also {
+            edit(ByteBuffer.wrap(it).order(ByteOrder.LITTLE_ENDIAN))
+        }
+        val pool = 8
+        val header = 28
+        failsAsArchive(corrupt { it.putShort(pool + 2, 8) })
+        failsAsArchive(corrupt { it.putInt(pool + 20, header) }) // data overlaps offset table
+        failsAsArchive(corrupt { it.putInt(pool + header, -1) })
+        failsAsArchive(corrupt { it.putInt(pool + header, Int.MAX_VALUE) })
+        failsAsArchive(corrupt { b ->
+            val first = pool + b.getInt(pool + 20) + b.getInt(pool + header)
+            val length = b.getShort(first).toInt() and 65535
+            b.putShort(first + 2 + length * 2, 1) // missing UTF-16 terminator
+        })
+        failsAsArchive(corrupt { b ->
+            val poolSize = b.getInt(pool + 4)
+            val dataOffset = b.getInt(pool + 20)
+            b.putInt(pool + header, poolSize - dataOffset - 1) // length prefix crosses chunk
+        })
+    }
+
     /** Random corruption must end in a clean AppFailure, never a crash or a hang. */
     @Test
     fun corruptedManifestsFailCleanly() {

@@ -697,12 +697,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val installer = owner.packageManager.packageInstaller
         fun lastUpdate() = runCatching { owner.apps.packageInfo(pkg).lastUpdateTime }.getOrNull()
         val before = withContext(Dispatchers.IO) { lastUpdate() }
-        val started = System.currentTimeMillis()
+        val started = android.os.SystemClock.elapsedRealtime()
         var goneAt: Long? = null
         try {
             while (true) {
                 owner.installResult.value?.takeIf { it.answers(session, pkg) }?.let { return it }
-                val now = System.currentTimeMillis()
+                val now = android.os.SystemClock.elapsedRealtime()
                 val exists = withContext(Dispatchers.IO) { installer.getSessionInfo(session) != null }
                 if (exists) goneAt = null else if (goneAt == null) goneAt = now
                 val updated = withContext(Dispatchers.IO) { lastUpdate() }?.let { it != before } == true
