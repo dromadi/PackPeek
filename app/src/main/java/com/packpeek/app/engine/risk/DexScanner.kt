@@ -308,6 +308,8 @@ object DexScanner {
                 Library("Lcom/iab/omid/", "Open Measurement SDK", true),
                 Library("Lio/appmetrica/", "AppMetrica", true),
                 Library("Lcom/yandex/", "Yandex SDK"),
+                // Yandex Mobile Ads ships its internals in the short package "yads".
+                Library("Lyads/", "Yandex Ads", true),
                 Library("Lio/jsonwebtoken/", "JJWT"),
                 Library("Lnet/aihelp/", "AIHelp"),
             )
