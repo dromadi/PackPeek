@@ -328,7 +328,11 @@ object DexScanner {
             "libnqshield", "libmobisec", "libexecmain", "libtosprotection", "libapkprotect", "libjgdtc",
             "libbaiduprotect", "libddog", "libnesec", "libapssec", "librsprotect")
 
-    /** Everything an app method does that matters for flows. */
+    /**
+     * Everything an app method does that matters for flows. Large apps have a hundred thousand
+     * methods or more, most with nothing to track, so collections are created on first write:
+     * each property reads as empty until then, and the function of the same name makes it.
+     */
     private class MethodInfo {
         /** From calls and fields: always real. */
         var sources = 0
@@ -337,29 +341,55 @@ object DexScanner {
         var stringSources = 0
         var stringSinks = 0
         var markers = 0
-        val apis = HashMap<Capability, String>()
-        val callees = HashSet<String>()
+        private var apisM: HashMap<Capability, String>? = null
+        val apis: Map<Capability, String> get() = apisM ?: emptyMap()
+        fun apis() = apisM ?: HashMap<Capability, String>(4).also { apisM = it }
+        private var calleesM: HashSet<String>? = null
+        val callees: Set<String> get() = calleesM ?: emptySet()
+        fun callees() = calleesM ?: HashSet<String>().also { calleesM = it }
         /** Deep: app classes named by const-class, started through an Intent or work request. */
-        val constClasses = HashSet<String>()
+        private var constClassesM: HashSet<String>? = null
+        val constClasses: Set<String> get() = constClassesM ?: emptySet()
+        fun constClasses() = constClassesM ?: HashSet<String>().also { constClassesM = it }
         var launches = false
-        val listing = ArrayList<String>()
+        private var listingM: ArrayList<String>? = null
+        val listing: List<String> get() = listingM ?: emptyList()
+        fun listing() = listingM ?: ArrayList<String>().also { listingM = it }
         /** Value tracking: every sending call with what reaches its arguments. */
-        val sinkCalls = LinkedHashMap<Int, SinkCall>()
+        private var sinkCallsM: LinkedHashMap<Int, SinkCall>? = null
+        val sinkCalls: Map<Int, SinkCall> get() = sinkCallsM ?: emptyMap()
+        fun sinkCalls() = sinkCallsM ?: LinkedHashMap<Int, SinkCall>().also { sinkCallsM = it }
         /** Sources whose values the method returns, and app methods whose results it returns. */
         var returnSources = 0
-        val returnCallees = HashSet<String>()
+        private var returnCalleesM: HashSet<String>? = null
+        val returnCallees: Set<String> get() = returnCalleesM ?: emptySet()
+        fun returnCallees() = returnCalleesM ?: HashSet<String>().also { returnCalleesM = it }
         /** Calls to app methods: callee, source bits of the arguments, whether a parameter is passed. */
-        val calls = LinkedHashMap<Int, TaintCall>()
+        private var callsM: LinkedHashMap<Int, TaintCall>? = null
+        val calls: Map<Int, TaintCall> get() = callsM ?: emptyMap()
+        fun calls() = callsM ?: LinkedHashMap<Int, TaintCall>().also { callsM = it }
         /** Stores into fields of `this`: labels and source bits per field, and parameters stored. */
-        val thisFieldFrom = HashMap<String, MutableSet<String>>()
-        val thisFieldBits = HashMap<String, Int>()
-        val thisParamFields = Array(PARAM_SLOTS) { HashSet<String>() }
+        private var thisFieldFromM: HashMap<String, MutableSet<String>>? = null
+        val thisFieldFrom: Map<String, Set<String>> get() = thisFieldFromM ?: emptyMap()
+        fun thisFieldFrom() = thisFieldFromM ?: HashMap<String, MutableSet<String>>().also { thisFieldFromM = it }
+        private var thisFieldBitsM: HashMap<String, Int>? = null
+        val thisFieldBits: Map<String, Int> get() = thisFieldBitsM ?: emptyMap()
+        fun thisFieldBits() = thisFieldBitsM ?: HashMap<String, Int>().also { thisFieldBitsM = it }
+        private var thisParamFieldsM: Array<HashSet<String>>? = null
+        val thisParamFields: Array<out Set<String>> get() = thisParamFieldsM ?: NO_SLOTS
+        fun thisParamFields() = thisParamFieldsM ?: Array(PARAM_SLOTS) { HashSet<String>() }.also { thisParamFieldsM = it }
         /** Stores into fields of other objects whose labels are known (object allocated or fetched here). */
-        val objectStores = ArrayList<ObjectStore>()
+        private var objectStoresM: ArrayList<ObjectStore>? = null
+        val objectStores: List<ObjectStore> get() = objectStoresM ?: emptyList()
+        fun objectStores() = objectStoresM ?: ArrayList<ObjectStore>().also { objectStoresM = it }
         /** Per parameter slot, fields it is stored into (a lambda capturing it, a spilled local). */
-        val paramFields = Array(PARAM_SLOTS) { HashSet<String>() }
+        private var paramFieldsM: Array<HashSet<String>>? = null
+        val paramFields: Array<out Set<String>> get() = paramFieldsM ?: NO_SLOTS
+        fun paramFields() = paramFieldsM ?: Array(PARAM_SLOTS) { HashSet<String>() }.also { paramFieldsM = it }
         /** Per field, labels of the values this method stores into it. */
-        val fieldFrom = HashMap<String, MutableSet<String>>()
+        private var fieldFromM: HashMap<String, MutableSet<String>>? = null
+        val fieldFrom: Map<String, Set<String>> get() = fieldFromM ?: emptyMap()
+        fun fieldFrom() = fieldFromM ?: HashMap<String, MutableSet<String>>().also { fieldFromM = it }
 
         fun merge(other: MethodInfo) {
             sources = sources or other.sources
@@ -367,23 +397,25 @@ object DexScanner {
             stringSources = stringSources or other.stringSources
             stringSinks = stringSinks or other.stringSinks
             markers = markers or other.markers
-            other.apis.forEach { (k, v) -> apis.putIfAbsent(k, v) }
-            callees += other.callees
-            constClasses += other.constClasses
+            other.apis.forEach { (k, v) -> apis().putIfAbsent(k, v) }
+            if (other.callees.isNotEmpty()) callees() += other.callees
+            if (other.constClasses.isNotEmpty()) constClasses() += other.constClasses
             launches = launches || other.launches
-            if (listing.isEmpty()) listing += other.listing
-            other.sinkCalls.forEach { (pc, c) -> sinkCalls.putIfAbsent(pc, c) }
+            if (listing.isEmpty() && other.listing.isNotEmpty()) listing() += other.listing
+            other.sinkCalls.forEach { (pc, c) -> sinkCalls().putIfAbsent(pc, c) }
             returnSources = returnSources or other.returnSources
-            returnCallees += other.returnCallees
-            other.calls.forEach { (pc, c) -> calls.putIfAbsent(pc, c) }
-            other.thisFieldFrom.forEach { (k, v) -> thisFieldFrom.getOrPut(k) { HashSet() } += v }
-            other.thisFieldBits.forEach { (k, v) -> thisFieldBits[k] = (thisFieldBits[k] ?: 0) or v }
-            for (k in 0 until PARAM_SLOTS) thisParamFields[k] += other.thisParamFields[k]
-            objectStores += other.objectStores
-            for (k in 0 until PARAM_SLOTS) paramFields[k] += other.paramFields[k]
-            other.fieldFrom.forEach { (k, v) -> fieldFrom.getOrPut(k) { HashSet() } += v }
+            if (other.returnCallees.isNotEmpty()) returnCallees() += other.returnCallees
+            other.calls.forEach { (pc, c) -> calls().putIfAbsent(pc, c) }
+            other.thisFieldFrom.forEach { (k, v) -> thisFieldFrom().getOrPut(k) { HashSet() } += v }
+            other.thisFieldBits.forEach { (k, v) -> thisFieldBits()[k] = (thisFieldBits[k] ?: 0) or v }
+            for (k in 0 until PARAM_SLOTS) if (other.thisParamFields[k].isNotEmpty()) thisParamFields()[k] += other.thisParamFields[k]
+            if (other.objectStores.isNotEmpty()) objectStores() += other.objectStores
+            for (k in 0 until PARAM_SLOTS) if (other.paramFields[k].isNotEmpty()) paramFields()[k] += other.paramFields[k]
+            other.fieldFrom.forEach { (k, v) -> fieldFrom().getOrPut(k) { HashSet() } += v }
         }
     }
+
+    private val NO_SLOTS: Array<Set<String>> = Array(PARAM_SLOTS) { emptySet() }
 
     /** An app-method call seen by value tracking; [results] are callees whose results are passed. */
     /**
@@ -392,16 +424,22 @@ object DexScanner {
      */
     private class TaintCall(val callee: String) {
         /** Per callee parameter slot. */
-        val args = HashMap<Int, TaintArg>()
+        private var argsM: HashMap<Int, TaintArg>? = null
+        val args: Map<Int, TaintArg> get() = argsM ?: emptyMap()
+        fun arg(slot: Int) = (argsM ?: HashMap<Int, TaintArg>(4).also { argsM = it }).getOrPut(slot) { TaintArg(slot, 0, 0) }
         /** Labels of the receiver (instance calls): which object the call is made on. */
-        val receiver = HashSet<String>()
+        private var receiverM: HashSet<String>? = null
+        val receiver: Set<String> get() = receiverM ?: emptySet()
+        fun receiver() = receiverM ?: HashSet<String>().also { receiverM = it }
     }
 
     /**
      * One argument of an app-method call: the callee parameter [slot] it lands in, the source bits
      * and caller-parameter bits it carries, and its labels.
      */
-    private class TaintArg(val slot: Int, var sources: Int, var params: Int, val labels: MutableSet<String>)
+    private class TaintArg(val slot: Int, var sources: Int, var params: Int) {
+        var labels: Set<String> = emptySet()
+    }
 
     /** A store into a field of an object other than `this`: the object's labels, field, value. */
     private class ObjectStore(val target: Set<String>, val field: String, val sources: Int, val labels: Set<String>)
@@ -488,7 +526,32 @@ object DexScanner {
         for (slot in 0 until PARAM_SLOTS) if (bits and (1 shl (PARAM_SHIFT + slot)) != 0) action(slot)
     }
 
-    private class State(val deadline: Long, val deep: Boolean = false) {
+    private class State(val deadline: Long, val deep: Boolean = false, val trackDeadline: Long = deadline) {
+        /** Value tracking was skipped or stopped somewhere to keep the scan within its limit. */
+        var trackingCut = false
+        private var trackChecks = 0
+        private var lastLive = 0L
+
+        /**
+         * Whether value tracking may go on: within its time share, and while the heap has room.
+         * Tracking data grows with app size; the plain scan must never run out of memory for it.
+         */
+        fun mayTrack(): Boolean {
+            if (trackingCut) return false
+            if (System.currentTimeMillis() >= trackDeadline || (++trackChecks and 255 == 0 && memoryTight(0.55))) trackingCut = true
+            return !trackingCut
+        }
+
+        /** Live heap above [fraction] of the maximum. Collects first, but only after real growth. */
+        fun memoryTight(fraction: Double): Boolean {
+            val rt = Runtime.getRuntime()
+            val limit = (rt.maxMemory() * fraction).toLong()
+            val used = rt.totalMemory() - rt.freeMemory()
+            if (used < limit || used < lastLive + rt.maxMemory() / 16) return false
+            System.gc()
+            lastLive = rt.totalMemory() - rt.freeMemory()
+            return lastLive >= limit
+        }
         val decoded = mutableListOf<DecodedText>()
         val decodedKeys = HashSet<String>()
         val payloads = mutableListOf<PayloadScan>()
@@ -499,6 +562,10 @@ object DexScanner {
         val libraryHits = HashMap<Capability, MutableList<CodeHit>>()
         val hitKeys = HashSet<String>()
         val methods = HashMap<String, MethodInfo>()
+        private val keys = HashMap<String, String>()
+
+        /** One copy of each method key, however many calls name it. */
+        fun intern(key: String): String = keys.getOrPut(key) { key }
         val classMethods = HashMap<String, MutableList<String>>()
         val names = HashMap<String, String>()
         val destinations = LinkedHashMap<String, Destination>()
@@ -554,7 +621,9 @@ object DexScanner {
         tracedBy: ((Map<String, Map<Capability, Map<Capability, Set<String>>>>) -> Unit)? = null,
     ): CodeFacts {
         val started = System.currentTimeMillis()
-        val state = State(started + timeLimitMs, deep)
+        // Value tracking gets part of the time: the plain scan (capabilities, SDKs, addresses,
+        // code paths) must always finish, even for very large apps on a slow phone.
+        val state = State(started + timeLimitMs, deep, trackDeadline = started + timeLimitMs * 6 / 10)
         apks.forEach { apk ->
             runCatching {
                     ZipFile(apk).use { zip ->
@@ -584,7 +653,15 @@ object DexScanner {
                 .onFailure { state.gaps += CodeGap(GapKind.UNREADABLE, apk.name) }
         }
         if (state.stopped) state.gaps += CodeGap(GapKind.LIMIT, "time")
-        val traced = tracedFlows(state)
+        val traced =
+            try {
+                tracedFlows(state, started + timeLimitMs * 9 / 10)
+            } catch (e: OutOfMemoryError) {
+                // Last resort: everything tracking allocated is garbage once it unwinds.
+                state.trackingCut = true
+                emptyMap()
+            }
+        if (state.trackingCut) state.gaps += CodeGap(GapKind.TRACKING, "")
         tracedBy?.invoke(
             traced.entries.associate { (k, map) ->
                 (state.names[k] ?: k) to
@@ -930,8 +1007,28 @@ object DexScanner {
      * object a call is made on (allocation sites), so two instances of one client keep their own
      * base address. Without a known object, fields fall back to one value per field name.
      */
-    private fun tracedFlows(state: State): Map<String, Map<Int, Reached>> {
-        val methods = state.methods
+    private fun tracedFlows(state: State, until: Long): Map<String, Map<Int, Reached>> {
+        val all = state.methods
+        // Only methods whose values can reach a send matter: those with a send or storing a value
+        // somewhere a send can read it (fields, returns, constructor arguments), plus their callers,
+        // transitively, since callers supply the arguments. Everything else is skipped, which keeps
+        // large apps within time and memory.
+        val callersOf = HashMap<String, MutableList<String>>()
+        all.forEach { (k, m) -> m.calls.values.forEach { callersOf.getOrPut(it.callee) { ArrayList() } += k } }
+        val relevant = HashSet<String>()
+        val queue = ArrayDeque<String>()
+        all.forEach { (k, m) ->
+            if (m.sinkCalls.isNotEmpty() || m.thisFieldFrom.isNotEmpty() || m.thisFieldBits.isNotEmpty() ||
+                m.objectStores.isNotEmpty() || m.fieldFrom.isNotEmpty() || m.returnSources != 0 ||
+                m.returnCallees.isNotEmpty() || m.paramFields.any { it.isNotEmpty() } ||
+                m.thisParamFields.any { it.isNotEmpty() })
+                if (relevant.add(k)) queue += k
+        }
+        while (queue.isNotEmpty()) {
+            val k = queue.removeFirst()
+            callersOf[k]?.forEach { if (relevant.add(it)) queue += it }
+        }
+        val methods = all.filterKeys { it in relevant }
         val returns = HashMap<String, Val>()
         val fieldVal = HashMap<String, Val>()
         state.fieldTaint.forEach { (f, bits) -> fieldVal.getOrPut(f) { Val() }.sources = bits }
@@ -1034,9 +1131,14 @@ object DexScanner {
         /** A resolved value for global use: this-fields still open fall back to all objects. */
         fun closed(v: Val): Val = if (v.open.isEmpty()) v else Val().also { it.add(v); it.open.clear(); it.add(global(v.open)) }
 
-        for (round in 0 until 12) {
+        var steps = 0
+        rounds@ for (round in 0 until 12) {
             changed = false
-            methods.forEach { (k, m) ->
+            for ((k, m) in methods) {
+                if (++steps and 255 == 0 && (System.currentTimeMillis() > until || state.memoryTight(0.8))) {
+                    state.trackingCut = true
+                    break@rounds
+                }
                 grow(returns.getOrPut(k) { Val() }, resolve(m, m.returnCallees, null).also { it.sources = it.sources or m.returnSources })
                 m.fieldFrom.forEach { (f, labels) -> grow(fieldVal.getOrPut(f) { Val() }, closed(resolve(m, labels, null))) }
                 // Global fallback: callers passing values to parameters stored in fields.
@@ -1420,8 +1522,8 @@ object DexScanner {
             storeField(f, bits)
             if (f >= fieldCount) return
             val key = fieldKey(f)
-            forSlots(bits) { slot -> mi.paramFields[slot] += key }
-            if (labels.isNotEmpty() && mi.fieldFrom.size < 200) mi.fieldFrom.getOrPut(key) { HashSet() } += labels.take(MAX_LABELS)
+            forSlots(bits) { slot -> mi.paramFields()[slot] += key }
+            if (labels.isNotEmpty() && mi.fieldFrom.size < 200) mi.fieldFrom().getOrPut(key) { HashSet() } += labels.take(MAX_LABELS)
         }
 
         fun storeField(f: Int, bits: Int) {
@@ -1511,7 +1613,7 @@ object DexScanner {
             val deep = state.deep && info != null
             val strings = if (deep) ArrayList<String>() else null
             fun line(text: String) {
-                if (deep && info!!.listing.size < LISTING_LINES) info.listing += text
+                if (deep && info!!.listing.size < LISTING_LINES) info.listing() += text
             }
             // Deep: constants in registers and the arrays filled from them one element at a time,
             // the way d8 compiles short array initialisers.
@@ -1618,7 +1720,7 @@ object DexScanner {
                     }
                     0x0f, 0x10, 0x11 -> {
                         mi.returnSources = mi.returnSources or ((st.taint[a8] ?: 0) and PARAMS.inv())
-                        st.labels[a8]?.let { mi.returnCallees += it }
+                        st.labels[a8]?.let { if (it.isNotEmpty()) mi.returnCallees() += it }
                     }
                     in 0x12..0x19 -> set(if (op == 0x12) a4 else a8, 0)
                     0x1a, 0x1b -> {
@@ -1662,12 +1764,12 @@ object DexScanner {
                             val f = fieldKey(next)
                             if (THIS in obj) {
                                 if (valueLabels.isNotEmpty() && mi.thisFieldFrom.size < 200)
-                                    mi.thisFieldFrom.getOrPut(f) { HashSet() } += valueLabels.take(MAX_LABELS)
+                                    mi.thisFieldFrom().getOrPut(f) { HashSet() } += valueLabels.take(MAX_LABELS)
                                 val src = value and (sourceBits or destinationBits)
-                                if (src != 0) mi.thisFieldBits[f] = (mi.thisFieldBits[f] ?: 0) or src
-                                forSlots(value) { slot -> mi.thisParamFields[slot] += f }
+                                if (src != 0) mi.thisFieldBits()[f] = (mi.thisFieldBits[f] ?: 0) or src
+                                forSlots(value) { slot -> mi.thisParamFields()[slot] += f }
                             } else if (mi.objectStores.size < 200 && (valueLabels.isNotEmpty() || value and sourceBits != 0))
-                                mi.objectStores += ObjectStore(obj, f, value and (sourceBits or destinationBits), valueLabels)
+                                mi.objectStores() += ObjectStore(obj, f, value and (sourceBits or destinationBits), valueLabels)
                         }
                     }
                     in 0x60..0x66 -> set(a8, fieldBits(next), fieldLabels(next, emptySet()))
@@ -1689,7 +1791,7 @@ object DexScanner {
                             // Data sent together with a bot or webhook address goes to that destination.
                             val sinkBits = cap.bit or (sources and destinationBits)
                             if (sources != 0 || mask and PARAMS != 0 || from.isNotEmpty()) {
-                                val call = mi.sinkCalls.getOrPut(i) { SinkCall(0, 0, 0, HashSet()) }
+                                val call = mi.sinkCalls().getOrPut(i) { SinkCall(0, 0, 0, HashSet()) }
                                 call.sinks = call.sinks or sinkBits
                                 call.sources = call.sources or (sources and sourceBits)
                                 call.params = call.params or (mask and PARAMS)
@@ -1705,22 +1807,22 @@ object DexScanner {
                             // receiver tells which object the call is made on.
                             val static = op == 0x71 || op == 0x77
                             val call =
-                                mi.calls[i] ?: (if (mi.calls.size >= MAX_CALLS) null else TaintCall(called).also { mi.calls[i] = it })
+                                mi.calls[i] ?: (if (mi.calls.size >= MAX_CALLS) null else TaintCall(state.intern(called)).also { mi.calls()[i] = it })
                             if (call != null) {
                                 regs.forEachIndexed { p, r ->
                                     val labels = st.labels[r].orEmpty()
                                     val slot = if (static) p else p - 1
                                     if (slot < 0) {
-                                        call.receiver += labels.take(MAX_LABELS)
+                                        if (labels.isNotEmpty()) call.receiver() += labels.take(MAX_LABELS)
                                         return@forEachIndexed
                                     }
                                     val bits = st.taint[r] ?: 0
                                     if (bits == 0 && labels.isEmpty()) return@forEachIndexed
                                     val s0 = slot.coerceAtMost(PARAM_SLOTS - 1)
-                                    val arg = call.args.getOrPut(s0) { TaintArg(s0, 0, 0, HashSet()) }
+                                    val arg = call.arg(s0)
                                     arg.sources = arg.sources or (bits and (sourceBits or destinationBits))
                                     arg.params = arg.params or (bits and PARAMS)
-                                    if (arg.labels.size < MAX_LABELS) arg.labels += labels
+                                    if (arg.labels.size < MAX_LABELS && !arg.labels.containsAll(labels)) arg.labels = arg.labels + labels
                                 }
                                 // The result is labelled with this call, resolved with its receiver later.
                                 resultFrom = if (from.size < MAX_LABELS) from + "C:$i" else from
@@ -1766,7 +1868,7 @@ object DexScanner {
                         cap.sink && rule.string -> info.stringSinks = info.stringSinks or cap.bit
                         cap.sink -> info.sinks = info.sinks or cap.bit
                     }
-                    info.apis.putIfAbsent(cap, rule.api)
+                    info.apis().putIfAbsent(cap, rule.api)
                 }
             }
             val starts = BooleanArray(if (info != null) size else 0)
@@ -1798,7 +1900,7 @@ object DexScanner {
                     0x1c ->
                         if (deep && next < typeCount) {
                             val target = type(next)
-                            if (isAppClass(target)) info!!.constClasses += target
+                            if (isAppClass(target)) info!!.constClasses() += target
                             line("class ${simple(target)}")
                         }
                     0x22 -> if (deep && next < typeCount) line("new ${simple(type(next))}")
@@ -1835,7 +1937,7 @@ object DexScanner {
                         if (info != null && next < methodCount) {
                             val target = methodIdsOff + 8 * next
                             val owner = type(u16(target))
-                            if (isAppClass(owner)) info.callees += methodKey(next)
+                            if (isAppClass(owner)) info.callees() += state.intern(methodKey(next))
                             if (deep) {
                                 val called = methodKey(next)
                                 if (called.substringBefore('(') in launchKeys) info.launches = true
@@ -1856,15 +1958,18 @@ object DexScanner {
                 if (info != null) starts[i] = true
                 i += width(op, unit, start, i, size)
             }
-            if (info != null) dataflow(start, size, starts, entry, { st = it }, ::track)
+            if (info != null) {
+                if (state.mayTrack()) dataflow(start, size, starts, entry, { st = it }, ::track)
+            }
             if (deep) {
                 arrays!!.keys.toList().forEach(::flushArray)
                 decodeStrings(strings!!, readable, key)
             }
             if (info != null) {
-                state.names.putIfAbsent(key, readable)
-                state.classMethods.getOrPut(descriptor) { mutableListOf() }.let { if (key !in it) it += key }
-                state.methods.getOrPut(key) { MethodInfo() }.merge(info)
+                val stored = state.intern(key)
+                state.names.putIfAbsent(stored, readable)
+                state.classMethods.getOrPut(descriptor) { mutableListOf() }.let { if (stored !in it) it += stored }
+                state.methods[stored]?.merge(info) ?: state.methods.put(stored, info)
             }
         }
 
@@ -1918,7 +2023,7 @@ object DexScanner {
                     if (rule.capability.source) info.stringSources = info.stringSources or rule.capability.bit
                     else info.stringSinks = info.stringSinks or rule.capability.bit
                 } else state.hit(Rule(rule.capability, hit.api, true), readable, null)
-                info.apis.putIfAbsent(rule.capability, hit.api)
+                info.apis().putIfAbsent(rule.capability, hit.api)
             }
             // A join of unrelated constants would invent hosts such as "instagram.compriority".
             if (technique != Decoding.JOINED) url(text, key.substringBefore("->"))

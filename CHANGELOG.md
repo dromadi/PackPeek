@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.0-alpha.17 — 2026-10-11
+
+**Perbaikan regresi: analisis terpotong pada aplikasi besar.** Laporan InSaver alpha.16 hanya berisi 1 temuan, 3 SDK, dan bagian analisis mendalam kosong. Penyebabnya, pelacakan nilai (alpha.14–16) menghabiskan waktu dan memori pada aplikasi besar yang kodenya disamarkan, sehingga pemindaian dasar ikut gagal. Laporan alpha.16 untuk aplikasi seperti itu tidak bisa dipakai. Kini:
+
+- Pemindaian dasar (kemampuan, SDK, alamat, jalur kode) selalu selesai. Pelacakan nilai hanya mendapat sebagian waktu (60% untuk pelacakan per fungsi, sampai 90% untuk penyelesaian) dan berhenti sendiri bila memori menipis.
+- Penyelesaian hanya mencakup fungsi yang bisa berpengaruh pada pengiriman: fungsi yang mengirim atau menyimpan nilai, beserta pemanggilnya.
+- Data per fungsi dibuat hanya bila dipakai, dan nama metode disimpan sekali. Memori turun sekitar 40% pada uji 154 ribu metode.
+- Bila pelacakan terpotong, laporan menyebutnya dengan jujur di kartu Cakupan: "Pelacakan nilai kehabisan waktu; kemampuan dan alamat lengkap, tetapi sebagian jalur data belum ditandai terlacak".
+- Laporan teks/PDF kini punya bagian **Cakupan analisis** (jumlah kelas, batas waktu, kode tersembunyi, pelacakan terpotong).
+- Uji beban: APK PackPeek dengan semua 22.587 kelas dianggap kode aplikasi. Sebelumnya kehabisan memori, kini selesai dalam 28 detik (batas 30 detik) dan 18 detik (mendalam, batas 90 detik). Tes: 135.
+
 ## 2.0.0-alpha.16 — 2026-10-11
 
 **Field dilacak per objek.** Di InSaver, semua jalur cookie dan clipboard menyebut delapan alamat yang sama. Penyebabnya, satu kelas klien HTTP dipakai untuk Instagram, Facebook, TikTok, dan server sendiri, sementara PackPeek mencatat field per nama. Kini:

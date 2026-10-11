@@ -509,6 +509,7 @@
     <string name="coverage_gap_cross">La lógica de %1$s se ejecuta fuera de DEX y no se analiza</string>
     <string name="coverage_gap_unreadable">No se pudo leer el código en %1$s</string>
     <string name="coverage_gap_limit">El análisis del código se detuvo al alcanzar su límite de tiempo o tamaño; los resultados son parciales</string>
+    <string name="coverage_gap_tracking">El rastreo de valores se quedó sin tiempo; las capacidades y direcciones están completas, pero algunas rutas de datos no están marcadas como rastreadas</string>
     <string name="find_target_body">El SDK objetivo es inferior a API 31 (Android 12). Es posible que algunas protecciones más recientes no se apliquen.</string>
     <string name="find_exported_body">Componentes exportados activados sin permiso de componente: %1$d. No se cuentan los puntos de entrada del launcher.</string>
     <string name="format_explanation">Las apps independientes siempre se guardan como .apk. Las apps divididas usan el formato elegido arriba. Los nombres existentes reciben un sufijo numerado.</string>

@@ -1,21 +1,22 @@
-# Hasil verifikasi — 2.0.0-alpha.16 (2026-10-11)
+# Hasil verifikasi — 2.0.0-alpha.17 (2026-10-11)
 
 | Pemeriksaan | Hasil |
 |---|---|
 | assembleDebug | Lulus |
-| testDebugUnitTest | 134 tes, 0 gagal, 0 error (JVM, termasuk render layar Robolectric dan 16 APK uji: 8 modus penipuan, 4 pembanding, 4 fixture termasuk 3 Kotlin) |
+| testDebugUnitTest | 135 tes, 0 gagal, 0 error (JVM, termasuk render layar Robolectric dan 16 APK uji: 8 modus penipuan, 4 pembanding, 4 fixture termasuk 3 Kotlin) |
 | lintDebug | 0 error, 71 peringatan |
 | assembleRelease + R8 | Lulus; keluaran unsigned, bukan APK produksi siap pasang |
 | apksigner verify APK debug | Lulus |
 | zipalign 16 KiB APK debug | Lulus |
-| Identitas | com.packpeek.app.debug, 2.0.0-alpha.16-debug (versionCode 20016) |
+| Identitas | com.packpeek.app.debug, 2.0.0-alpha.17-debug (versionCode 20017) |
 | SDK | minimum 24, target 36 |
 | Izin Internet | **Ada** sejak alpha.10, hanya untuk cek hash VirusTotal opsional (kunci milik pengguna; hanya SHA-256 yang dikirim) |
 | Uji emulator | GitHub API 36, run 13 (alpha.13): 18 dari 18 langkah lulus. Langkahnya: daftar aplikasi, ringkasan dan pemeriksaan semua aplikasi, buka berkas lewat pemilih sistem, analisis, analisis mendalam, laporan PDF sampai lembar bagikan, pasang `control-clean.apk` sampai prompt sistem dan dialog hasil, aplikasi benar-benar terpasang, tanpa crash. Hasil di branch `emulator-results` |
 | HP fisik | Belum diuji oleh pengembang |
+| Uji beban (alpha.17) | APK PackPeek, semua 22.587 kelas dianggap kode aplikasi, heap 512 MB: selesai 28 dtk (biasa, batas 30) dan 18 dtk (mendalam, batas 90), tanpa kehabisan memori; pelacakan terpotong dilaporkan sebagai celah cakupan |
 
-Ukuran APK debug: 17,574,340 byte. SHA-256:
-`93f9287d9c66664a3f7a9bdd93daf014e2c22980adbf86df908ba88928c07c89`
+Ukuran APK debug: 17,576,276 byte. SHA-256:
+`dc2d9443e4df688409139cf10d7af255657b81d58f6f7c9d0439d41afb12a832`
 
 Perintah yang dijalankan:
 ```bash

@@ -485,6 +485,7 @@
     <string name="coverage_gap_cross">Logic %1$s chạy ngoài DEX và không được phân tích</string>
     <string name="coverage_gap_unreadable">Không đọc được mã trong %1$s</string>
     <string name="coverage_gap_limit">Phân tích mã đã dừng ở giới hạn thời gian hoặc kích thước; kết quả chỉ là một phần</string>
+    <string name="coverage_gap_tracking">Việc theo dõi giá trị đã hết thời gian; khả năng và địa chỉ đầy đủ, nhưng một số đường dữ liệu chưa được đánh dấu là đã theo dõi</string>
     <string name="find_target_body">SDK mục tiêu thấp hơn API 31 (Android 12). Một số cơ chế bảo vệ mới hơn có thể không được áp dụng.</string>
     <string name="find_exported_body">Thành phần được xuất đang bật mà không có quyền thành phần: %1$d. Không tính điểm vào từ launcher.</string>
     <string name="format_explanation">Ứng dụng đơn lẻ luôn được lưu dạng .apk. Ứng dụng chia nhỏ dùng định dạng đã chọn ở trên. Tên đã tồn tại sẽ được thêm hậu tố số.</string>

@@ -96,6 +96,11 @@ enum class GapKind {
     UNREADABLE,
     /** Analysis stopped at the time or size limit. */
     LIMIT,
+    /**
+     * Value tracking (which value goes where) ran out of its time share; capabilities, addresses
+     * and code paths are complete, but some flows are not marked as traced.
+     */
+    TRACKING,
 }
 
 data class CodeGap(val kind: GapKind, val detail: String)

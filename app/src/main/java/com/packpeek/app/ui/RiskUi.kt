@@ -439,6 +439,20 @@ fun evidenceText(e: Evidence): String = evidenceText(LocalResources.current, e)
 
 private fun shortName(permission: String) = permission.substringAfterLast('.')
 
+/** The gaps worth a line each: one per kind and place, the time limits only once. */
+fun shownGaps(gaps: List<CodeGap>): List<CodeGap> =
+    gaps.distinctBy { it.kind to (if (it.kind == GapKind.LIMIT || it.kind == GapKind.TRACKING) "" else it.detail) }.take(6)
+
+fun gapText(res: Resources, gap: CodeGap): String =
+    when (gap.kind) {
+        GapKind.HIDDEN_CODE -> res.getString(R.string.coverage_gap_hidden, gap.detail.substringAfter('!'))
+        GapKind.PACKER -> res.getString(R.string.coverage_gap_packer, gap.detail)
+        GapKind.CROSS_PLATFORM -> res.getString(R.string.coverage_gap_cross, gap.detail)
+        GapKind.UNREADABLE -> res.getString(R.string.coverage_gap_unreadable, gap.detail)
+        GapKind.LIMIT -> res.getString(R.string.coverage_gap_limit)
+        GapKind.TRACKING -> res.getString(R.string.coverage_gap_tracking)
+    }
+
 @Composable
 fun CoverageCard(coverage: Coverage, onGrantUsage: () -> Unit) {
     RowGroup(title = stringResource(R.string.coverage)) {
@@ -459,18 +473,8 @@ fun CoverageCard(coverage: Coverage, onGrantUsage: () -> Unit) {
             if (code == null) CoverageLine(false, stringResource(R.string.coverage_code_failed))
             else {
                 CoverageLine(true, stringResource(R.string.coverage_code, code.dexFiles, code.classes, code.appClasses))
-                code.gaps.distinctBy { it.kind to (if (it.kind == GapKind.LIMIT) "" else it.detail) }.take(6).forEach { gap ->
-                    CoverageLine(
-                        false,
-                        when (gap.kind) {
-                            GapKind.HIDDEN_CODE -> stringResource(R.string.coverage_gap_hidden, gap.detail.substringAfter('!'))
-                            GapKind.PACKER -> stringResource(R.string.coverage_gap_packer, gap.detail)
-                            GapKind.CROSS_PLATFORM -> stringResource(R.string.coverage_gap_cross, gap.detail)
-                            GapKind.UNREADABLE -> stringResource(R.string.coverage_gap_unreadable, gap.detail)
-                            GapKind.LIMIT -> stringResource(R.string.coverage_gap_limit)
-                        },
-                    )
-                }
+                val res = LocalResources.current
+                shownGaps(code.gaps).forEach { gap -> CoverageLine(false, gapText(res, gap)) }
             }
             CoverageLine(
                 coverage.deviceStateRead,

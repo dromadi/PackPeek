@@ -497,6 +497,7 @@
     <string name="coverage_gap_cross">%1$s mantığı DEX dışında çalışıyor ve analiz edilmiyor</string>
     <string name="coverage_gap_unreadable">Koddaki şu bölüm okunamadı: %1$s</string>
     <string name="coverage_gap_limit">Kod analizi süre veya boyut sınırında durdu; sonuçlar kısmi</string>
+    <string name="coverage_gap_tracking">Değer izleme için süre yetmedi; yetenekler ve adresler eksiksiz, ancak bazı veri yolları izlendi olarak işaretlenmedi</string>
     <string name="find_target_body">Hedef SDK, API 31\'in (Android 12) altında. Bazı yeni korumalar geçerli olmayabilir.</string>
     <string name="find_exported_body">Bileşen izni olmayan etkin dışa aktarılmış bileşenler: %1$d. Başlatıcı giriş noktaları sayılmaz.</string>
     <string name="format_explanation">Tek parça uygulamalar her zaman .apk olarak kaydedilir. Bölünmüş uygulamalar yukarıda seçilen biçimi kullanır. Var olan adlara numaralı bir sonek eklenir.</string>

@@ -33,6 +33,13 @@ class DestinationTrackingTest {
         assertEquals(setOf("collect.sim-server.example"), cookieHosts("sim.app.destination.Main\$toOwnServer\$1.invokeSuspend"))
     }
 
+    /** A small app is tracked completely: no gap about value tracking is reported. */
+    @Test
+    fun smallAppIsTrackedCompletely() {
+        val code = DexScanner.scan(listOf(apk))
+        assertTrue(code.gaps.none { it.kind == GapKind.TRACKING || it.kind == GapKind.LIMIT })
+    }
+
     /** Reading the cookie and sending a fixed text to the server is not the cookie going there. */
     @Test
     fun fixedTextIsNotTheCookie() {

@@ -67,6 +67,13 @@ object EvidenceReport {
                     line("  ${e.level.tag} ${evidenceText(res, e).replace("\n", " ")}${if (where.isBlank()) "" else " — $where"}")
                 }
             }
+            line()
+            line("== ${res.getString(R.string.coverage)} ==")
+            if (code == null) line("  ${res.getString(R.string.coverage_code_failed)}")
+            else {
+                line("  ${res.getString(R.string.coverage_code, code.dexFiles, code.classes, code.appClasses)}")
+                shownGaps(code.gaps).forEach { line("  ! ${gapText(res, it)}") }
+            }
             code?.deep?.let { deep ->
                 line()
                 line("== ${res.getString(R.string.report_deep)} ==")

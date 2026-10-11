@@ -497,6 +497,7 @@
     <string name="coverage_gap_cross">%1$s लॉजिक DEX के बाहर चलता है और उसका विश्लेषण नहीं होता</string>
     <string name="coverage_gap_unreadable">%1$s में कोड पढ़ा नहीं जा सका</string>
     <string name="coverage_gap_limit">कोड विश्लेषण अपनी समय या आकार सीमा पर रुक गया; नतीजे आंशिक हैं</string>
+    <string name="coverage_gap_tracking">मान ट्रैकिंग का समय खत्म हो गया; क्षमताएँ और पते पूरे हैं, लेकिन कुछ डेटा पथ ट्रैक किए गए के रूप में चिह्नित नहीं हैं</string>
     <string name="find_target_body">टारगेट SDK, API 31 (Android 12) से नीचे है। कुछ नई सुरक्षाएँ लागू नहीं हो सकतीं।</string>
     <string name="find_exported_body">बिना कंपोनेंट अनुमति वाले चालू एक्सपोर्टेड कंपोनेंट: %1$d। लॉन्चर एंट्री पॉइंट गिने नहीं जाते।</string>
     <string name="format_explanation">सामान्य ऐप्स हमेशा .apk के रूप में सेव होते हैं। Split ऐप्स ऊपर चुना गया फ़ॉर्मैट इस्तेमाल करते हैं। पहले से मौजूद नामों में संख्या जोड़ दी जाती है।</string>
