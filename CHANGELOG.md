@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.0-alpha.14 — 2026-10-11
+
+**Pelacakan nilai menembus coroutine Kotlin.** Aplikasi modern, seperti InSaver, mengoper data lewat coroutine. Sebelumnya nilai hilang di setiap perpindahan, sehingga hasilnya "nilainya belum dilacak".
+
+- Nilai diikuti lewat **lambda** (`launch { kirim(cookie) }`: variabel tertangkap di field `$c`), **continuation** (variabel `suspend` disimpan di `L$0` saat menunggu), dan **hasil fungsi `suspend`** (diterima `invokeSuspend` atau field `result`).
+- Label per parameter: lambda yang menangkap objek luar (`this`) dan cookie sekaligus tidak lagi membuat `this` dianggap cookie.
+- Pelacakan kini **mengikuti percabangan** (dataflow per blok dasar, digabung di titik temu). Sebelumnya satu cabang bisa menimpa nilai cabang lain, seperti cabang "resume" pada state machine coroutine.
+- Jejak data di analisis mendalam ditandai terlacak bila nilai terlacak di salah satu langkahnya, dan jejak yang terlacak didahulukan.
+- Fixture baru `coroutine-cookie` dikompilasi oleh compiler Kotlin sungguhan: tiga jalur coroutine terlacak, pembanding (cookie hanya untuk keputusan) tidak.
+- `yads` (bagian dalam Yandex Ads) dikenali sebagai library. "Bukti terkuat" menyebut bila nilainya terlacak.
+- Waktu pindai sekitar 1,5× dibanding sebelumnya. Tes: 126.
+
 ## 2.0.0-alpha.13 — 2026-10-11
 
 Perbaikan dari hasil review kode, diurutkan menurut dampaknya pada kepercayaan laporan.
