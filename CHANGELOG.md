@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.0-alpha.16 — 2026-10-11
+
+**Field dilacak per objek.** Di InSaver, semua jalur cookie dan clipboard menyebut delapan alamat yang sama. Penyebabnya, satu kelas klien HTTP dipakai untuk Instagram, Facebook, TikTok, dan server sendiri, sementara PackPeek mencatat field per nama. Kini:
+
+- Setiap `new` adalah satu objek (lokasi alokasi). `this.base` di dalam metode dibaca relatif terhadap objek tempat metode itu dipanggil. `Clients.instagram.send(cookie)` kini hanya menyebut alamat milik objek Instagram.
+- Identitas objek ikut terbawa lewat field (singleton/DI), nilai kembali fungsi, dan pemanggilan pada `this`.
+- Kalau objeknya tidak bisa ditentukan, PackPeek kembali ke cara lama (per nama field), jadi deteksi tidak pernah berkurang.
+- Laporan yang menyebut beberapa alamat kini ditulis "salah satu dari", dan daftar yang terpotong diberi akhiran "dan lainnya".
+- Fixture baru `two-clients` (Kotlin): satu kelas klien, dua instans di singleton, satu instans lokal. Masing-masing hanya menyebut alamatnya sendiri.
+- Tes: 134. Waktu pindai sekitar 1,2× alpha.15.
+
 ## 2.0.0-alpha.15 — 2026-10-11
 
 **Alamat tujuan untuk nilai yang terlacak.** Bila nilai data pribadi terlacak sampai ke panggilan pengiriman, PackPeek kini juga menyebut **ke alamat mana** pengiriman itu, misalnya "Nilai cookie login dilacak sampai ke panggilan yang mengirim ke internet, alamat: i.instagram.com".

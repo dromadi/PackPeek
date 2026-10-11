@@ -344,12 +344,18 @@ object DexScanner {
         var launches = false
         val listing = ArrayList<String>()
         /** Value tracking: every sending call with what reaches its arguments. */
-        val sinkCalls = ArrayList<SinkCall>()
+        val sinkCalls = LinkedHashMap<Int, SinkCall>()
         /** Sources whose values the method returns, and app methods whose results it returns. */
         var returnSources = 0
         val returnCallees = HashSet<String>()
         /** Calls to app methods: callee, source bits of the arguments, whether a parameter is passed. */
-        val calls = ArrayList<TaintCall>()
+        val calls = LinkedHashMap<Int, TaintCall>()
+        /** Stores into fields of `this`: labels and source bits per field, and parameters stored. */
+        val thisFieldFrom = HashMap<String, MutableSet<String>>()
+        val thisFieldBits = HashMap<String, Int>()
+        val thisParamFields = Array(PARAM_SLOTS) { HashSet<String>() }
+        /** Stores into fields of other objects whose labels are known (object allocated or fetched here). */
+        val objectStores = ArrayList<ObjectStore>()
         /** Per parameter slot, fields it is stored into (a lambda capturing it, a spilled local). */
         val paramFields = Array(PARAM_SLOTS) { HashSet<String>() }
         /** Per field, labels of the values this method stores into it. */
@@ -366,10 +372,14 @@ object DexScanner {
             constClasses += other.constClasses
             launches = launches || other.launches
             if (listing.isEmpty()) listing += other.listing
-            sinkCalls += other.sinkCalls
+            other.sinkCalls.forEach { (pc, c) -> sinkCalls.putIfAbsent(pc, c) }
             returnSources = returnSources or other.returnSources
             returnCallees += other.returnCallees
-            calls += other.calls
+            other.calls.forEach { (pc, c) -> calls.putIfAbsent(pc, c) }
+            other.thisFieldFrom.forEach { (k, v) -> thisFieldFrom.getOrPut(k) { HashSet() } += v }
+            other.thisFieldBits.forEach { (k, v) -> thisFieldBits[k] = (thisFieldBits[k] ?: 0) or v }
+            for (k in 0 until PARAM_SLOTS) thisParamFields[k] += other.thisParamFields[k]
+            objectStores += other.objectStores
             for (k in 0 until PARAM_SLOTS) paramFields[k] += other.paramFields[k]
             other.fieldFrom.forEach { (k, v) -> fieldFrom.getOrPut(k) { HashSet() } += v }
         }
@@ -380,13 +390,21 @@ object DexScanner {
      * An app-method call seen by value tracking. [results] are the labels of its arguments: app
      * methods whose results they hold, "F:<field>" for values read from a field, or [RESUMED].
      */
-    private class TaintCall(val callee: String, val args: List<TaintArg>)
+    private class TaintCall(val callee: String) {
+        /** Per callee parameter slot. */
+        val args = HashMap<Int, TaintArg>()
+        /** Labels of the receiver (instance calls): which object the call is made on. */
+        val receiver = HashSet<String>()
+    }
 
     /**
      * One argument of an app-method call: the callee parameter [slot] it lands in, the source bits
      * and caller-parameter bits it carries, and its labels.
      */
-    private class TaintArg(val slot: Int, val sources: Int, val params: Int, val labels: Set<String>)
+    private class TaintArg(val slot: Int, var sources: Int, var params: Int, val labels: MutableSet<String>)
+
+    /** A store into a field of an object other than `this`: the object's labels, field, value. */
+    private class ObjectStore(val target: Set<String>, val field: String, val sources: Int, val labels: Set<String>)
 
     /** Register state of value tracking at one instruction; joined where branches meet. */
     private class RegState(withTexts: Boolean) {
@@ -447,7 +465,10 @@ object DexScanner {
      * A sending call: [sinks] (the sink and any bot/webhook address among its arguments), source
      * and caller-parameter bits reaching its arguments, and their labels (including "H:<host>").
      */
-    private class SinkCall(val sinks: Int, val sources: Int, val params: Int, val labels: Set<String>)
+    private class SinkCall(var sinks: Int, var sources: Int, var params: Int, val labels: MutableSet<String>)
+
+    /** Label of `this` in an instance method. */
+    private const val THIS = "T"
 
     /** Label of a value delivered when a coroutine resumes (invokeSuspend's argument). */
     private const val RESUMED = "R"
@@ -871,7 +892,7 @@ object DexScanner {
     }
 
     /** Summary of sends a method makes: sources and hosts already known, and its parameters involved. */
-    private class Acc(var sources: Int = 0, val hosts: MutableSet<String> = HashSet())
+    private class Acc(var sources: Int = 0, val hosts: MutableSet<String> = HashSet(), val open: MutableSet<String> = HashSet())
 
     private const val MAX_HOSTS = 9
     private const val SHOWN_HOSTS = 8
@@ -886,120 +907,218 @@ object DexScanner {
      * through arguments, fields (captured lambda variables, continuation spills, base URLs),
      * results of app methods and resumed coroutines. Bounded rounds until nothing changes.
      */
+    /** A resolved value: sources, hosts, objects (allocation sites) and this-fields still open. */
+    private class Val {
+        var sources = 0
+        val hosts = HashSet<String>()
+        val sites = HashSet<String>()
+        val open = HashSet<String>()
+
+        fun add(o: Val?) {
+            if (o == null) return
+            sources = sources or o.sources
+            if (hosts.size < MAX_HOSTS) hosts += o.hosts
+            if (sites.size < MAX_LABELS) sites += o.sites
+            open += o.open
+        }
+    }
+
+    /**
+     * Per method, per sink: which sources reach it and to which hosts. Each send is summarised
+     * per method as (sink, parameters involved) -> (sources, hosts, this-fields still open) and
+     * composed into callers: through arguments, results, fields, coroutines, and fields of the
+     * object a call is made on (allocation sites), so two instances of one client keep their own
+     * base address. Without a known object, fields fall back to one value per field name.
+     */
     private fun tracedFlows(state: State): Map<String, Map<Int, Reached>> {
         val methods = state.methods
-        val returns = HashMap<String, Int>()
-        val returnHosts = HashMap<String, MutableSet<String>>()
-        val fieldSources = HashMap<String, Int>(state.fieldTaint)
-        val fieldHosts = HashMap<String, MutableSet<String>>()
-        // Per field: sends its value reaches once read, as sink bits -> hosts.
+        val returns = HashMap<String, Val>()
+        val fieldVal = HashMap<String, Val>()
+        state.fieldTaint.forEach { (f, bits) -> fieldVal.getOrPut(f) { Val() }.sources = bits }
+        val objField = HashMap<String, Val>()
         val fieldSinks = HashMap<String, HashMap<Int, MutableSet<String>>>()
         val summaries = HashMap<String, HashMap<Long, Acc>>()
         val callers = HashMap<String, MutableList<Pair<MethodInfo, TaintCall>>>()
-        methods.forEach { (k, m) ->
-            returns[k] = m.returnSources
-            m.calls.forEach { callers.getOrPut(it.callee) { ArrayList() } += m to it }
-        }
+        methods.forEach { (_, m) -> m.calls.values.forEach { callers.getOrPut(it.callee) { ArrayList() } += m to it } }
         var changed = false
-        fun addHosts(target: MutableSet<String>, more: Collection<String>) {
-            for (h in more) if (target.size < MAX_HOSTS && target.add(h)) changed = true
+        fun grow(target: Val, more: Val) {
+            if (more.sources and target.sources.inv() != 0) { target.sources = target.sources or more.sources; changed = true }
+            for (h in more.hosts) if (target.hosts.size < MAX_HOSTS && target.hosts.add(h)) changed = true
+            for (x in more.sites) if (target.sites.size < MAX_LABELS && target.sites.add(x)) changed = true
+            for (x in more.open) if (target.open.size < MAX_LABELS && target.open.add(x)) changed = true
         }
-        fun grow(map: HashMap<String, Int>, key: String, bits: Int) {
-            val old = map[key] ?: 0
-            if (bits and old.inv() != 0) { map[key] = old or bits; changed = true }
-        }
-        /** Sources and hosts behind labels, as seen from method [m]. */
-        fun resolve(m: MethodInfo, labels: Collection<String>): Pair<Int, Set<String>> {
-            var bits = 0
-            val hosts = HashSet<String>()
+        fun global(fields: Collection<String>): Val = Val().also { v -> fields.forEach { v.add(fieldVal[it]) } }
+        fun ofObjects(sites: Collection<String>, field: String): Val = Val().also { v -> sites.forEach { v.add(objField["$it|$field"]) } }
+
+        // Declared ahead: resolving a call result needs the call's receiver, and vice versa.
+        var receiverOf: (MethodInfo, TaintCall, Set<String>?, Int) -> Pair<Set<String>, Boolean> = { _, _, _, _ -> emptySet<String>() to false }
+
+        /**
+         * Labels resolved in method [m]. [recv]: objects `this` stands for (null: unknown, this-fields
+         * stay open). Depth-bounded through calls on objects.
+         */
+        fun resolve(m: MethodInfo, labels: Collection<String>, recv: Set<String>?, depth: Int = 0): Val {
+            val v = Val()
             for (l in labels)
                 when {
-                    l.startsWith("H:") -> hosts += l.substring(2)
-                    l == RESUMED -> m.calls.forEach { c ->
-                        bits = bits or (returns[c.callee] ?: 0)
-                        returnHosts[c.callee]?.let { hosts += it }
+                    l.startsWith("H:") -> if (v.hosts.size < MAX_HOSTS) v.hosts += l.substring(2)
+                    l.startsWith("O:") -> v.sites += l
+                    l.startsWith("TF:") -> {
+                        val f = l.substring(3)
+                        if (recv != null && recv.isNotEmpty()) v.add(ofObjects(recv, f)) else v.open += f
                     }
-                    l.startsWith("F:") -> {
-                        val f = l.substring(2)
-                        bits = bits or (fieldSources[f] ?: 0)
-                        fieldHosts[f]?.let { hosts += it }
-                    }
-                    else -> {
-                        bits = bits or (returns[l] ?: 0)
-                        returnHosts[l]?.let { hosts += it }
+                    l.startsWith("F:") -> v.add(fieldVal[l.substring(2)])
+                    l == RESUMED -> m.calls.values.forEach { c -> returns[c.callee]?.let { r -> v.sources = v.sources or r.sources; v.hosts += r.hosts } }
+                    l.startsWith("C:") -> {
+                        val call = m.calls[l.substring(2).toIntOrNull() ?: continue] ?: continue
+                        val r = returns[call.callee] ?: continue
+                        v.sources = v.sources or r.sources
+                        v.hosts += r.hosts
+                        v.sites += r.sites
+                        // What the callee returns from its own fields depends on the object it was called on.
+                        if (r.open.isNotEmpty()) {
+                            val on = receiverOf(m, call, recv, depth)
+                            when {
+                                on.first.isNotEmpty() -> r.open.forEach { v.add(ofObjects(on.first, it)) }
+                                on.second -> v.open += r.open
+                                else -> v.add(global(r.open))
+                            }
+                        }
                     }
                 }
-            return bits to hosts
+            return v
         }
-        fun summarize(k: String, sinks: Int, params: Int, sources: Int, hosts: Collection<String>) {
-            if (sources == 0 && params == 0 && hosts.isEmpty()) return
+
+        /** Objects a call is made on, and whether it is made on `this` of the caller. */
+        receiverOf = { m, call, recv, depth ->
+            when {
+                THIS in call.receiver -> (recv ?: emptySet()) to (recv == null)
+                depth >= 3 || call.receiver.isEmpty() -> emptySet<String>() to false
+                else -> resolve(m, call.receiver, recv, depth + 1).sites to false
+            }
+        }
+
+        /** Open this-fields resolved against a call's objects, passed up when the call is on `this`. */
+        fun close(m: MethodInfo, call: TaintCall, open: Collection<String>, into: Val) {
+            if (open.isEmpty()) return
+            val (sites, onThis) = receiverOf(m, call, null, 0)
+            when {
+                sites.isNotEmpty() -> open.forEach { into.add(ofObjects(sites, it)) }
+                onThis -> into.open += open
+                else -> into.add(global(open))
+            }
+        }
+
+        fun summarize(k: String, sinks: Int, params: Int, v: Val) {
+            if (v.sources == 0 && params == 0 && v.hosts.isEmpty() && v.open.isEmpty()) return
             val map = summaries.getOrPut(k) { HashMap() }
             val key = (sinks.toLong() shl 32) or (params.toLong() and 0xffffffffL)
             val acc = map[key] ?: (if (map.size >= MAX_SUMMARIES) return else Acc().also { map[key] = it; changed = true })
-            if (sources and acc.sources.inv() != 0) { acc.sources = acc.sources or sources; changed = true }
-            addHosts(acc.hosts, hosts)
+            if (v.sources and acc.sources.inv() != 0) { acc.sources = acc.sources or v.sources; changed = true }
+            for (h in v.hosts) if (acc.hosts.size < MAX_HOSTS && acc.hosts.add(h)) changed = true
+            for (f in v.open) if (acc.open.size < MAX_LABELS && acc.open.add(f)) changed = true
         }
         fun fieldSink(f: String, sinks: Int, hosts: Collection<String>) {
             val map = fieldSinks.getOrPut(f) { HashMap() }
             val set = map[sinks] ?: HashSet<String>().also { map[sinks] = it; changed = true }
-            addHosts(set, hosts)
+            for (h in hosts) if (set.size < MAX_HOSTS && set.add(h)) changed = true
         }
+        /** The field a label reads, of any object (fallback when the object is not known). */
+        fun fieldOf(l: String): String? =
+            when {
+                l.startsWith("F:") -> l.substring(2)
+                l.startsWith("TF:") -> l.substring(3)
+                else -> null
+            }
+
+        /** A resolved value for global use: this-fields still open fall back to all objects. */
+        fun closed(v: Val): Val = if (v.open.isEmpty()) v else Val().also { it.add(v); it.open.clear(); it.add(global(v.open)) }
+
         for (round in 0 until 12) {
             changed = false
             methods.forEach { (k, m) ->
-                val (rs, rh) = resolve(m, m.returnCallees)
-                grow(returns, k, m.returnSources or rs)
-                if (rh.isNotEmpty()) addHosts(returnHosts.getOrPut(k) { HashSet() }, rh)
-                m.fieldFrom.forEach { (f, labels) ->
-                    val (fs, fh) = resolve(m, labels)
-                    grow(fieldSources, f, fs)
-                    if (fh.isNotEmpty()) addHosts(fieldHosts.getOrPut(f) { HashSet() }, fh)
-                }
-                // Callers passing values to parameters this method stores in fields.
+                grow(returns.getOrPut(k) { Val() }, resolve(m, m.returnCallees, null).also { it.sources = it.sources or m.returnSources })
+                m.fieldFrom.forEach { (f, labels) -> grow(fieldVal.getOrPut(f) { Val() }, closed(resolve(m, labels, null))) }
+                // Global fallback: callers passing values to parameters stored in fields.
                 if (m.paramFields.any { it.isNotEmpty() })
                     callers[k]?.forEach { (caller, call) ->
-                        call.args.forEach { arg ->
+                        call.args.values.forEach { arg ->
                             val fields = m.paramFields.getOrNull(arg.slot) ?: return@forEach
                             if (fields.isEmpty()) return@forEach
-                            val (s1, h1) = resolve(caller, arg.labels)
-                            fields.forEach { f ->
-                                grow(fieldSources, f, arg.sources or s1)
-                                if (h1.isNotEmpty()) addHosts(fieldHosts.getOrPut(f) { HashSet() }, h1)
-                            }
+                            val v = closed(resolve(caller, arg.labels, null)).also { it.sources = it.sources or arg.sources }
+                            fields.forEach { f -> grow(fieldVal.getOrPut(f) { Val() }, v) }
                         }
                     }
-                // Its own sends.
-                m.sinkCalls.forEach { call ->
-                    val (s1, h1) = resolve(m, call.labels)
-                    summarize(k, call.sinks, call.params, call.sources or s1, h1)
-                    call.labels.forEach { l -> if (l.startsWith("F:")) fieldSink(l.substring(2), call.sinks, h1) }
+                // Fields of the objects this method's calls are made on: what the callee stores in this.f.
+                m.calls.values.forEach { call ->
+                    val callee = methods[call.callee] ?: return@forEach
+                    if (callee.thisFieldFrom.isEmpty() && callee.thisFieldBits.isEmpty() && callee.thisParamFields.all { it.isEmpty() }) return@forEach
+                    val (sites, _) = receiverOf(m, call, null, 0)
+                    if (sites.isEmpty()) return@forEach
+                    callee.thisFieldFrom.forEach { (f, labels) ->
+                        val v = closed(resolve(callee, labels, sites))
+                        sites.forEach { s -> grow(objField.getOrPut("$s|$f") { Val() }, v) }
+                    }
+                    callee.thisFieldBits.forEach { (f, bits) ->
+                        sites.forEach { s -> grow(objField.getOrPut("$s|$f") { Val() }, Val().also { it.sources = bits }) }
+                    }
+                    call.args.values.forEach { arg ->
+                        val fields = callee.thisParamFields.getOrNull(arg.slot) ?: return@forEach
+                        if (fields.isEmpty()) return@forEach
+                        val v = closed(resolve(m, arg.labels, null)).also { it.sources = it.sources or arg.sources }
+                        fields.forEach { f -> sites.forEach { s -> grow(objField.getOrPut("$s|$f") { Val() }, v) } }
+                    }
                 }
-                // Sends made by app methods it calls, with what it passes them.
-                m.calls.forEach { call ->
+                m.objectStores.forEach { store ->
+                    val sites = resolve(m, store.target, null).sites
+                    if (sites.isEmpty()) return@forEach
+                    val v = closed(resolve(m, store.labels, null)).also { it.sources = it.sources or store.sources }
+                    sites.forEach { s -> grow(objField.getOrPut("$s|${store.field}") { Val() }, v) }
+                }
+                // Its own sends.
+                m.sinkCalls.values.forEach { call ->
+                    val v = resolve(m, call.labels, null).also { it.sources = it.sources or call.sources }
+                    summarize(k, call.sinks, call.params, v)
+                    // A field reaching a send: the hosts that come with it, not the field's own values.
+                    call.labels.forEach { l ->
+                        fieldOf(l)?.let { fieldSink(it, call.sinks, closed(resolve(m, call.labels - l, null)).hosts) }
+                    }
+                }
+                // Sends made by app methods it calls, with what it passes them and the object they run on.
+                m.calls.values.forEach { call ->
                     val theirs = summaries[call.callee] ?: return@forEach
                     for ((key, acc) in theirs.entries.toList()) {
                         val sinks = (key ushr 32).toInt()
                         val slots = key.toInt()
-                        var bits = 0
+                        val v = Val()
+                        v.sources = acc.sources
+                        v.hosts += acc.hosts
+                        close(m, call, acc.open, v)
                         var params = 0
-                        val hosts = HashSet(acc.hosts)
-                        val fields = ArrayList<String>()
-                        call.args.forEach { arg ->
-                            if (slots and paramBit(arg.slot) == 0) return@forEach
-                            val (s1, h1) = resolve(m, arg.labels)
-                            bits = bits or arg.sources or s1
+                        val fields = ArrayList<Pair<String, TaintArg>>()
+                        val involved = call.args.values.filter { slots and paramBit(it.slot) != 0 }
+                        involved.forEach { arg ->
+                            v.add(resolve(m, arg.labels, null))
+                            v.sources = v.sources or arg.sources
                             params = params or arg.params
-                            hosts += h1
-                            arg.labels.forEach { l -> if (l.startsWith("F:")) fields += l.substring(2) }
+                            arg.labels.forEach { l -> fieldOf(l)?.let { fields += it to arg } }
                         }
-                        summarize(k, sinks or (bits and destinationBits), params, (acc.sources or bits) and sourceBits, hosts)
-                        fields.forEach { fieldSink(it, sinks, hosts) }
+                        summarize(k, sinks or (v.sources and destinationBits), params, v.also { it.sources = it.sources and sourceBits })
+                        // A field passed into a send: the hosts of the send and the other arguments.
+                        fields.forEach { (f, from) ->
+                            val others = Val().also { o ->
+                                o.hosts += acc.hosts
+                                close(m, call, acc.open, o)
+                                involved.filter { it !== from }.forEach { o.add(resolve(m, it.labels, null)) }
+                            }
+                            fieldSink(f, sinks, closed(others).hosts)
+                        }
                     }
                 }
                 // Parameters stored in fields reach whatever reading those fields reaches.
                 for (slot in 0 until PARAM_SLOTS)
                     m.paramFields[slot].forEach { f ->
-                        fieldSinks[f]?.forEach { (sinks, hosts) -> summarize(k, sinks, paramBit(slot), 0, hosts) }
+                        fieldSinks[f]?.forEach { (sinks, hosts) -> summarize(k, sinks, paramBit(slot), Val().also { it.hosts += hosts }) }
                     }
             }
             if (!changed) break
@@ -1008,15 +1127,18 @@ object DexScanner {
         summaries.forEach { (k, map) ->
             val reached = HashMap<Int, Reached>()
             map.forEach { (key, acc) ->
-                val sources = acc.sources and sourceBits
+                // This-fields never tied to an object: all objects' values, as before.
+                val fallback = global(acc.open)
+                val sources = (acc.sources or fallback.sources) and sourceBits
                 if (sources == 0) return@forEach
+                val hosts = acc.hosts + fallback.hosts
                 val sinks = (key ushr 32).toInt()
                 for (c in Capability.entries)
                     if (c.sink && sinks and c.bit != 0) {
                         val r = reached.getOrPut(c.bit) { Reached() }
                         r.sources = r.sources or sources
                         for (src in Capability.entries)
-                            if (sources and src.bit != 0) r.hosts.getOrPut(src.bit) { HashSet() } += acc.hosts
+                            if (sources and src.bit != 0) r.hosts.getOrPut(src.bit) { HashSet() } += hosts
                     }
             }
             if (reached.isNotEmpty()) out[k] = reached
@@ -1364,6 +1486,7 @@ object DexScanner {
                 // Parameters sit in the last registers; `this` is not a parameter.
                 val first = registerCount - ins + (if (static) 0 else 1)
                 for (r in first until registerCount) entry.taint[r] = paramBit(r - first)
+                if (!static && ins > 0) entry.labels[registerCount - ins] = setOf(THIS)
                 // A coroutine resumes with the result of the suspend call it was waiting for.
                 if (!static && ins == 2 && string(b.getInt(methodIdsOff + 8 * index + 4)) == "invokeSuspend")
                     entry.labels[registerCount - 1] = setOf(RESUMED)
@@ -1507,7 +1630,9 @@ object DexScanner {
                         set(a8, bits, hostLabels(string(idx)))
                         text(a8, string(idx), 1)
                     }
-                    0x1c, 0x22 -> set(a8, 0)
+                    0x1c -> set(a8, 0)
+                    // Each allocation site is one object, so its fields are told apart from others'.
+                    0x22 -> set(a8, 0, setOf("O:$key@$i"))
                     0x1f -> Unit // check-cast keeps the value
                     in 0x44..0x4a -> set(a8, st.taint[next and 0xff] ?: 0, st.labels[next and 0xff].orEmpty())
                     in 0x4b..0x51 -> {
@@ -1518,9 +1643,33 @@ object DexScanner {
                     // A field of an object read from a source holds that source: notification.extras.
                     // Field reads carry the field as a label, resolved app-wide later: a captured
                     // lambda variable ($c), a spilled local (L$0) or a continuation's result.
-                    in 0x52..0x58 ->
-                        set(a4, fieldBits(next) or ((st.taint[b4] ?: 0) and PARAMS.inv()), fieldLabels(next, st.labels[b4].orEmpty()))
-                    in 0x59..0x5f -> storeLabels(mi, next, st.taint[a4] ?: 0, st.labels[a4].orEmpty())
+                    in 0x52..0x58 -> {
+                        val obj = st.labels[b4].orEmpty()
+                        val labels =
+                            if (THIS in obj && next < fieldCount) {
+                                // this.f: resolved against the object the method is called on.
+                                val f = fieldKey(next)
+                                fieldLabels(next, emptySet()).filterTo(HashSet()) { !it.startsWith("F:") }.also { it += "TF:$f" }
+                            } else fieldLabels(next, obj.filterTo(HashSet()) { it != THIS })
+                        set(a4, fieldBits(next) or ((st.taint[b4] ?: 0) and PARAMS.inv()), labels)
+                    }
+                    in 0x59..0x5f -> {
+                        val value = st.taint[a4] ?: 0
+                        val valueLabels = st.labels[a4].orEmpty()
+                        storeLabels(mi, next, value, valueLabels)
+                        val obj = st.labels[b4].orEmpty()
+                        if (next < fieldCount && obj.isNotEmpty()) {
+                            val f = fieldKey(next)
+                            if (THIS in obj) {
+                                if (valueLabels.isNotEmpty() && mi.thisFieldFrom.size < 200)
+                                    mi.thisFieldFrom.getOrPut(f) { HashSet() } += valueLabels.take(MAX_LABELS)
+                                val src = value and (sourceBits or destinationBits)
+                                if (src != 0) mi.thisFieldBits[f] = (mi.thisFieldBits[f] ?: 0) or src
+                                forSlots(value) { slot -> mi.thisParamFields[slot] += f }
+                            } else if (mi.objectStores.size < 200 && (valueLabels.isNotEmpty() || value and sourceBits != 0))
+                                mi.objectStores += ObjectStore(obj, f, value and (sourceBits or destinationBits), valueLabels)
+                        }
+                    }
                     in 0x60..0x66 -> set(a8, fieldBits(next), fieldLabels(next, emptySet()))
                     in 0x67..0x6d -> storeLabels(mi, next, st.taint[a8] ?: 0, st.labels[a8].orEmpty())
                     in 0x6e..0x72, in 0x74..0x78, 0xfa, 0xfb, 0xfc, 0xfd -> {
@@ -1531,33 +1680,51 @@ object DexScanner {
                             mask = mask or (st.taint[r] ?: 0)
                             st.labels[r]?.let { from += it }
                         }
+                        // Object identities say which object a call is on; they are not data.
+                        from.removeAll { it == THIS || it.startsWith("O:") }
                         val sources = mask and PARAMS.inv()
                         val rule = if (op == 0xfc || op == 0xfd) null else methodRule.getOrNull(next)
                         val cap = rule?.capability
                         if (cap != null && cap.sink && mi.sinkCalls.size < MAX_CALLS) {
                             // Data sent together with a bot or webhook address goes to that destination.
                             val sinkBits = cap.bit or (sources and destinationBits)
-                            if (sources != 0 || mask and PARAMS != 0 || from.isNotEmpty())
-                                mi.sinkCalls += SinkCall(sinkBits, sources and sourceBits, mask and PARAMS, from)
+                            if (sources != 0 || mask and PARAMS != 0 || from.isNotEmpty()) {
+                                val call = mi.sinkCalls.getOrPut(i) { SinkCall(0, 0, 0, HashSet()) }
+                                call.sinks = call.sinks or sinkBits
+                                call.sources = call.sources or (sources and sourceBits)
+                                call.params = call.params or (mask and PARAMS)
+                                if (call.labels.size < MAX_LABELS) call.labels += from
+                            }
                         }
                         var result = mask
                         var resultFrom: Set<String> = from
                         if (cap != null && cap.source) result = result or cap.bit
                         val called = if (op == 0xfc || op == 0xfd || next >= methodCount) null else methodKey(next)
                         if (called != null && isAppClass(called.substringBefore("->"))) {
-                            // Per argument, so a callee parameter only gets what is passed to it.
+                            // Per argument, so a callee parameter only gets what is passed to it; the
+                            // receiver tells which object the call is made on.
                             val static = op == 0x71 || op == 0x77
-                            val passed =
-                                regs.toList().mapIndexedNotNull { p, r ->
-                                    val slot = if (static) p else p - 1
-                                    if (slot < 0) return@mapIndexedNotNull null
-                                    val bits = st.taint[r] ?: 0
+                            val call =
+                                mi.calls[i] ?: (if (mi.calls.size >= MAX_CALLS) null else TaintCall(called).also { mi.calls[i] = it })
+                            if (call != null) {
+                                regs.forEachIndexed { p, r ->
                                     val labels = st.labels[r].orEmpty()
-                                    if (bits == 0 && labels.isEmpty()) null
-                                    else TaintArg(slot.coerceAtMost(PARAM_SLOTS - 1), bits and (sourceBits or destinationBits), bits and PARAMS, labels)
+                                    val slot = if (static) p else p - 1
+                                    if (slot < 0) {
+                                        call.receiver += labels.take(MAX_LABELS)
+                                        return@forEachIndexed
+                                    }
+                                    val bits = st.taint[r] ?: 0
+                                    if (bits == 0 && labels.isEmpty()) return@forEachIndexed
+                                    val s0 = slot.coerceAtMost(PARAM_SLOTS - 1)
+                                    val arg = call.args.getOrPut(s0) { TaintArg(s0, 0, 0, HashSet()) }
+                                    arg.sources = arg.sources or (bits and (sourceBits or destinationBits))
+                                    arg.params = arg.params or (bits and PARAMS)
+                                    if (arg.labels.size < MAX_LABELS) arg.labels += labels
                                 }
-                            if (passed.isNotEmpty() && mi.calls.size < MAX_CALLS) mi.calls += TaintCall(called, passed)
-                            resultFrom = if (from.size < MAX_LABELS) from + called else from
+                                // The result is labelled with this call, resolved with its receiver later.
+                                resultFrom = if (from.size < MAX_LABELS) from + "C:$i" else from
+                            }
                         }
                         // Data read from a source is not sent to the address it was read for
                         // (getCookie("https://www.instagram.com") returns the cookie, not a request).

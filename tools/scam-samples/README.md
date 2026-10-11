@@ -45,6 +45,7 @@ Setiap baris di atas dikunci oleh `ScamSamplesTest` (JVM), jadi perubahan pada m
 | `joined-pieces` | Alamat bot dipecah lalu digabung dengan `+`, plus potongan yang tidak digabung | Hanya gabungan yang sungguh dibuat kode yang dilaporkan |
 | `coroutine-cookie` (Kotlin) | Cookie lewat lambda `launch`, disimpan di continuation (`L$0`), dikembalikan fungsi `suspend`, plus pembanding yang hanya memakai cookie untuk keputusan | Tiga jalur coroutine terlacak; pembanding tidak (`CoroutineTrackingTest`) |
 | `destination-cookie` (Kotlin) | Cookie dikirim ke `i.instagram.com` lewat helper `get(url, cookie)`, ke server sendiri dari coroutine dengan alamat dasar di field, dan pembanding yang hanya mengirim teks tetap | Alamat tujuan per nilai terlacak (`DestinationTrackingTest`) |
+| `two-clients` (Kotlin) | Satu kelas klien HTTP dengan alamat dasar di field. Dua instans di singleton (Instagram, server sendiri) plus satu instans lokal | Setiap pengiriman hanya menyebut alamat instansnya sendiri (`ObjectFieldsTest`) |
 
 Fixture Kotlin dibangun dengan `./build-kotlin.sh` (memakai compiler Kotlin dari cache Gradle proyek ini), karena bentuk coroutine hanya realistis bila dikompilasi oleh Kotlin sungguhan.
 
