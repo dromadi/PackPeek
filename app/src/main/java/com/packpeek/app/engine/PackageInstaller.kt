@@ -74,8 +74,10 @@ suspend fun installPackage(context: Context, pkg: String, files: List<File>): In
 
 /**
  * The system installer reports through this PendingIntent while PackPeek is on screen. From
- * Android 15 (target SDK 35+) the creator must opt in, or the launch of [InstallStatusActivity],
- * and with it the confirmation prompt, is blocked as a background activity start.
+ * Android 14 the creator must opt in, or the launch of [InstallStatusActivity], and with it the
+ * confirmation prompt, can be blocked as a background activity start. Android 14 and 15 (API 34–35)
+ * know only MODE_BACKGROUND_ACTIVITY_START_ALLOWED; Android 16 (API 36) adds ALLOW_IF_VISIBLE and
+ * deprecates ALLOWED, so each version gets the mode it defines.
  */
 @Suppress("DEPRECATION")
 private fun creatorMayStart(): Bundle? =

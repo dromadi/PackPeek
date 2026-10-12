@@ -8,6 +8,9 @@
 - Correlate install results with a session ID retained in the PendingIntent, reject unidentified/stale results, and measure waiting with a monotonic clock.
 - Label static URLs, unrecognized code origins and untraced flows conservatively in all eight supported languages.
 - Make the ZIP-bomb regression deterministic with an explicit inflated-byte cap and a valid-manifest control; test expired deadlines without timing a busy loop.
+- Read DEX files and hidden payloads with a limit on the bytes actually inflated, since ZIP sizes can be understated by a crafted APK; reading now sits inside the error handling, so one oversized or out-of-memory file becomes a coverage gap instead of ending the APK's code analysis, and an out-of-memory payload no longer stops the main DEX scan.
+- Name `versionCodeMajor` by its framework ID, so split checks still compare it when attribute names are stripped.
+- Document why the installer's background-start opt-in differs between Android 14–15 and 16.
 - Add regression coverage and CI for unit tests, lint, debug and R8 release builds. CI results are recorded on the PR; no new release or production-signing claim.
 
 ## 2.0.0-alpha.20 — 2026-10-11

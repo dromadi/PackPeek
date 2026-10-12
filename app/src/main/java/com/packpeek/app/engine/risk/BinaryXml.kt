@@ -85,6 +85,7 @@ object BinaryXml {
             0x0101020c to "minSdkVersion",
             0x0101021b to "versionCode",
             0x0101021c to "versionName",
+            0x01010576 to "versionCodeMajor",
             0x01010270 to "targetSdkVersion",
             0x01010271 to "maxSdkVersion",
             0x01010380 to "accessibilityEventTypes",
