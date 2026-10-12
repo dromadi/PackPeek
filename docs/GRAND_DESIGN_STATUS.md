@@ -1,6 +1,6 @@
 # Status grand design
 
-Implementasi source dan penerimaan perangkat dibedakan. Workbook asli tidak diubah. Perkiraan progres alpha sekitar 80% sebelum pengemasan, bukan pernyataan bahwa seluruh grand design selesai.
+Implementasi source dan penerimaan perangkat dibedakan. Workbook asli tidak diubah. Status ditinjau terhadap alpha.20. Tidak ada persentase keseluruhan karena bukti implementasi, pengujian otomatis, dan penerimaan perangkat berbeda.
 
 | ID | Tugas | Status | Bukti / batas |
 |---|---|---|---|
@@ -42,11 +42,11 @@ Implementasi source dan penerimaan perangkat dibedakan. Workbook asli tidak diub
 | T803 | Aksesibilitas & layar besar (tablet/foldable) | Sebagian / menunggu QA | Grid adaptive dan kontrol Material; TalkBack, font 200%, kontras dan foldable menunggu QA perangkat. |
 | T706 | Halaman Tentang & Lisensi Open Source | Sebagian / menunggu QA | About/versi/notice OSS/privasi lokal ada; kontak dan URL kebijakan privasi publik belum diisi. |
 | T317 | Menu Masukan/Dukungan, Bagikan Aplikasi & Beri Rating | Sebagian / menunggu QA | Share info/diagnostik ada; email belum diberikan, rating Play disembunyikan. |
-| T208 | Unit test untuk logika inti | Implementasi alpha | 20 unit test aturan inti dan manifest (termasuk deteksi launcher dan filter multi-framework) |
+| T208 | Unit test untuk logika inti | Implementasi alpha | BUILD_REPORT alpha.20 mencatat 151 tes; jumlah dan hasil perubahan PR berikutnya mengikuti laporan CI pada commit terkait |
 | T341 | Optimasi performa: Baseline Profile & startup | Belum selesai | Baseline Profile khusus aplikasi dan benchmark startup/scroll belum dibuat/dijalankan. |
 | T802 | Uji build release dengan R8 & aturan ProGuard | Sebagian / menunggu QA | Build release R8 diperiksa dalam BUILD_REPORT; pengujian runtime release belum dilakukan. |
-| T801 | Uji di berbagai versi Android & perangkat | Belum selesai | Uji emulator API 24/29/33/34/36 dan satu HP fisik belum dilakukan. |
+| T801 | Uji di berbagai versi Android & perangkat | Belum selesai | BUILD_REPORT mencatat emulator API 36 alpha.13 dan uji HP pemilik alpha.17/18. Matriks API 24/29/33/34/36 untuk commit rilis belum lengkap. |
 | T901 | Buat upload keystore & signingConfig aman | Sebagian / menunggu QA | SigningConfig membaca keystore.properties; kunci produksi dan backup milik pemilik belum dibuat. |
 | T350 | Build APK rilis v2.0 + changelog | Belum selesai | Alpha, belum rilis stabil v2.0. Menunggu pengujian perangkat dan signing produksi. |
 
-Fitur opsional yang tidak dipilih dan tahap 2 belum ditambahkan: auto-backup terjadwal, Hilt, tracker detector, laporan PDF, manifest viewer penuh, ads, billing dan analitik.
+Deteksi SDK iklan/analitik dan laporan PDF sudah tersedia; deteksi SDK bukan bukti pelacakan berjalan. Auto-backup terjadwal, Hilt, manifest viewer penuh, monetisasi ads/billing, dan analitik penggunaan PackPeek belum ditambahkan.

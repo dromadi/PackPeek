@@ -43,6 +43,8 @@ class EvidenceReportTest {
         assertTrue(text.contains("SHA-256: ${code.deep!!.sha256}"))
         assertTrue(text, text.contains("T3 Value of SMS traced into the call that sends to a Telegram bot"))
         assertTrue(text.contains("OtpReceiver"))
+        assertTrue(text.contains("code outside recognized SDKs"))
+        assertFalse(text.contains("Connects to "))
         assertTrue(text.contains("Decoded with XOR key 0x2a"))
         assertTrue(text.contains("assets/payload.bin"))
         assertFalse("token must stay masked", text.contains("SIMULATIONxONLY"))

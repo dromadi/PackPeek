@@ -37,7 +37,7 @@ class LimitedInputTest {
     @Test
     fun stopsAtTheDeadlineAndOnCancel() {
         assertThrows(InterruptedIOException::class.java) {
-            drain(LimitedInput(Endless(), Long.MAX_VALUE, System.currentTimeMillis() + 50) { true })
+            drain(LimitedInput(Endless(), Long.MAX_VALUE, 0L) { true })
         }
         var active = true
         val limited = LimitedInput(Endless(), Long.MAX_VALUE, Long.MAX_VALUE) { active }
@@ -53,17 +53,23 @@ class LimitedInputTest {
         ZipOutputStream(out).use { zip ->
             zip.putNextEntry(ZipEntry("bomb.bin"))
             val zeros = ByteArray(1 shl 20)
-            repeat(256) { zip.write(zeros) } // 256 MiB of zeros, a few hundred KiB compressed
+            repeat(8) { zip.write(zeros) } // 8 MiB inflated; tiny compressed input
+            zip.closeEntry()
+            zip.putNextEntry(ZipEntry("AndroidManifest.xml"))
+            javaClass.getResourceAsStream("/omniextract_manifest.bin")!!.use { zip.write(it.readBytes()) }
             zip.closeEntry()
         }
         val bytes = out.toByteArray()
         assertTrue(bytes.size < 2_000_000)
-        val start = System.currentTimeMillis()
-        val result =
-            runCatching {
-                StreamManifest.read(LimitedInput(ByteArrayInputStream(bytes), Long.MAX_VALUE, start + 200) { true })
-            }
-        assertTrue(result.isFailure)
-        assertTrue(System.currentTimeMillis() - start < 5_000)
+        // No short deadline: a fast machine must hit the same inflated-byte guard as a slow one.
+        val failure = assertThrows(InterruptedIOException::class.java) {
+            StreamManifest.read(ByteArrayInputStream(bytes), maxInflatedBytes = 1024 * 1024L)
+        }
+        assertEquals("inflated read limit", failure.message)
+        // The archive itself is valid; with enough budget its later manifest is readable.
+        assertEquals(
+            "io.github.omniextract.claude",
+            StreamManifest.read(ByteArrayInputStream(bytes), maxInflatedBytes = 16 * 1024 * 1024L)?.get("package"),
+        )
     }
 }

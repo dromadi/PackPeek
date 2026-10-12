@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased — review alpha.19–20
+
+- Bound backup indexing by shared inflated bytes and entry count, including nested APKs and skipped entries; preserve cancellation and release ZIP inflaters.
+- Require MAIN and a launcher category in the same intent filter in both manifest readers.
+- Validate string-pool boundaries/terminators and bound decoded allocations.
+- Correlate install results with a session ID retained in the PendingIntent, reject unidentified/stale results, and measure waiting with a monotonic clock.
+- Label static URLs, unrecognized code origins and untraced flows conservatively in all eight supported languages.
+- Make the ZIP-bomb regression deterministic with an explicit inflated-byte cap and a valid-manifest control; test expired deadlines without timing a busy loop.
+- Read DEX files and hidden payloads with a limit on the bytes actually inflated, since ZIP sizes can be understated by a crafted APK; reading now sits inside the error handling, so one oversized or out-of-memory file becomes a coverage gap instead of ending the APK's code analysis, and an out-of-memory payload no longer stops the main DEX scan.
+- Name `versionCodeMajor` by its framework ID, so split checks still compare it when attribute names are stripped.
+- Document why the installer's background-start opt-in differs between Android 14–15 and 16.
+- Recognize Alipay SDK, ZEGO SDK and Drake libraries, so findings from them (cookie reads, screen capture for live streaming, clipboard and shell helpers) are no longer reported as the app's own code. Seen in a report on HOT51, a sideloaded live-streaming app.
+- Add regression coverage and CI for unit tests, lint, debug and R8 release builds. CI results are recorded on the PR; no new release or production-signing claim.
+
 ## 2.0.0-alpha.20 — 2026-10-11
 
 **Kalibrasi lanjutan "Pola pencurian OTP" dari laporan Getcontact.** Di alpha.19, Getcontact (Play Store) masih ditandai indikator kuat karena `TelephonyManager.sendUssdRequest` dianggap tanda pengalihan panggilan. Getcontact memakainya di `TelcoActivationRepositoryImpl.callUssd` untuk aktivasi layanan operator. USSD juga dipakai untuk cek pulsa dan paket data.

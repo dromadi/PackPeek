@@ -497,11 +497,11 @@
     <string name="cap_discord">Discord-вебхук</string>
     <string name="ev_code_call">Вызывает %1$s</string>
     <string name="ev_code_string">Содержит текст %1$s</string>
-    <string name="ev_flow">Читает %1$s и отправляет в %2$s в одном пути кода (значение не отслежено)</string>
-    <string name="ev_destination">Подключается к %1$s</string>
+    <string name="ev_flow">Один путь кода содержит чтение %1$s и отправку в %2$s (значение не отслежено)</string>
+    <string name="ev_destination">URL найден в коде: %1$s</string>
     <string name="ev_destination_cleartext">%1$s (незашифрованный http)</string>
     <string name="ev_destination_ip">%1$s (IP-адрес без доменного имени)</string>
-    <string name="ev_origin_app">собственный код приложения</string>
+    <string name="ev_origin_app">код вне распознанных SDK</string>
     <string name="ev_origin_library">библиотека: %1$s</string>
     <string name="ev_hidden_code">Скрытый файл кода: %1$s</string>
     <string name="ev_packer">Упаковщик кода: %1$s</string>
@@ -514,7 +514,7 @@
     <string name="strength_t2">код делает эти вызовы</string>
     <string name="strength_t3">чтение и отправка в одном пути кода</string>
     <string name="strength_t4">наблюдается на этом устройстве</string>
-    <string name="coverage_code">Проанализирован код (DEX): файлов DEX: %1$d, классов: %2$d, из них в собственном коде приложения: %3$d</string>
+    <string name="coverage_code">Проанализирован код (DEX): файлов DEX: %1$d, классов: %2$d, из них вне распознанных SDK: %3$d</string>
     <string name="coverage_code_failed">Не удалось проанализировать код приложения (DEX)</string>
     <string name="coverage_gap_hidden">Скрытый код не проанализирован: %1$s</string>
     <string name="coverage_gap_packer">Код защищён упаковщиком (%1$s); настоящий код зашифрован</string>

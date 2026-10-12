@@ -39,9 +39,9 @@ data class InstallResult(
     /** The installer session this result belongs to; -1 when unknown. */
     val sessionId: Int = -1,
 ) {
-    /** Whether this report answers [session] (for [pkg], when the system did not name a session). */
+    /** A delayed result for another attempt at the same package must never finish this session. */
     fun answers(session: Int, pkg: String) =
-        if (sessionId >= 0) sessionId == session else packageName.isBlank() || packageName == pkg
+        session >= 0 && sessionId == session && (packageName.isBlank() || packageName == pkg)
 
     val success
         get() = failure == null
@@ -91,7 +91,8 @@ object InstallErrors {
      */
     fun settle(goneForMs: Long?, updated: Boolean, waitedMs: Long): InstallWait =
         when {
-            goneForMs == null -> if (waitedMs >= TIMEOUT_MS) InstallWait.NO_RESULT else InstallWait.WAIT
+            waitedMs >= TIMEOUT_MS -> InstallWait.NO_RESULT
+            goneForMs == null -> InstallWait.WAIT
             goneForMs < GRACE_MS -> InstallWait.WAIT
             updated -> InstallWait.SUCCESS
             else -> InstallWait.NO_RESULT

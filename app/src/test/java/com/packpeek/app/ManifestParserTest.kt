@@ -133,7 +133,7 @@ class ManifestParserTest {
     }
 
     private fun apk(manifest: ByteArray): File {
-        val file = temp.newFile("base.apk")
+        val file = temp.newFile()
         ZipOutputStream(file.outputStream()).use { zip ->
             zip.putNextEntry(ZipEntry("AndroidManifest.xml"))
             zip.write(manifest)
@@ -233,6 +233,29 @@ class ManifestParserTest {
     }
 
     @Test
+    fun launcherNeedsMainAndCategoryInTheSameFilter() {
+        fun child(tag: String, value: String) = Element(tag, listOf(str("name", NAME, value)))
+        fun filter(vararg children: Element) = Element("intent-filter", emptyList(), children.toList())
+        val main = child("action", "android.intent.action.MAIN")
+        val category = child("category", "android.intent.category.LAUNCHER")
+        val cases = listOf(
+            listOf(filter(category)) to false,
+            listOf(filter(main), filter(category)) to false,
+            listOf(filter(main, category)) to true,
+            listOf(filter(main, child("category", "android.intent.category.LEANBACK_LAUNCHER"))) to true,
+        )
+        for (kind in listOf("activity", "activity-alias")) {
+            for ((filters, expected) in cases) {
+                val activity = Element(kind, listOf(str("name", NAME, ".Main")), filters)
+                val bytes = compile(Element("manifest", listOf(str("package", null, "t.app")),
+                    listOf(Element("application", emptyList(), listOf(activity)))))
+                assertEquals(expected, com.packpeek.app.engine.ManifestRoot.parse(bytes).launchers.contains("t.app.Main"))
+                assertEquals(expected, ManifestScanner.scan(listOf(apk(bytes))).hasLauncher)
+            }
+        }
+    }
+
+    @Test
     fun launcherHiddenAtRuntimeIsObserved() {
         val manifest =
             Element(
@@ -305,6 +328,30 @@ class ManifestParserTest {
         failsAsArchive(shortHeader)
         val wrongHeaderSize = good.copyOf().also { it[2] = 16 }
         failsAsArchive(wrongHeaderSize)
+    }
+
+    @Test
+    fun stringPoolHeaderOffsetsAndTerminatorsStayInsideTheirChunk() {
+        val good = compile(nested)
+        fun corrupt(edit: (ByteBuffer) -> Unit) = good.copyOf().also {
+            edit(ByteBuffer.wrap(it).order(ByteOrder.LITTLE_ENDIAN))
+        }
+        val pool = 8
+        val header = 28
+        failsAsArchive(corrupt { it.putShort(pool + 2, 8) })
+        failsAsArchive(corrupt { it.putInt(pool + 20, header) }) // data overlaps offset table
+        failsAsArchive(corrupt { it.putInt(pool + header, -1) })
+        failsAsArchive(corrupt { it.putInt(pool + header, Int.MAX_VALUE) })
+        failsAsArchive(corrupt { b ->
+            val first = pool + b.getInt(pool + 20) + b.getInt(pool + header)
+            val length = b.getShort(first).toInt() and 65535
+            b.putShort(first + 2 + length * 2, 1) // missing UTF-16 terminator
+        })
+        failsAsArchive(corrupt { b ->
+            val poolSize = b.getInt(pool + 4)
+            val dataOffset = b.getInt(pool + 20)
+            b.putInt(pool + header, poolSize - dataOffset - 1) // length prefix crosses chunk
+        })
     }
 
     /** Random corruption must end in a clean AppFailure, never a crash or a hang. */

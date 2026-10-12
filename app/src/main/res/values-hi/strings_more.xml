@@ -473,11 +473,11 @@
     <string name="cap_discord">Discord webhook</string>
     <string name="ev_code_call">%1$s कॉल करता है</string>
     <string name="ev_code_string">इसमें टेक्स्ट %1$s है</string>
-    <string name="ev_flow">%1$s पढ़ता है और उसी कोड पथ में %2$s को भेजता है (मान ट्रैक नहीं हुआ)</string>
-    <string name="ev_destination">%1$s से कनेक्ट होता है</string>
+    <string name="ev_flow">एक ही कोड पथ में %1$s को पढ़ने और %2$s को भेजने की क्रियाएँ हैं (मान ट्रैक नहीं हुआ)</string>
+    <string name="ev_destination">कोड में मिला URL: %1$s</string>
     <string name="ev_destination_cleartext">%1$s (बिना एन्क्रिप्शन का http)</string>
     <string name="ev_destination_ip">%1$s (IP पता, कोई डोमेन नाम नहीं)</string>
-    <string name="ev_origin_app">ऐप का अपना कोड</string>
+    <string name="ev_origin_app">पहचाने गए SDK से बाहर का कोड</string>
     <string name="ev_origin_library">लाइब्रेरी: %1$s</string>
     <string name="ev_hidden_code">छिपी कोड फ़ाइल: %1$s</string>
     <string name="ev_packer">कोड पैकर: %1$s</string>
@@ -490,7 +490,7 @@
     <string name="strength_t2">कोड ये कॉल करता है</string>
     <string name="strength_t3">पढ़ना और भेजना एक ही कोड पथ में</string>
     <string name="strength_t4">इस डिवाइस पर देखा गया</string>
-    <string name="coverage_code">कोड (DEX) का विश्लेषण हुआ: %1$d DEX फ़ाइलें, %2$d क्लास, %3$d ऐप के अपने कोड में</string>
+    <string name="coverage_code">कोड (DEX) का विश्लेषण हुआ: %1$d DEX फ़ाइलें, %2$d क्लास, %3$d पहचाने गए SDK से बाहर</string>
     <string name="coverage_code_failed">ऐप कोड (DEX) का विश्लेषण नहीं हो सका</string>
     <string name="coverage_gap_hidden">छिपे कोड का विश्लेषण नहीं हुआ: %1$s</string>
     <string name="coverage_gap_packer">कोड पैकर (%1$s) से सुरक्षित है; असली कोड एन्क्रिप्टेड है</string>

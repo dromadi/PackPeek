@@ -292,11 +292,11 @@
     <string name="cap_discord">webhook Discord</string>
     <string name="ev_code_call">Memanggil %1$s</string>
     <string name="ev_code_string">Berisi teks %1$s</string>
-    <string name="ev_flow">Membaca %1$s dan mengirim ke %2$s di jalur kode yang sama (nilainya belum dilacak)</string>
-    <string name="ev_destination">Terhubung ke %1$s</string>
+    <string name="ev_flow">Jalur kode yang sama memuat pembacaan %1$s dan pengiriman ke %2$s (nilainya belum dilacak)</string>
+    <string name="ev_destination">URL ditemukan di kode: %1$s</string>
     <string name="ev_destination_cleartext">%1$s (http tanpa enkripsi)</string>
     <string name="ev_destination_ip">%1$s (alamat IP, tanpa nama domain)</string>
-    <string name="ev_origin_app">kode aplikasi sendiri</string>
+    <string name="ev_origin_app">kode di luar SDK yang dikenali</string>
     <string name="ev_origin_library">library: %1$s</string>
     <string name="ev_hidden_code">Berkas kode tersembunyi: %1$s</string>
     <string name="ev_packer">Packer kode: %1$s</string>
@@ -309,7 +309,7 @@
     <string name="strength_t2">kode memanggil fungsi tersebut</string>
     <string name="strength_t3">membaca dan mengirim di satu jalur kode</string>
     <string name="strength_t4">teramati di perangkat ini</string>
-    <string name="coverage_code">Kode (DEX) dianalisis: %1$d berkas DEX, %2$d kelas, %3$d di kode aplikasi sendiri</string>
+    <string name="coverage_code">Kode (DEX) dianalisis: %1$d berkas DEX, %2$d kelas, %3$d di luar SDK yang dikenali</string>
     <string name="coverage_code_failed">Kode aplikasi (DEX) tidak bisa dianalisis</string>
     <string name="coverage_gap_hidden">Kode tersembunyi tidak dianalisis: %1$s</string>
     <string name="coverage_gap_packer">Kode dilindungi packer (%1$s); kode aslinya terenkripsi</string>

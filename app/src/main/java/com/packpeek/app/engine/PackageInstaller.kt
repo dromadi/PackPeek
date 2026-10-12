@@ -14,6 +14,7 @@ import com.packpeek.app.model.InstallResult
 import java.io.File
 import kotlinx.coroutines.*
 
+private const val EXTRA_SESSION = "com.packpeek.app.extra.INSTALL_SESSION"
 private const val EXTRA_TARGET = "com.packpeek.app.extra.TARGET_PACKAGE"
 
 /** Writes and commits an installer session; returns its id so the result can be matched to it. */
@@ -55,6 +56,7 @@ suspend fun installPackage(context: Context, pkg: String, files: List<File>): In
                     Intent(context, InstallStatusActivity::class.java)
                         .setAction("${context.packageName}.INSTALL_RESULT.$id")
                         .putExtra(EXTRA_TARGET, pkg)
+                        .putExtra(EXTRA_SESSION, id)
                 val flags =
                     PendingIntent.FLAG_UPDATE_CURRENT or
                         if (Build.VERSION.SDK_INT >= 31) PendingIntent.FLAG_MUTABLE else 0
@@ -72,8 +74,10 @@ suspend fun installPackage(context: Context, pkg: String, files: List<File>): In
 
 /**
  * The system installer reports through this PendingIntent while PackPeek is on screen. From
- * Android 15 (target SDK 35+) the creator must opt in, or the launch of [InstallStatusActivity],
- * and with it the confirmation prompt, is blocked as a background activity start.
+ * Android 14 the creator must opt in, or the launch of [InstallStatusActivity], and with it the
+ * confirmation prompt, can be blocked as a background activity start. Android 14 and 15 (API 34–35)
+ * know only MODE_BACKGROUND_ACTIVITY_START_ALLOWED; Android 16 (API 36) adds ALLOW_IF_VISIBLE and
+ * deprecates ALLOWED, so each version gets the mode it defines.
  */
 @Suppress("DEPRECATION")
 private fun creatorMayStart(): Bundle? =
@@ -113,6 +117,7 @@ class InstallStatusActivity : Activity() {
                 ?: intent.getStringExtra(EXTRA_TARGET).orEmpty()
         val message = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE).orEmpty()
         val session = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
+            .takeIf { it >= 0 } ?: intent.getIntExtra(EXTRA_SESSION, -1)
         val result =
             when (status) {
                 PackageInstaller.STATUS_PENDING_USER_ACTION -> {

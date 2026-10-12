@@ -16,6 +16,24 @@ import java.util.zip.ZipFile
  */
 object DexScanner {
     const val MAX_DEX_BYTES = 96 * 1024 * 1024
+
+    /** An entry inflated past its limit; its declared size is not trusted. */
+    class TooLarge(limit: Long) : java.io.IOException("larger than $limit bytes")
+
+    /**
+     * Reads at most [limit] bytes. ZIP sizes come from the archive's own directory, which a crafted
+     * APK can understate, so the bytes actually inflated are counted instead.
+     */
+    fun readBounded(input: java.io.InputStream, limit: Long): ByteArray {
+        val out = java.io.ByteArrayOutputStream()
+        val buffer = ByteArray(64 * 1024)
+        while (true) {
+            val n = input.read(buffer)
+            if (n < 0) return out.toByteArray()
+            if (out.size() + n.toLong() > limit) throw TooLarge(limit)
+            out.write(buffer, 0, n)
+        }
+    }
     const val TIME_LIMIT_MS = 30_000L
     const val DEEP_TIME_LIMIT_MS = 90_000L
     /** Call levels followed by the deep analysis. */
@@ -288,6 +306,11 @@ object DexScanner {
                 Library("Lcom/microsoft/", "Microsoft"),
                 Library("Lcom/amazon/", "Amazon"),
                 Library("Lcom/tencent/", "Tencent"),
+                // Payments, live streaming and utilities seen in sideloaded live-streaming apps.
+                Library("Lcom/alipay/", "Alipay SDK"),
+                Library("Lim/zego/", "ZEGO SDK"),
+                Library("Lcom/zego/", "ZEGO SDK"),
+                Library("Lcom/drake/", "Drake libraries"),
                 Library("Lcom/android/volley/", "Volley"),
                 Library("Lnet/sqlcipher/", "SQLCipher"),
                 Library("Lcom/reandroid/", "ARSCLib"),
@@ -322,6 +345,9 @@ object DexScanner {
             .sortedByDescending { it.prefix.length }
 
     private fun library(descriptor: String): Library? = libraries.firstOrNull { descriptor.startsWith(it.prefix) }
+
+    /** The known library a class (descriptor such as `Lcom/alipay/A;`) belongs to; null for app code. */
+    fun libraryName(descriptor: String): String? = library(descriptor)?.name
 
     private val packerLibs =
         listOf("libjiagu", "libsecexe", "libsecmain", "libdexhelper", "libshell", "libprotectclass",
@@ -528,6 +554,8 @@ object DexScanner {
     }
 
     private class State(val deadline: Long, val deep: Boolean = false, val trackDeadline: Long = deadline, val track: Boolean = true) {
+        /** Largest DEX file read, counted while inflating. */
+        var dexLimit = MAX_DEX_BYTES.toLong()
         /** Value tracking was skipped or stopped somewhere to keep the scan within its limit. */
         var trackingCut = false
         var progress: ((ScanProgress) -> Unit)? = null
@@ -642,6 +670,8 @@ object DexScanner {
          */
         track: Boolean = true,
         progress: ((ScanProgress) -> Unit)? = null,
+        /** Largest DEX file read, counted while inflating; lower only in tests. */
+        maxDexBytes: Long = MAX_DEX_BYTES.toLong(),
         tracedBy: ((Map<String, Map<Capability, Map<Capability, Set<String>>>>) -> Unit)? = null,
     ): CodeFacts {
         val started = System.currentTimeMillis()
@@ -649,6 +679,7 @@ object DexScanner {
         // code paths) must always finish, even for very large apps on a slow phone.
         val state = State(started + timeLimitMs, deep, trackDeadline = started + timeLimitMs * 6 / 10, track = track)
         state.progress = progress
+        state.dexLimit = maxDexBytes
         state.dexTotal =
             apks.sumOf { apk -> runCatching { ZipFile(apk).use { z -> z.entries().asSequence().count { DEX_NAME.matches(it.name) } } }.getOrDefault(0) }
                 .coerceAtLeast(1)
@@ -664,15 +695,19 @@ object DexScanner {
                             .forEach { entry ->
                                 if (state.stopped) return@forEach
                                 state.report(0f)
-                                if (entry.size > MAX_DEX_BYTES) {
+                                if (entry.size > state.dexLimit) {
                                     state.gaps += CodeGap(GapKind.LIMIT, "${apk.name}!${entry.name}")
                                     state.dexDone++
                                     return@forEach
                                 }
-                                val bytes = zip.getInputStream(entry).use { it.readBytes() }
+                                // Reading is inside the try: one oversized or memory-hungry file is a
+                                // gap of its own and never ends the scan of the other DEX files.
                                 try {
+                                    val bytes = zip.getInputStream(entry).use { readBounded(it, state.dexLimit) }
                                     Dex(bytes, state).scan()
                                     state.dexFiles++
+                                } catch (e: TooLarge) {
+                                    state.gaps += CodeGap(GapKind.LIMIT, "${apk.name}!${entry.name}")
                                 } catch (e: OutOfMemoryError) {
                                     state.gaps += CodeGap(GapKind.LIMIT, "${apk.name}!${entry.name}")
                                 } catch (e: Exception) {
@@ -802,7 +837,7 @@ object DexScanner {
                 !e.isDirectory &&
                     (lower.startsWith("assets/") || lower.startsWith("res/") || !lower.contains('/')) &&
                     !Regex("""classes\d*\.dex""").matches(name) &&
-                    e.size in 112..MAX_DEX_BYTES.toLong()
+                    e.size in 112..state.dexLimit
             ) {
                 // Payloads are often renamed, so check the content, not just the extension.
                 val head = runCatching { zip.getInputStream(e).use { magic(it) } }.getOrNull()
@@ -850,7 +885,7 @@ object DexScanner {
         val before = state.classes
         state.payloadCaps = caps
         try {
-            val bytes = zip.getInputStream(entry).use { it.readBytes() }
+            val bytes = zip.getInputStream(entry).use { readBounded(it, state.dexLimit) }
             if (kind == PayloadKind.DEX) Dex(bytes, state, entry.name).scan()
             else {
                 val temp = File.createTempFile("payload", ".zip")
@@ -858,8 +893,8 @@ object DexScanner {
                     temp.writeBytes(bytes)
                     ZipFile(temp).use { inner ->
                         inner.entries().asSequence().filter { Regex("""classes\d*\.dex""").matches(it.name) }.forEach { dex ->
-                            if (dex.size <= MAX_DEX_BYTES)
-                                Dex(inner.getInputStream(dex).use { it.readBytes() }, state, entry.name).scan()
+                            if (dex.size <= state.dexLimit)
+                                Dex(inner.getInputStream(dex).use { readBounded(it, state.dexLimit) }, state, entry.name).scan()
                         }
                     }
                 } finally {
@@ -868,6 +903,9 @@ object DexScanner {
             }
         } catch (e: Exception) {
             /* Recorded with no classes below. */
+        } catch (e: OutOfMemoryError) {
+            // Payloads are scanned before the main DEX files; running out of memory on one must not
+            // cost the analysis of the app's own code. Recorded with no classes below.
         } finally {
             state.payloadCaps = null
         }

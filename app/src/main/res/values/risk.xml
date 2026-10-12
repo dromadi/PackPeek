@@ -307,11 +307,11 @@
     <string name="cap_discord">a Discord webhook</string>
     <string name="ev_code_call">Calls %1$s</string>
     <string name="ev_code_string">Contains the text %1$s</string>
-    <string name="ev_flow">Reads %1$s and sends to %2$s in the same code path (the value was not traced)</string>
-    <string name="ev_destination">Connects to %1$s</string>
+    <string name="ev_flow">The same code path contains a %1$s read and a send to %2$s (the value was not traced)</string>
+    <string name="ev_destination">URL found in code: %1$s</string>
     <string name="ev_destination_cleartext">%1$s (unencrypted http)</string>
     <string name="ev_destination_ip">%1$s (IP address, no domain name)</string>
-    <string name="ev_origin_app">app\'s own code</string>
+    <string name="ev_origin_app">code outside recognized SDKs</string>
     <string name="ev_origin_library">library: %1$s</string>
     <string name="ev_hidden_code">Hidden code file: %1$s</string>
     <string name="ev_packer">Code packer: %1$s</string>
@@ -324,7 +324,7 @@
     <string name="strength_t2">the code makes these calls</string>
     <string name="strength_t3">reading and sending in one code path</string>
     <string name="strength_t4">observed on this device</string>
-    <string name="coverage_code">Code (DEX) analysed: %1$d DEX files, %2$d classes, %3$d in the app\'s own code</string>
+    <string name="coverage_code">Code (DEX) analysed: %1$d DEX files, %2$d classes, %3$d outside recognized SDKs</string>
     <string name="coverage_code_failed">App code (DEX) could not be analysed</string>
     <string name="coverage_gap_hidden">Hidden code not analysed: %1$s</string>
     <string name="coverage_gap_packer">Code is protected by a packer (%1$s); the real code is encrypted</string>

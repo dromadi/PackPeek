@@ -85,6 +85,7 @@ object BinaryXml {
             0x0101020c to "minSdkVersion",
             0x0101021b to "versionCode",
             0x0101021c to "versionName",
+            0x01010576 to "versionCodeMajor",
             0x01010270 to "targetSdkVersion",
             0x01010271 to "maxSdkVersion",
             0x01010380 to "accessibilityEventTypes",
@@ -219,34 +220,60 @@ object BinaryXml {
     ): List<String> {
         fun u16(p: Int) = b.getShort(p).toInt() and 65535
         fun i32(p: Int) = b.getInt(p)
+        require(header >= 28 && pos.toLong() + header <= end)
         val count = i32(pos + 8)
+        val styles = i32(pos + 12)
         val utf8 = i32(pos + 16) and 256 != 0
-        val start = pos + i32(pos + 20)
-        require(count in 0..100000 && pos + header + 4L * count <= end)
-        require(start in pos..end)
+        val startOffset = i32(pos + 20)
+        val styleOffset = i32(pos + 24)
+        require(count in 0..100000 && styles in 0..100000)
+        val tableEnd = header + 4L * (count + styles)
+        require(tableEnd <= end - pos && startOffset.toLong() in tableEnd..(end - pos).toLong())
+        val start = pos + startOffset
+        val stringEnd = if (styleOffset == 0) end else {
+            require(styleOffset in startOffset..(end - pos))
+            pos + styleOffset
+        }
+        // Reused offsets must not allocate the same large string thousands of times. Bound the
+        // total decoded payload too: malicious offsets can overlap without being identical.
+        val decoded = HashMap<Int, String>()
+        var decodedBytes = 0L
         return (0 until count).map { index ->
-            var p = start + i32(pos + header + 4 * index)
-            require(p in start until end)
-            fun len8(): Int {
-                val n = bytes[p++].toInt() and 255
-                return if (n and 128 != 0) ((n and 127) shl 8) or (bytes[p++].toInt() and 255)
-                else n
-            }
-            fun len16(): Int {
-                val n = u16(p)
-                p += 2
-                return if (n and 32768 != 0) ((n and 32767) shl 16) or u16(p).also { p += 2 }
-                else n
-            }
-            if (utf8) {
-                len8()
-                val n = len8()
-                require(p + n.toLong() <= end)
-                String(bytes, p, n, Charsets.UTF_8)
-            } else {
-                val n = len16()
-                require(p + 2L * n <= end)
-                String(bytes, p, n * 2, Charsets.UTF_16LE)
+            val offset = i32(pos + header + 4 * index)
+            require(offset >= 0 && offset.toLong() < stringEnd - start)
+            decoded.getOrPut(offset) {
+                var p = start + offset
+                fun len8(): Int {
+                    require(p < stringEnd)
+                    val n = bytes[p++].toInt() and 255
+                    return if (n and 128 != 0) {
+                        require(p < stringEnd)
+                        ((n and 127) shl 8) or (bytes[p++].toInt() and 255)
+                    } else n
+                }
+                fun len16(): Int {
+                    require(p.toLong() + 2 <= stringEnd)
+                    val n = u16(p)
+                    p += 2
+                    return if (n and 32768 != 0) {
+                        require(p.toLong() + 2 <= stringEnd)
+                        ((n and 32767) shl 16) or u16(p).also { p += 2 }
+                    } else n
+                }
+                if (utf8) {
+                    len8()
+                    val n = len8()
+                    require(p.toLong() + n < stringEnd && bytes[p + n] == 0.toByte())
+                    decodedBytes += n
+                    require(decodedBytes <= LIMIT)
+                    String(bytes, p, n, Charsets.UTF_8)
+                } else {
+                    val n = len16()
+                    require(p + 2L * n + 2 <= stringEnd && u16(p + 2 * n) == 0)
+                    decodedBytes += 2L * n
+                    require(decodedBytes <= LIMIT)
+                    String(bytes, p, n * 2, Charsets.UTF_16LE)
+                }
             }
         }
     }
