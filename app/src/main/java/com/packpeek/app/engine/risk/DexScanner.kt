@@ -306,6 +306,11 @@ object DexScanner {
                 Library("Lcom/microsoft/", "Microsoft"),
                 Library("Lcom/amazon/", "Amazon"),
                 Library("Lcom/tencent/", "Tencent"),
+                // Payments, live streaming and utilities seen in sideloaded live-streaming apps.
+                Library("Lcom/alipay/", "Alipay SDK"),
+                Library("Lim/zego/", "ZEGO SDK"),
+                Library("Lcom/zego/", "ZEGO SDK"),
+                Library("Lcom/drake/", "Drake libraries"),
                 Library("Lcom/android/volley/", "Volley"),
                 Library("Lnet/sqlcipher/", "SQLCipher"),
                 Library("Lcom/reandroid/", "ARSCLib"),
@@ -340,6 +345,9 @@ object DexScanner {
             .sortedByDescending { it.prefix.length }
 
     private fun library(descriptor: String): Library? = libraries.firstOrNull { descriptor.startsWith(it.prefix) }
+
+    /** The known library a class (descriptor such as `Lcom/alipay/A;`) belongs to; null for app code. */
+    fun libraryName(descriptor: String): String? = library(descriptor)?.name
 
     private val packerLibs =
         listOf("libjiagu", "libsecexe", "libsecmain", "libdexhelper", "libshell", "libprotectclass",
